@@ -70,6 +70,14 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
 
   const renderTraits = () => {
     if (!traits || traits.length === 0) return null;
+    // Handle both string array and object array formats
+    const traitStrings = traits.map(trait => {
+      if (typeof trait === 'string') return trait;
+      if (typeof trait === 'object' && trait !== null) {
+        return (trait as any).name || (trait as any).key || String(trait);
+      }
+      return String(trait);
+    });
     return (
       <View style={styles.traitsContainer}>
         <Icon
@@ -78,7 +86,7 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
           color={colors.text}
         />
         <Text style={styles.valueTextStyle} numberOfLines={1}>
-          {traits.join(', ')}
+          {traitStrings.join(', ')}
         </Text>
       </View>
     );

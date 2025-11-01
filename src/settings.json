@@ -1,0 +1,5 @@
+{
+  "scm.diffDecorations": "none",
+  "diffEditor.ignoreTrimWhitespace": true,
+  "git.decorations.enabled": false
+}

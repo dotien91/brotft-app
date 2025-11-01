@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo} from 'react';
 import {
   FlatList,
   Image,
@@ -16,7 +16,7 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {SCREENS} from '@shared-constants';
-import {useChampions} from '@services/api/hooks/useChampions';
+import {useChampionsWithPagination} from '@services/api/hooks/listQueryHooks';
 
 const profileURI =
   // eslint-disable-next-line max-len
@@ -26,30 +26,21 @@ const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
 
   const {
-    data: championsData,
+    data: allChampions,
     isLoading,
     isError,
     error,
-    refetch,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
     isRefetching,
-  } = useChampions({page, limit});
+  } = useChampionsWithPagination(10);
 
   const handleItemPress = (championId?: string) => {
-    // Navigate to detail screen with champion ID if needed
     NavigationService.push(SCREENS.DETAIL, {championId});
-  };
-
-  const handleLoadMore = () => {
-    if (
-      championsData?.pagination &&
-      page < championsData.pagination.totalPages
-    ) {
-      setPage(prev => prev + 1);
-    }
   };
 
   /* -------------------------------------------------------------------------- */
@@ -59,7 +50,7 @@ const HomeScreen: React.FC = () => {
   const renderMenuButton = () => (
     <RNBounceable>
       <Icon
-        name="menu"
+        name="menuq"
         type={IconType.Ionicons}
         color={colors.iconBlack}
         size={30}
@@ -68,13 +59,15 @@ const HomeScreen: React.FC = () => {
   );
 
   const renderHeader = () => (
-    <View style={styles.header}>
-      {renderMenuButton()}
-      <Image
-        resizeMode="cover"
-        source={{uri: profileURI}}
-        style={styles.profilePicImageStyle}
-      />
+    <View style={styles.headerContainer}>
+      <View style={styles.header}>
+        {renderMenuButton()}
+        <Image
+          resizeMode="cover"
+          source={{uri: profileURI}}
+          style={styles.profilePicImageStyle}
+        />
+      </View>
     </View>
   );
 
@@ -103,7 +96,7 @@ const HomeScreen: React.FC = () => {
       </Text>
       <RNBounceable
         style={styles.retryButton}
-        onPress={() => refetch()}>
+        onPress={() => refresh()}>
         <Text color={colors.white} bold>
           Retry
         </Text>
@@ -126,71 +119,82 @@ const HomeScreen: React.FC = () => {
   );
 
   const renderList = () => {
-    if (isLoading && !championsData) {
+    if (isLoading && allChampions.length === 0) {
       return renderLoading();
     }
 
-    if (isError) {
+    if (isError && allChampions.length === 0) {
       return renderError();
     }
 
-    const champions = championsData?.data || [];
-
-    if (champions.length === 0 && !isLoading) {
+    if (allChampions.length === 0 && !isLoading) {
       return renderEmpty();
     }
 
     return (
-      <View style={styles.listContainer}>
-        <FlatList
-          data={champions}
-          renderItem={({item}) => (
-            <ChampionCard
-              data={item}
-              onPress={() => handleItemPress(item.id)}
-            />
-          )}
-          keyExtractor={item => item.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={colors.primary}
-            />
-          }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isLoading && championsData ? (
-              <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color={colors.primary} />
-              </View>
-            ) : null
-          }
-        />
-      </View>
+      <FlatList
+        data={allChampions}
+        renderItem={({item}) => (
+          <ChampionCard
+            data={item}
+            onPress={() => handleItemPress(item.id)}
+          />
+        )}
+        keyExtractor={item => item.id}
+        contentContainerStyle={{paddingBottom: 20}}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          isLoadingMore || (isLoading && allChampions.length > 0) ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text
+                color={colors.placeholder}
+                style={{marginTop: 8, fontSize: 14}}>
+                Loading more...
+              </Text>
+            </View>
+          ) : !hasMore && allChampions.length > 0 ? (
+            <View style={styles.footerLoader}>
+              <Text color={colors.placeholder} style={{fontSize: 14}}>
+                No more champions to load
+              </Text>
+            </View>
+          ) : null
+        }
+      />
     );
   };
 
   const renderWelcome = () => (
-    <>
-      <Text h1 bold color={colors.text}>
+    <View style={styles.welcomeContainer}>
+      <Text style={styles.welcomeTitle} color={colors.text}>
         Champions
       </Text>
       <Text
+        style={styles.welcomeSubtitle}
         fontFamily={fonts.montserrat.lightItalic}
         color={colors.placeholder}>
-        {championsData?.pagination
-          ? `Total: ${championsData.pagination.total} champions`
-          : 'Welcome Back'}
+        {allChampions.length > 0
+          ? `${allChampions.length} champions loaded`
+          : 'Explore all champions'}
       </Text>
-    </>
+    </View>
   );
 
   const renderContent = () => (
     <View style={styles.contentContainer}>
       {renderWelcome()}
-      {renderList()}
+      <View style={styles.listContainer}>{renderList()}</View>
     </View>
   );
 

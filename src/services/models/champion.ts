@@ -25,11 +25,6 @@ export interface IChampionsQueryParams {
 
 export interface IChampionsResponse {
   data: IChampion[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  hasNextPage?: boolean;
 }
 

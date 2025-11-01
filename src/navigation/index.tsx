@@ -13,6 +13,8 @@ import DetailScreen from '@screens/detail/DetailScreen';
 import NotificationScreen from '@screens/notification/NotificationScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
 import SearchScreen from '@screens/search/SearchScreen';
+import TraitsScreen from '@screens/traits/TraitsScreen';
+import TraitDetailScreen from '@screens/traits/TraitDetailScreen';
 
 // ? If you want to use stack or tab or both
 const Tab = createBottomTabNavigator();
@@ -46,6 +48,9 @@ const Navigation = () => {
       case SCREENS.PROFILE:
         iconName = focused ? 'person' : 'person-outline';
         break;
+      case SCREENS.TRAITS:
+        iconName = focused ? 'grid' : 'grid-outline';
+        break;
       default:
         iconName = focused ? 'home' : 'home-outline';
         break;
@@ -75,6 +80,7 @@ const Navigation = () => {
         })}>
         <Tab.Screen name={SCREENS.HOME} component={HomeScreen} />
         <Tab.Screen name={SCREENS.SEARCH} component={SearchScreen} />
+        <Tab.Screen name={SCREENS.TRAITS} component={TraitsScreen} />
         <Tab.Screen
           name={SCREENS.NOTIFICATION}
           component={NotificationScreen}
@@ -95,6 +101,9 @@ const Navigation = () => {
         <Stack.Screen name={SCREENS.HOME_ROOT} component={TabNavigation} />
         <Stack.Screen name={SCREENS.DETAIL}>
           {props => <DetailScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name={SCREENS.TRAIT_DETAIL}>
+          {props => <TraitDetailScreen {...props} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

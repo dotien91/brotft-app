@@ -1,4 +1,4 @@
-import {StyleSheet, TextStyle, ViewStyle, ImageStyle} from 'react-native';
+import {StyleSheet, TextStyle, ViewStyle} from 'react-native';
 import {ExtendedTheme} from '@react-navigation/native';
 import {ScreenWidth} from '@freakycoder/react-native-helpers';
 
@@ -8,11 +8,14 @@ interface Style {
   backButton: ViewStyle;
   scrollView: ViewStyle;
   scrollContent: ViewStyle;
-  heroImage: ImageStyle;
+  headerSection: ViewStyle;
+  typeIndicator: ViewStyle;
   content: ViewStyle;
   titleSection: ViewStyle;
   title: TextStyle;
   badgesRow: ViewStyle;
+  typeBadge: ViewStyle;
+  typeBadgeText: TextStyle;
   badge: ViewStyle;
   badgeSecondary: ViewStyle;
   badgeText: TextStyle;
@@ -20,14 +23,20 @@ interface Style {
   section: ViewStyle;
   sectionTitle: TextStyle;
   description: TextStyle;
-  traitsContainer: ViewStyle;
-  traitBadge: ViewStyle;
-  traitText: TextStyle;
-  traitTypeIndicator: ViewStyle;
+  tierCard: ViewStyle;
+  tierHeader: ViewStyle;
+  tierCountBadge: ViewStyle;
+  tierCountText: TextStyle;
+  tierCountLabel: TextStyle;
+  tierEffectContainer: ViewStyle;
+  tierEffectText: TextStyle;
+  championsContainer: ViewStyle;
+  championBadge: ViewStyle;
+  championText: TextStyle;
+  championsNote: TextStyle;
   infoRow: ViewStyle;
   infoLabel: TextStyle;
   infoValue: TextStyle;
-  statsContainer: ViewStyle;
   loadingContainer: ViewStyle;
   loadingText: TextStyle;
   errorContainer: ViewStyle;
@@ -81,10 +90,26 @@ export default (theme: ExtendedTheme) => {
     scrollContent: {
       paddingBottom: 40,
     },
-    heroImage: {
+    headerSection: {
       width: '100%',
-      height: 380,
-      backgroundColor: colors.placeholder + '40',
+      alignItems: 'center',
+      paddingVertical: 32,
+      paddingTop: 40,
+    },
+    typeIndicator: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 4,
     },
     content: {
       padding: 24,
@@ -92,17 +117,44 @@ export default (theme: ExtendedTheme) => {
     },
     titleSection: {
       marginBottom: 24,
+      alignItems: 'center',
     },
     title: {
       fontSize: 36,
-      marginBottom: 16,
+      marginBottom: 20,
       letterSpacing: -0.5,
+      textAlign: 'center',
     },
     badgesRow: {
       flexDirection: 'row',
       alignItems: 'center',
       flexWrap: 'wrap',
+      justifyContent: 'center',
       marginHorizontal: -6,
+    },
+    typeBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      borderRadius: 20,
+      marginHorizontal: 6,
+      marginBottom: 10,
+      borderWidth: 2,
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    typeBadgeText: {
+      marginLeft: 8,
+      fontSize: 15,
+      fontWeight: '700',
+      letterSpacing: 0.3,
     },
     badge: {
       flexDirection: 'row',
@@ -143,7 +195,7 @@ export default (theme: ExtendedTheme) => {
       letterSpacing: 0.3,
     },
     section: {
-      marginBottom: 28,
+      marginBottom: 32,
     },
     sectionTitle: {
       fontSize: 22,
@@ -156,22 +208,87 @@ export default (theme: ExtendedTheme) => {
       opacity: 0.85,
       letterSpacing: 0.2,
     },
-    traitsContainer: {
+    tierCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+      borderWidth: 1.5,
+      borderColor: colors.primary + '20',
+      shadowColor: colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    tierHeader: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    tierCountBadge: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 20,
+      shadowColor: colors.primary,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    tierCountText: {
+      color: colors.white,
+      fontSize: 28,
+      fontWeight: '800',
+      marginBottom: 2,
+    },
+    tierCountLabel: {
+      color: colors.white,
+      fontSize: 11,
+      fontWeight: '600',
+      opacity: 0.9,
+    },
+    tierEffectContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background + '80',
+      padding: 16,
+      borderRadius: 12,
+    },
+    tierEffectText: {
+      flex: 1,
+      marginLeft: 12,
+      fontSize: 16,
+      color: colors.text,
+      lineHeight: 22,
+      fontWeight: '600',
+    },
+    championsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       marginHorizontal: -6,
+      marginBottom: 12,
     },
-    traitBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    championBadge: {
       backgroundColor: colors.primary + '12',
-      paddingHorizontal: 18,
+      paddingHorizontal: 14,
       paddingVertical: 12,
-      borderRadius: 18,
+      borderRadius: 16,
       borderWidth: 1.5,
       borderColor: colors.primary + '25',
       marginHorizontal: 6,
       marginBottom: 10,
+      minWidth: ScreenWidth * 0.4,
       shadowColor: colors.shadow,
       shadowOffset: {
         width: 0,
@@ -179,19 +296,37 @@ export default (theme: ExtendedTheme) => {
       },
       shadowOpacity: 0.08,
       shadowRadius: 4,
-      elevation: 1,
+      elevation: 2,
     },
-    traitTypeIndicator: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+    championContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    championCostBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.primary + '20',
+      paddingHorizontal: 6,
+      paddingVertical: 4,
+      borderRadius: 8,
       marginRight: 8,
+      borderWidth: 1,
+      borderColor: colors.primary + '30',
     },
-    traitText: {
-      fontSize: 15,
+    championCostText: {
+      marginLeft: 4,
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.primary,
+    },
+    championText: {
+      marginLeft: 8,
+      fontSize: 14,
       fontWeight: '600',
       color: colors.text,
       letterSpacing: 0.3,
+      flex: 1,
     },
     infoRow: {
       flexDirection: 'row',
@@ -205,7 +340,7 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '700',
       color: colors.text,
       marginRight: 12,
-      minWidth: 60,
+      minWidth: 80,
       letterSpacing: 0.2,
     },
     infoValue: {
@@ -214,13 +349,6 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       fontWeight: '500',
       letterSpacing: 0.2,
-    },
-    statsContainer: {
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: colors.placeholder + '15',
     },
     loadingContainer: {
       flex: 1,
@@ -276,3 +404,4 @@ export default (theme: ExtendedTheme) => {
     },
   });
 };
+

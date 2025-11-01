@@ -8,6 +8,8 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useChampionById} from '@services/api/hooks/listQueryHooks';
+import {SCREENS} from '@shared-constants';
+import type {ITrait} from '@services/models/trait';
 
 interface DetailScreenProps {
   route?: {
@@ -114,26 +116,92 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   };
 
   const renderTraits = () => {
-    if (!champion?.traits || champion.traits.length === 0) return null;
-    // Handle both string array and object array formats
-    const getTraitName = (trait: any): string => {
-      if (typeof trait === 'string') return trait;
-      if (typeof trait === 'object' && trait !== null) {
-        return trait.name || trait.key || String(trait);
+    // Use traitDetails if available, otherwise fallback to traits
+    const displayTraits = champion?.traitDetails && champion.traitDetails.length > 0
+      ? champion.traitDetails
+      : champion?.traits || [];
+    
+    if (!displayTraits || displayTraits.length === 0) return null;
+
+    const isTraitObject = (trait: string | ITrait): trait is ITrait => {
+      return typeof trait === 'object' && trait !== null && 'name' in trait;
+    };
+
+    const handleTraitPress = (trait: string | ITrait) => {
+      if (isTraitObject(trait)) {
+        NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: trait.id});
       }
+    };
+
+    const getTraitName = (trait: string | ITrait): string => {
+      if (typeof trait === 'string') return trait;
+      if (isTraitObject(trait)) return trait.name;
       return String(trait);
     };
+
+    const getTraitType = (trait: string | ITrait): 'origin' | 'class' | null => {
+      if (isTraitObject(trait)) return trait.type;
+      return null;
+    };
+
     return (
       <View style={styles.section}>
         <Text h4 bold color={colors.text} style={styles.sectionTitle}>
           Traits
         </Text>
         <View style={styles.traitsContainer}>
-          {champion.traits.map((trait, index) => (
-            <View key={index} style={styles.traitBadge}>
-              <Text style={styles.traitText}>{getTraitName(trait)}</Text>
-            </View>
-          ))}
+          {displayTraits.map((trait, index) => {
+            // If traitDetails is available, traits are already ITrait objects
+            const isTraitDetail = champion?.traitDetails && champion.traitDetails.length > 0;
+            const traitObj = isTraitDetail ? (trait as ITrait) : null;
+            const traitName = traitObj 
+              ? traitObj.name 
+              : getTraitName(trait as string | ITrait);
+            const traitType = traitObj ? traitObj.type : getTraitType(trait as string | ITrait);
+            const isOrigin = traitType === 'origin';
+
+            return (
+              <RNBounceable
+                key={traitObj ? traitObj.id : index}
+                onPress={() => handleTraitPress(trait as string | ITrait)}
+                disabled={!traitObj}>
+                <View
+                  style={[
+                    styles.traitBadge,
+                    traitObj && {
+                      backgroundColor: isOrigin
+                        ? colors.primary + '20'
+                        : colors.danger + '20',
+                      borderColor: isOrigin
+                        ? colors.primary + '40'
+                        : colors.danger + '40',
+                    },
+                  ]}>
+                  {traitObj && (
+                    <View
+                      style={[
+                        styles.traitTypeIndicator,
+                        {
+                          backgroundColor: isOrigin
+                            ? colors.primary
+                            : colors.danger,
+                        },
+                      ]}
+                    />
+                  )}
+                  <Text
+                    style={[
+                      styles.traitText,
+                      traitObj && {
+                        color: isOrigin ? colors.primary : colors.danger,
+                      },
+                    ]}>
+                    {traitName}
+                  </Text>
+                </View>
+              </RNBounceable>
+            );
+          })}
         </View>
       </View>
     );
@@ -154,13 +222,26 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         {/* Hero Image */}
-        {champion.imageUrl && (
-          <Image
-            source={{uri: champion.imageUrl}}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-        )}
+        {(() => {
+          // Use image.path if available, otherwise fallback to imageUrl
+          const imageSource = champion.image?.path || champion.imageUrl;
+          if (!imageSource) return null;
+          
+          // If image.path is relative, prepend base URL
+          const imageUri = champion.image?.path?.startsWith('http')
+            ? champion.image.path
+            : champion.image?.path?.startsWith('/')
+              ? `http://localhost:3000${champion.image.path}`
+              : champion.imageUrl || imageSource;
+          
+          return (
+            <Image
+              source={{uri: imageUri}}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
+          );
+        })()}
 
         {/* Content */}
         <View style={styles.content}>
@@ -187,8 +268,83 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
             </View>
           )}
 
+          {/* Ability */}
+          {champion.abilityName && (
+            <View style={styles.section}>
+              <Text h4 bold color={colors.text} style={styles.sectionTitle}>
+                {champion.abilityName}
+              </Text>
+              {champion.abilityDescription && (
+                <Text color={colors.placeholder} style={styles.description}>
+                  {champion.abilityDescription}
+                </Text>
+              )}
+            </View>
+          )}
+
           {/* Traits */}
           {renderTraits()}
+
+          {/* Stats */}
+          {(champion.health || champion.armor || champion.magicResist || 
+            champion.attackDamage || champion.attackSpeed || champion.attackRange ||
+            champion.startingMana || champion.maxMana) && (
+            <View style={styles.section}>
+              <Text h4 bold color={colors.text} style={styles.sectionTitle}>
+                Stats
+              </Text>
+              <View style={styles.statsContainer}>
+                {champion.health !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Health:</Text>
+                    <Text style={styles.infoValue}>{champion.health}</Text>
+                  </View>
+                )}
+                {champion.armor !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Armor:</Text>
+                    <Text style={styles.infoValue}>{champion.armor}</Text>
+                  </View>
+                )}
+                {champion.magicResist !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Magic Resist:</Text>
+                    <Text style={styles.infoValue}>{champion.magicResist}</Text>
+                  </View>
+                )}
+                {champion.attackDamage !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Attack Damage:</Text>
+                    <Text style={styles.infoValue}>{champion.attackDamage}</Text>
+                  </View>
+                )}
+                {champion.attackSpeed !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Attack Speed:</Text>
+                    <Text style={styles.infoValue}>{champion.attackSpeed}</Text>
+                  </View>
+                )}
+                {champion.attackRange !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Attack Range:</Text>
+                    <Text style={styles.infoValue}>{champion.attackRange}</Text>
+                  </View>
+                )}
+                {champion.startingMana !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Starting Mana:</Text>
+                    <Text style={styles.infoValue}>{champion.startingMana}</Text>
+                  </View>
+                )}
+                {champion.maxMana !== undefined && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Max Mana:</Text>
+                    <Text style={styles.infoValue}>{champion.maxMana}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
 
           {/* Additional Info */}
           <View style={styles.section}>

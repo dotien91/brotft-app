@@ -1,0 +1,87 @@
+import axiosInstance from './axios';
+import type {
+  ITrait,
+  ITraitsQueryParams,
+  ITraitsResponse,
+} from '@services/models/trait';
+
+// Get all traits with pagination and filters
+export const getTraits = async (
+  params?: ITraitsQueryParams,
+): Promise<ITraitsResponse> => {
+  const queryParams = new URLSearchParams();
+
+  if (params?.page) {
+    queryParams.append('page', params.page.toString());
+  }
+  if (params?.limit) {
+    queryParams.append('limit', params.limit.toString());
+  }
+  if (params?.filters) {
+    const {filters} = params;
+    if (filters.type !== undefined && filters.type !== null) {
+      queryParams.append('filters[type]', filters.type);
+    }
+    if (filters.name !== undefined && filters.name !== null && filters.name !== '') {
+      queryParams.append('filters[name]', filters.name);
+    }
+    if (filters.key !== undefined && filters.key !== null && filters.key !== '') {
+      queryParams.append('filters[key]', filters.key);
+    }
+    if (filters.set !== undefined && filters.set !== null && filters.set !== '') {
+      queryParams.append('filters[set]', filters.set);
+    }
+  }
+
+  const url = `/origins?${queryParams.toString()}`;
+  console.log('=====================================');
+  console.log('[getTraits] API URL:', url);
+  console.log('[getTraits] Full URL:', `http://localhost:3000/api/v1${url}`);
+  console.log('[getTraits] Params object:', JSON.stringify(params, null, 2));
+  console.log('[getTraits] Query String:', queryParams.toString());
+  console.log('[getTraits] Has filters:', !!params?.filters);
+  if (params?.filters) {
+    console.log('[getTraits] Filter type:', params.filters.type);
+    console.log('[getTraits] Filter name:', params.filters.name);
+    console.log('[getTraits] Filter key:', params.filters.key);
+    console.log('[getTraits] Filter set:', params.filters.set);
+  }
+  console.log('=====================================');
+  
+  const response = await axiosInstance.get<ITraitsResponse>(url);
+  
+  console.log('[getTraits] Response status:', response.status);
+  console.log('[getTraits] Response headers:', response.headers);
+  console.log('[getTraits] Response data:', JSON.stringify(response.data, null, 2));
+  
+  // Handle different response formats
+  let responseData = response.data;
+  if (response.data) {
+    // If response.data is an array directly, wrap it
+    if (Array.isArray(response.data)) {
+      responseData = { data: response.data };
+    }
+    // If response.data.data doesn't exist but response.data.results exists
+    else if (!response.data.data && response.data.results && Array.isArray(response.data.results)) {
+      responseData = { data: response.data.results };
+    }
+  }
+  
+  console.log('[getTraits] Processed response data:', responseData);
+  console.log('[getTraits] Response count:', responseData?.data?.length);
+  if (responseData?.data && responseData.data.length > 0) {
+    const types = responseData.data.map(t => t.type);
+    const uniqueTypes = [...new Set(types)];
+    console.log('[getTraits] Response types:', types);
+    console.log('[getTraits] Unique types:', uniqueTypes);
+  }
+  
+  return responseData;
+};
+
+// Get trait by ID
+export const getTraitById = async (id: string): Promise<ITrait> => {
+  const response = await axiosInstance.get<ITrait>(`/origins/${id}`);
+  return response.data;
+};
+

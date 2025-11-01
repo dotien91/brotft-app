@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import {useQuery, type UseQueryOptions} from '@tanstack/react-query';
 import {
   getChampions,
@@ -7,10 +7,16 @@ import {
   getChampionsByCost,
   getChampionsByTrait,
 } from '../champions';
+import {getTraits, getTraitById} from '../traits';
 import type {
   IChampionsQueryParams,
   IChampion,
 } from '@services/models/champion';
+import type {
+  ITraitsQueryParams,
+  ITraitsFilters,
+  ITrait,
+} from '@services/models/trait';
 
 // Query keys
 export const championKeys = {
@@ -256,5 +262,181 @@ export const useChampionsByTrait = (
     queryFn: getChampionsByTrait,
     enabled: (traitKey?: string) => !!traitKey,
   })(traitKey, queryOptions);
+};
+
+// ============= TRAITS HOOKS =============
+
+// Query keys for traits
+export const traitKeys = {
+  all: ['traits'] as const,
+  lists: () => [...traitKeys.all, 'list'] as const,
+  list: (params?: ITraitsQueryParams) => {
+    // Serialize params to ensure queryKey changes when filters change
+    const serializedParams = params
+      ? {
+          page: params.page,
+          limit: params.limit,
+          filters: params.filters
+            ? {
+                type: params.filters.type || null,
+                name: params.filters.name || null,
+                key: params.filters.key || null,
+                set: params.filters.set || null,
+              }
+            : null,
+        }
+      : undefined;
+    return [...traitKeys.lists(), serializedParams] as const;
+  },
+  details: () => [...traitKeys.all, 'detail'] as const,
+  detail: (id: string) => [...traitKeys.details(), id] as const,
+};
+
+// Get all traits with pagination and filters
+export const useTraits = (
+  params?: ITraitsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTraits>>,
+      Error,
+      Awaited<ReturnType<typeof getTraits>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createOptionalListQueryHook<
+    ITraitsQueryParams,
+    Awaited<ReturnType<typeof getTraits>>,
+    Awaited<ReturnType<typeof getTraits>>
+  >({
+    queryKey: traitKeys.list,
+    queryFn: getTraits,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for traits
+export const useTraitsWithPagination = (
+  limit: number = 10,
+  filters?: ITraitsFilters,
+) => {
+  const [page, setPage] = useState(1);
+  const [allTraits, setAllTraits] = useState<ITrait[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Create params object - ensure filters object identity changes when filters change
+  const queryParams = useMemo(() => {
+    const params = {
+      page,
+      limit,
+      filters: filters
+        ? {
+            type: filters.type || null,
+            name: filters.name || null,
+            key: filters.key || null,
+            set: filters.set || null,
+          }
+        : undefined,
+    };
+    console.log('[useTraitsWithPagination] Creating queryParams with filters:', filters);
+    console.log('[useTraitsWithPagination] queryParams:', JSON.stringify(params, null, 2));
+    return params;
+  }, [page, limit, filters]);
+
+  const {
+    data: traitsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useTraits(queryParams, {
+    // Ensure query refetches when filters change
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to refetch on filter change
+  });
+
+  // Reset when filters change - must run before data effect
+  useEffect(() => {
+    setPage(1);
+    setAllTraits([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+  }, [filters]);
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    // Only process data if we have traitsData (even if empty array)
+    if (traitsData !== undefined) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllTraits(traitsData.data || []);
+      } else {
+        // Append new data when loading more
+        setAllTraits(prev => [...prev, ...(traitsData.data || [])]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (traitsData.hasNextPage !== undefined) {
+        setHasMore(traitsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [traitsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      traitsData?.hasNextPage !== undefined
+        ? traitsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && traitsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllTraits([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allTraits,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get trait by ID
+export const useTraitById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTraitById>>,
+      Error,
+      Awaited<ReturnType<typeof getTraitById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: traitKeys.detail(id),
+    queryFn: () => getTraitById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
 };
 

@@ -1,22 +1,24 @@
-import {StyleSheet, ImageStyle, ViewStyle} from 'react-native';
+import {StyleSheet, ViewStyle, TextStyle} from 'react-native';
 import type {ExtendedTheme} from '@react-navigation/native';
-import {ScreenWidth} from '@freakycoder/react-native-helpers';
 
 interface Style {
   container: ViewStyle;
   contentWrapper: ViewStyle;
-  imageStyle: ImageStyle;
-  descriptionTextStyle: ViewStyle;
-  traitTitleText: TextStyle;
-  costContainer: ViewStyle;
+  headerRow: ViewStyle;
+  typeBadge: ViewStyle;
+  typeText: TextStyle;
+  descriptionTextStyle: TextStyle;
+  keyContainer: ViewStyle;
   setContainer: ViewStyle;
-  traitsContainer: ViewStyle;
-  traitsList: ViewStyle;
-  traitBadge: ViewStyle;
-  traitBadgeText: ViewStyle;
-  traitMoreText: ViewStyle;
+  championsContainer: ViewStyle;
   contentContainer: ViewStyle;
-  valueTextStyle: ViewStyle;
+  valueTextStyle: TextStyle;
+  tiersContainer: ViewStyle;
+  tiersTitle: TextStyle;
+  tierItem: ViewStyle;
+  tierCountBadge: ViewStyle;
+  tierCountText: TextStyle;
+  tierEffectText: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -41,17 +43,21 @@ export default (theme: ExtendedTheme) => {
     contentWrapper: {
       padding: 20,
     },
-    imageStyle: {
-      width: '100%',
-      height: 240,
-      backgroundColor: colors.placeholder + '40',
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 8,
     },
-    traitTitleText: {
-      marginTop: 6,
-      marginBottom: 6,
-      fontSize: 13,
-      fontWeight: '600',
-      opacity: 0.9,
+    typeBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+      borderWidth: 1,
+    },
+    typeText: {
+      fontSize: 12,
+      fontWeight: '700',
       letterSpacing: 0.3,
     },
     descriptionTextStyle: {
@@ -60,25 +66,17 @@ export default (theme: ExtendedTheme) => {
       lineHeight: 22,
       opacity: 0.85,
     },
-    costContainer: {
+    keyContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.primary + '20',
+      backgroundColor: colors.placeholder + '15',
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 12,
       marginRight: 10,
       marginBottom: 8,
       borderWidth: 1,
-      borderColor: colors.primary + '30',
-      shadowColor: colors.primary,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
+      borderColor: colors.placeholder + '25',
     },
     setContainer: {
       flexDirection: 'row',
@@ -92,45 +90,16 @@ export default (theme: ExtendedTheme) => {
       borderWidth: 1,
       borderColor: colors.placeholder + '25',
     },
-    traitsContainer: {
+    championsContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.placeholder + '15',
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 12,
-      flex: 1,
       marginBottom: 8,
       borderWidth: 1,
       borderColor: colors.placeholder + '25',
-    },
-    traitsList: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      flex: 1,
-      marginLeft: 8,
-      gap: 6,
-    },
-    traitBadge: {
-      backgroundColor: colors.primary + '20',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: colors.primary + '30',
-    },
-    traitBadgeText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.primary,
-      letterSpacing: 0.2,
-    },
-    traitMoreText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.placeholder,
-      marginLeft: 4,
     },
     contentContainer: {
       flexDirection: 'row',
@@ -144,6 +113,45 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '700',
       color: colors.text,
       letterSpacing: 0.2,
+    },
+    tiersContainer: {
+      marginTop: 16,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.placeholder + '20',
+    },
+    tiersTitle: {
+      marginBottom: 12,
+      fontSize: 16,
+    },
+    tierItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      backgroundColor: colors.background + '80',
+      borderRadius: 10,
+    },
+    tierCountBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    tierCountText: {
+      color: colors.white,
+      fontSize: 14,
+      fontWeight: '800',
+    },
+    tierEffectText: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text,
+      lineHeight: 20,
     },
   });
 };

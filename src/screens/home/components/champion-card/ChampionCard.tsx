@@ -25,23 +25,25 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const {name, description, cost, set, traits, imageUrl} = data;
+  const {name, description, cost, set, imageUrl, image} = data;
 
-  const renderHeader = () => (
-    <>
-      <Text h4 bold color={colors.text}>
-        {name}
-      </Text>
-      {description && (
-        <Text
-          h5
-          color={colors.placeholder}
-          style={styles.descriptionTextStyle}>
-          {description}
+  const renderHeader = () => {
+    return (
+      <>
+        <Text h4 bold color={colors.text}>
+          {name}
         </Text>
-      )}
-    </>
-  );
+        {description && (
+          <Text
+            h5
+            color={colors.placeholder}
+            style={styles.descriptionTextStyle}>
+            {description}
+          </Text>
+        )}
+      </>
+    );
+  };
 
   const renderCost = () => (
     <View style={styles.costContainer}>
@@ -68,35 +70,22 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
     );
   };
 
-  const renderTraits = () => {
-    if (!traits || traits.length === 0) return null;
-    // Handle both string array and object array formats
-    const traitStrings = traits.map(trait => {
-      if (typeof trait === 'string') return trait;
-      if (typeof trait === 'object' && trait !== null) {
-        return (trait as any).name || (trait as any).key || String(trait);
-      }
-      return String(trait);
-    });
-    return (
-      <View style={styles.traitsContainer}>
-        <Icon
-          name="users"
-          type={IconType.FontAwesome}
-          color={colors.text}
-        />
-        <Text style={styles.valueTextStyle} numberOfLines={1}>
-          {traitStrings.join(', ')}
-        </Text>
-      </View>
-    );
-  };
 
   const renderImage = () => {
-    if (!imageUrl) return null;
+    // Use image.path if available, otherwise fallback to imageUrl
+    const imageSource = image?.path || imageUrl;
+    if (!imageSource) return null;
+    
+    // If image.path is relative, may need to prepend base URL
+    const imageUri = image?.path?.startsWith('http') 
+      ? image.path 
+      : image?.path?.startsWith('/') 
+        ? `http://localhost:3000${image.path}`
+        : imageUrl || imageSource;
+    
     return (
       <Image
-        source={{uri: imageUrl}}
+        source={{uri: imageUri}}
         style={styles.imageStyle}
         resizeMode="cover"
       />
@@ -111,7 +100,6 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
         <View style={styles.contentContainer}>
           {renderCost()}
           {renderSet()}
-          {renderTraits()}
         </View>
       </View>
     </RNBounceable>

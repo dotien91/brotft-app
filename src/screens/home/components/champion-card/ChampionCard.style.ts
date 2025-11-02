@@ -1,4 +1,4 @@
-import {StyleSheet, ImageStyle, ViewStyle} from 'react-native';
+import {StyleSheet, ImageStyle, ViewStyle, TextStyle} from 'react-native';
 import type {ExtendedTheme} from '@react-navigation/native';
 import {ScreenWidth} from '@freakycoder/react-native-helpers';
 
@@ -17,6 +17,9 @@ interface Style {
   traitMoreText: ViewStyle;
   contentContainer: ViewStyle;
   valueTextStyle: ViewStyle;
+  originsWrapper: ViewStyle;
+  originContainer: ViewStyle;
+  originTextStyle: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -143,6 +146,30 @@ export default (theme: ExtendedTheme) => {
       fontSize: 14,
       fontWeight: '700',
       color: colors.text,
+      letterSpacing: 0.2,
+    },
+    originsWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      marginTop: 12,
+      gap: 8,
+    },
+    originContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.primary + '20',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.primary + '30',
+    },
+    originTextStyle: {
+      marginLeft: 6,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.primary,
       letterSpacing: 0.2,
     },
   });

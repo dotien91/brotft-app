@@ -13,6 +13,7 @@ export interface IChampion {
   set: string;
   traits: string[];
   traitDetails?: ITrait[];
+  origins?: ITrait[];
   description?: string;
   imageUrl?: string;
   image?: IChampionImage;

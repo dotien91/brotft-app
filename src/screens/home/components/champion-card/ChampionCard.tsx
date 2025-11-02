@@ -25,7 +25,7 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const {name, description, cost, set, imageUrl, image} = data;
+  const {name, description, cost, set, imageUrl, image, origins} = data;
 
   const renderHeader = () => {
     return (
@@ -70,6 +70,22 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
     );
   };
 
+  const renderOrigins = () => {
+    if (!origins || origins.length === 0) return null;
+    
+    return origins.map((origin, index) => (
+      <View key={origin.id || index} style={styles.originContainer}>
+        <Icon
+          name="star"
+          type={IconType.FontAwesome}
+          color={colors.primary}
+          size={12}
+        />
+        <Text style={styles.originTextStyle}>{origin.name}</Text>
+      </View>
+    ));
+  };
+
 
   const renderImage = () => {
     // Use image.path if available, otherwise fallback to imageUrl
@@ -101,6 +117,11 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
           {renderCost()}
           {renderSet()}
         </View>
+        {origins && origins.length > 0 && (
+          <View style={styles.originsWrapper}>
+            {renderOrigins()}
+          </View>
+        )}
       </View>
     </RNBounceable>
   );

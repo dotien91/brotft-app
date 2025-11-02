@@ -147,3 +147,4 @@ const TraitCard: React.FC<ITraitCardProps> = ({
 
 export default TraitCard;
 
+

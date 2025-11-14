@@ -1,207 +1,253 @@
 import React, {useMemo} from 'react';
-import {
-  FlatList,
-  Image,
-  View,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import {FlatList, Image, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './HomeScreen.style';
-import ChampionCard from './components/champion-card/ChampionCard';
-import fonts from '@fonts';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {SCREENS} from '@shared-constants';
-import {useChampionsWithPagination} from '@services/api/hooks/listQueryHooks';
 
-const profileURI =
-  // eslint-disable-next-line max-len
-  'https://images.unsplash.com/photo-1544568100-847a948585b9?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2574&q=80';
+const TFT_IMAGE_VERSION = '14.15.1';
+const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
+const ITEM_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-item/`;
+
+const championIcon = (fileName: string) => `${CHAMPION_BASE}${fileName}`;
+const itemIcon = (fileName: string) => `${ITEM_BASE}${fileName}`;
+
+interface TeamComp {
+  id: string;
+  name: string;
+  rank: string;
+  champions: Array<{
+    id: string;
+    image: string;
+    items?: Array<{icon: string}>;
+  }>;
+  items: Array<{icon: string}>;
+}
+
+const TEAM_COMPS: TeamComp[] = [
+  {
+    id: '1',
+    name: 'Học Viện Yuumi',
+    rank: 'OP',
+    champions: [
+      {id: 'lux', image: championIcon('TFT11_Lux.TFT_Set11.png')},
+      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
+      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
+      {id: 'yuumi', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
+      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
+      {id: 'nami', image: championIcon('TFT11_Nami.TFT_Set11.png')},
+      {id: 'lux2', image: championIcon('TFT11_Lux.TFT_Set11.png')},
+      {id: 'ahri', image: championIcon('TFT11_Ahri.TFT_Set11.png')},
+      {id: 'yuumi2', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
+    ],
+    items: [
+      {icon: itemIcon('TFT_Item_ArchangelsStaff.png')},
+      {icon: itemIcon('TFT_Item_JeweledGauntlet.png')},
+      {icon: itemIcon('TFT_Item_RabadonsDeathcap.png')},
+      {icon: itemIcon('TFT_Item_Morellonomicon.png')},
+    ],
+  },
+  {
+    id: '2',
+    name: 'Học Viện Katarina',
+    rank: 'S',
+    champions: [
+      {id: 'lux', image: championIcon('TFT11_Lux.TFT_Set11.png')},
+      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
+      {id: 'katarina', image: championIcon('TFT11_Katarina.TFT_Set11.png')},
+      {id: 'yuumi', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
+      {id: 'kaisa', image: championIcon('TFT11_Kaisa.TFT_Set11.png')},
+      {id: 'lux2', image: championIcon('TFT11_Lux.TFT_Set11.png')},
+      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
+      {id: 'syndra', image: championIcon('TFT11_Syndra.TFT_Set11.png')},
+    ],
+    items: [
+      {icon: itemIcon('TFT_Item_HextechGunblade.png')},
+      {icon: itemIcon('TFT_Item_GuardianAngel.png')},
+      {icon: itemIcon('TFT_Item_InfinityEdge.png')},
+      {icon: itemIcon('TFT_Item_BlueBuff.png')},
+    ],
+  },
+  {
+    id: '3',
+    name: 'Đại Cơ Giáp Yone',
+    rank: 'S',
+    champions: [
+      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
+      {id: 'riven', image: championIcon('TFT11_Riven.TFT_Set11.png')},
+      {id: 'riven2', image: championIcon('TFT11_Riven.TFT_Set11.png')},
+      {id: 'nami', image: championIcon('TFT11_Nami.TFT_Set11.png')},
+      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
+      {id: 'mordekaiser', image: championIcon('TFT11_Mordekaiser.TFT_Set11.png')},
+      {id: 'irelia', image: championIcon('TFT11_Irelia.TFT_Set11.png')},
+      {id: 'yone', image: championIcon('TFT11_Yone.TFT_Set11.png')},
+      {id: 'ahri', image: championIcon('TFT11_Ahri.TFT_Set11.png')},
+    ],
+    items: [
+      {icon: itemIcon('TFT_Item_GuinsoosRageblade.png')},
+      {icon: itemIcon('TFT_Item_HandOfJustice.png')},
+      {icon: itemIcon('TFT_Item_Deathblade.png')},
+      {icon: itemIcon('TFT_Item_BrambleVest.png')},
+    ],
+  },
+  {
+    id: '4',
+    name: 'Đại Cơ Giáp Akali',
+    rank: 'S',
+    champions: [
+      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
+      {id: 'riven', image: championIcon('TFT11_Riven.TFT_Set11.png')},
+      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
+      {id: 'nami', image: championIcon('TFT11_Nami.TFT_Set11.png')},
+      {id: 'kaisa', image: championIcon('TFT11_Kaisa.TFT_Set11.png')},
+      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
+      {id: 'irelia', image: championIcon('TFT11_Irelia.TFT_Set11.png')},
+      {id: 'akali', image: championIcon('TFT11_Akali.TFT_Set11.png')},
+      {id: 'yone', image: championIcon('TFT11_Yone.TFT_Set11.png')},
+    ],
+    items: [
+      {icon: itemIcon('TFT_Item_InfinityEdge.png')},
+      {icon: itemIcon('TFT_Item_JeweledGauntlet.png')},
+      {icon: itemIcon('TFT_Item_GuardianAngel.png')},
+      {icon: itemIcon('TFT_Item_BrambleVest.png')},
+    ],
+  },
+  {
+    id: '5',
+    name: 'Chiến Hạm Malphite',
+    rank: 'S',
+    champions: [
+      {id: 'nautilus', image: championIcon('TFT11_Nautilus.TFT_Set11.png')},
+      {id: 'graves', image: championIcon('TFT11_Graves.TFT_Set11.png')},
+      {id: 'katarina', image: championIcon('TFT11_Katarina.TFT_Set11.png')},
+      {id: 'malphite', image: championIcon('TFT11_Malphite.TFT_Set11.png')},
+      {id: 'urgot', image: championIcon('TFT11_Urgot.TFT_Set11.png')},
+      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
+      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
+      {id: 'yone', image: championIcon('TFT11_Yone.TFT_Set11.png')},
+    ],
+    items: [
+      {icon: itemIcon('TFT_Item_Redemption.png')},
+      {icon: itemIcon('TFT_Item_Morellonomicon.png')},
+      {icon: itemIcon('TFT_Item_Sunfire.png')},
+    ],
+  },
+  {
+    id: '6',
+    name: 'Hàng Nặng Malzahar',
+    rank: 'S',
+    champions: [
+      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
+      {id: 'ziggs', image: championIcon('TFT11_Ziggs.TFT_Set11.png')},
+      {id: 'katarina', image: championIcon('TFT11_Katarina.TFT_Set11.png')},
+      {id: 'malphite', image: championIcon('TFT11_Malphite.TFT_Set11.png')},
+      {id: 'kaisa', image: championIcon('TFT11_Kaisa.TFT_Set11.png')},
+      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
+      {id: 'malzahar', image: championIcon('TFT11_Malzahar.TFT_Set11.png')},
+      {id: 'yuumi', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
+    ],
+    items: [
+      {icon: itemIcon('TFT_Item_Redemption.png')},
+      {icon: itemIcon('TFT_Item_Morellonomicon.png')},
+      {icon: itemIcon('TFT_Item_ArchangelsStaff.png')},
+      {icon: itemIcon('TFT_Item_RabadonsDeathcap.png')},
+      {icon: itemIcon('TFT_Item_BlueBuff.png')},
+    ],
+  },
+];
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const {
-    data: allChampions,
-    isLoading,
-    isError,
-    error,
-    isLoadingMore,
-    hasMore,
-    loadMore,
-    refresh,
-    isRefetching,
-  } = useChampionsWithPagination(10);
-
-  const handleItemPress = (championId?: string) => {
-    NavigationService.push(SCREENS.DETAIL, {championId});
+  const handleTeamPress = (team: TeamComp) => {
+    // Convert TeamComp to TeamComposition format for detail screen
+    const teamData = {
+      id: team.id,
+      name: team.name,
+      plan: 'Lvl 7/8 Roll',
+      difficulty: team.rank === 'OP' ? 'Dễ' : team.rank === 'S' ? 'Trung bình' : 'Khó',
+      metaDescription: `Đội hình ${team.name} - ${team.rank} tier`,
+      isLateGame: true,
+      boardSize: {rows: 4, cols: 7},
+      synergies: [],
+      units: team.champions.map((champ, index) => ({
+        id: champ.id,
+        name: champ.id,
+        cost: Math.floor(Math.random() * 5) + 1,
+        star: 2,
+        position: {
+          row: Math.floor(index / 7),
+          col: index % 7,
+        },
+        image: champ.image,
+        items: champ.items || [],
+      })),
+      bench: [],
+      carryItems: [],
+      notes: [`Đội hình ${team.name} mạnh ở giai đoạn cuối game`],
+    };
+    
+    NavigationService.push(SCREENS.DETAIL, {team: teamData});
   };
 
-  /* -------------------------------------------------------------------------- */
-  /*                               Render Methods                               */
-  /* -------------------------------------------------------------------------- */
+  const getRankColor = (rank: string) => {
+    switch (rank) {
+      case 'OP':
+        return '#ff4757';
+      case 'S':
+        return '#5352ed';
+      case 'A':
+        return '#3742fa';
+      default:
+        return colors.primary;
+    }
+  };
 
-  const renderMenuButton = () => (
-    <RNBounceable>
-      <Icon
-        name="menuq"
-        type={IconType.Ionicons}
-        color={colors.iconBlack}
-        size={30}
-      />
+  const renderTeamCard = ({item}: {item: TeamComp}) => (
+    <RNBounceable style={styles.teamCard} onPress={() => handleTeamPress(item)}>
+      <View style={styles.teamHeader}>
+        <View style={[styles.rankBadge, {backgroundColor: getRankColor(item.rank)}]}>
+          <Text style={styles.rankText}>{item.rank}</Text>
+        </View>
+        <Text style={styles.teamName}>{item.name}</Text>
+      </View>
+
+      <View style={styles.championsRow}>
+        {item.champions.map((champion, index) => (
+          <Image
+            key={`${champion.id}-${index}`}
+            source={{uri: champion.image}}
+            style={styles.championAvatar}
+          />
+        ))}
+      </View>
+
+      <View style={styles.itemsRow}>
+        {item.items.map((itemObj, index) => (
+          <Image
+            key={`item-${index}`}
+            source={{uri: itemObj.icon}}
+            style={styles.itemIcon}
+          />
+        ))}
+      </View>
     </RNBounceable>
   );
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <View style={styles.header}>
-        {renderMenuButton()}
-        <Image
-          resizeMode="cover"
-          source={{uri: profileURI}}
-          style={styles.profilePicImageStyle}
-        />
-      </View>
-    </View>
-  );
-
-  const renderLoading = () => (
-    <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.loadingText}>
-        Loading champions...
-      </Text>
-    </View>
-  );
-
-  const renderError = () => (
-    <View style={styles.errorContainer}>
-      <Icon
-        name="alert-circle"
-        type={IconType.Ionicons}
-        color={colors.danger}
-        size={48}
-      />
-      <Text h4 color={colors.danger} style={styles.errorText}>
-        Error loading champions
-      </Text>
-      <Text color={colors.placeholder} style={styles.errorDescription}>
-        {error?.message || 'Something went wrong'}
-      </Text>
-      <RNBounceable
-        style={styles.retryButton}
-        onPress={() => refresh()}>
-        <Text color={colors.white} bold>
-          Retry
-        </Text>
-      </RNBounceable>
-    </View>
-  );
-
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Icon
-        name="inbox"
-        type={IconType.Ionicons}
-        color={colors.placeholder}
-        size={48}
-      />
-      <Text h4 color={colors.placeholder} style={styles.emptyText}>
-        No champions found
-      </Text>
-    </View>
-  );
-
-  const renderList = () => {
-    if (isLoading && allChampions.length === 0) {
-      return renderLoading();
-    }
-
-    if (isError && allChampions.length === 0) {
-      return renderError();
-    }
-
-    if (allChampions.length === 0 && !isLoading) {
-      return renderEmpty();
-    }
-
-    return (
-      <FlatList
-        data={allChampions}
-        renderItem={({item}) => (
-          <ChampionCard
-            data={item}
-            onPress={() => handleItemPress(item.id)}
-          />
-        )}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{paddingBottom: 20}}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.3}
-        ListFooterComponent={
-          isLoadingMore || (isLoading && allChampions.length > 0) ? (
-            <View style={styles.footerLoader}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text
-                color={colors.placeholder}
-                style={{marginTop: 8, fontSize: 14}}>
-                Loading more...
-              </Text>
-            </View>
-          ) : !hasMore && allChampions.length > 0 ? (
-            <View style={styles.footerLoader}>
-              <Text color={colors.placeholder} style={{fontSize: 14}}>
-                No more champions to load
-              </Text>
-            </View>
-          ) : null
-        }
-      />
-    );
-  };
-
-  const renderWelcome = () => (
-    <View style={styles.welcomeContainer}>
-      <Text style={styles.welcomeTitle} color={colors.text}>
-        Champions
-      </Text>
-      <Text
-        style={styles.welcomeSubtitle}
-        fontFamily={fonts.montserrat.lightItalic}
-        color={colors.placeholder}>
-        {allChampions.length > 0
-          ? `${allChampions.length} champions loaded`
-          : 'Explore all champions'}
-      </Text>
-    </View>
-  );
-
-  const renderContent = () => (
-    <View style={styles.contentContainer}>
-      {renderWelcome()}
-      <View style={styles.listContainer}>{renderList()}</View>
-    </View>
-  );
-
   return (
-    <SafeAreaView style={styles.container}>
-      {renderHeader()}
-      {renderContent()}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <FlatList
+        data={TEAM_COMPS}
+        renderItem={renderTeamCard}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 };

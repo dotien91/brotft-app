@@ -27,18 +27,10 @@ export default (theme: ExtendedTheme) => {
     container: {
       marginBottom: 20,
       borderRadius: 20,
-      backgroundColor: colors.card,
-      shadowRadius: 12,
-      shadowOpacity: 0.18,
-      shadowColor: colors.shadow,
-      shadowOffset: {
-        width: 0,
-        height: 6,
-      },
+      backgroundColor: '#252836',
       overflow: 'hidden',
-      elevation: 5,
       borderWidth: 1,
-      borderColor: colors.placeholder + '10',
+      borderColor: '#2a2d3a',
     },
     contentWrapper: {
       padding: 20,
@@ -69,37 +61,37 @@ export default (theme: ExtendedTheme) => {
     keyContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.placeholder + '15',
+      backgroundColor: '#1a1d29',
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 12,
       marginRight: 10,
       marginBottom: 8,
       borderWidth: 1,
-      borderColor: colors.placeholder + '25',
+      borderColor: '#2a2d3a',
     },
     setContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.placeholder + '15',
+      backgroundColor: '#1a1d29',
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 12,
       marginRight: 10,
       marginBottom: 8,
       borderWidth: 1,
-      borderColor: colors.placeholder + '25',
+      borderColor: '#2a2d3a',
     },
     championsContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.placeholder + '15',
+      backgroundColor: '#1a1d29',
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 12,
       marginBottom: 8,
       borderWidth: 1,
-      borderColor: colors.placeholder + '25',
+      borderColor: '#2a2d3a',
     },
     contentContainer: {
       flexDirection: 'row',
@@ -130,7 +122,7 @@ export default (theme: ExtendedTheme) => {
       marginBottom: 10,
       paddingVertical: 8,
       paddingHorizontal: 12,
-      backgroundColor: colors.background + '80',
+      backgroundColor: '#1a1d29',
       borderRadius: 10,
     },
     tierCountBadge: {
@@ -155,5 +147,8 @@ export default (theme: ExtendedTheme) => {
     },
   });
 };
+
+
+
 
 

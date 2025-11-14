@@ -12,7 +12,7 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: '#1a1d29',
       alignItems: "center",
       justifyContent: "center",
     },
@@ -28,7 +28,7 @@ export default (theme: ExtendedTheme) => {
       borderRadius: 16,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#135",
+      backgroundColor: colors.primary,
     },
   });
 };

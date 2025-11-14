@@ -10,10 +10,9 @@ import {DarkTheme, LightTheme, palette} from '@theme/themes';
 // ? Screens
 import HomeScreen from '@screens/home/HomeScreen';
 import DetailScreen from '@screens/detail/DetailScreen';
-import NotificationScreen from '@screens/notification/NotificationScreen';
+import ChampionDetailScreen from '@screens/champion-detail/ChampionDetailScreen';
+import GuideScreen from '@screens/guide/GuideScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
-import SearchScreen from '@screens/search/SearchScreen';
-import TraitsScreen from '@screens/traits/TraitsScreen';
 import TraitDetailScreen from '@screens/traits/TraitDetailScreen';
 
 // ? If you want to use stack or tab or both
@@ -39,17 +38,11 @@ const Navigation = () => {
       case SCREENS.HOME:
         iconName = focused ? 'home' : 'home-outline';
         break;
-      case SCREENS.SEARCH:
-        iconName = focused ? 'search' : 'search-outline';
+      case SCREENS.GUIDE:
+        iconName = focused ? 'book' : 'book-outline';
         break;
-      case SCREENS.NOTIFICATION:
-        iconName = focused ? 'notifications' : 'notifications-outline';
-        break;
-      case SCREENS.PROFILE:
-        iconName = focused ? 'person' : 'person-outline';
-        break;
-      case SCREENS.TRAITS:
-        iconName = focused ? 'grid' : 'grid-outline';
+      case SCREENS.SETTINGS:
+        iconName = focused ? 'settings' : 'settings-outline';
         break;
       default:
         iconName = focused ? 'home' : 'home-outline';
@@ -73,19 +66,28 @@ const Navigation = () => {
           tabBarIcon: ({focused, color, size}) =>
             renderTabIcon(route, focused, color, size),
           tabBarActiveTintColor: palette.primary,
-          tabBarInactiveTintColor: 'gray',
+          tabBarInactiveTintColor: '#8e8e93',
           tabBarStyle: {
-            backgroundColor: isDarkMode ? palette.black : palette.white,
+            backgroundColor: '#1a1d29',
+            borderTopColor: '#2a2d3a',
+            borderTopWidth: 1,
           },
         })}>
-        <Tab.Screen name={SCREENS.HOME} component={HomeScreen} />
-        <Tab.Screen name={SCREENS.SEARCH} component={SearchScreen} />
-        <Tab.Screen name={SCREENS.TRAITS} component={TraitsScreen} />
-        <Tab.Screen
-          name={SCREENS.NOTIFICATION}
-          component={NotificationScreen}
+        <Tab.Screen 
+          name={SCREENS.HOME} 
+          component={HomeScreen}
+          options={{tabBarLabel: 'Home'}}
         />
-        <Tab.Screen name={SCREENS.PROFILE} component={ProfileScreen} />
+        <Tab.Screen 
+          name={SCREENS.GUIDE} 
+          component={GuideScreen}
+          options={{tabBarLabel: 'Guide'}}
+        />
+        <Tab.Screen 
+          name={SCREENS.SETTINGS} 
+          component={ProfileScreen}
+          options={{tabBarLabel: 'Settings'}}
+        />
       </Tab.Navigator>
     );
   };
@@ -101,6 +103,9 @@ const Navigation = () => {
         <Stack.Screen name={SCREENS.HOME_ROOT} component={TabNavigation} />
         <Stack.Screen name={SCREENS.DETAIL}>
           {props => <DetailScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name={SCREENS.CHAMPION_DETAIL}>
+          {props => <ChampionDetailScreen {...props} />}
         </Stack.Screen>
         <Stack.Screen name={SCREENS.TRAIT_DETAIL}>
           {props => <TraitDetailScreen {...props} />}

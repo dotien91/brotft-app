@@ -1,20 +1,268 @@
-import React, {useMemo} from 'react';
-import {View, Image, ScrollView, ActivityIndicator} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {View, Image, ScrollView, Switch, useWindowDimensions} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
-import * as NavigationService from 'react-navigation-helpers';
-import createStyles from './DetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
+import * as NavigationService from 'react-navigation-helpers';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {useChampionById} from '@services/api/hooks/listQueryHooks';
-import {SCREENS} from '@shared-constants';
-import type {ITrait} from '@services/models/trait';
+import createStyles from './DetailScreen.style';
+import Hexagon from './components/Hexagon';
+
+const TFT_IMAGE_VERSION = '14.15.1';
+const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
+const ITEM_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-item/`;
+
+const COST_COLORS: Record<number, string> = {
+  1: '#a5b4fc',
+  2: '#38bdf8',
+  3: '#f97316',
+  4: '#facc15',
+  5: '#c084fc',
+};
+
+const championIcon = (fileName: string) => `${CHAMPION_BASE}${fileName}`;
+const itemIcon = (fileName: string) => `${ITEM_BASE}${fileName}`;
+
+type TeamUnitItem = {
+  id: string;
+  name: string;
+  icon: string;
+};
+
+type TeamUnit = {
+  id: string;
+  name: string;
+  cost: number;
+  star?: number;
+  carry?: boolean;
+  position: {
+    row: number;
+    col: number;
+  };
+  image: string;
+  items?: TeamUnitItem[];
+};
+
+type TeamSynergy = {
+  id: string;
+  name: string;
+  abbreviation: string;
+  count: number;
+  max: number;
+  color: string;
+};
+
+type TeamCarry = {
+  championId: string;
+  championName: string;
+  role: string;
+  image: string;
+  items: TeamUnitItem[];
+};
+
+type TeamComposition = {
+  id: string;
+  name: string;
+  plan: string;
+  difficulty: string;
+  metaDescription: string;
+  isLateGame: boolean;
+  boardSize: {
+    rows: number;
+    cols: number;
+  };
+  synergies: TeamSynergy[];
+  units: TeamUnit[];
+  bench: TeamUnit[];
+  carryItems: TeamCarry[];
+  notes: string[];
+};
+
+export const DEFAULT_TEAM: TeamComposition = {
+  id: 'comp-daicogiap-yone',
+  name: 'Đại Cơ Giáp Yone',
+  plan: 'Lvl 7/8 Roll',
+  difficulty: 'Trung bình',
+  metaDescription:
+    'Roll nhẹ ở cấp 7 tìm đủ dàn chắn Đại Cơ Giáp, giữ vàng lên 8 hoàn thiện đội hình với Yone chủ lực.',
+  isLateGame: true,
+  boardSize: {
+    rows: 4,
+    cols: 7,
+  },
+  synergies: [
+    {id: 'armor', name: 'Đại Cơ Giáp', abbreviation: 'ĐC', count: 7, max: 7, color: '#facc15'},
+    {id: 'pilot', name: 'Phi Công Công Nghệ', abbreviation: 'PC', count: 3, max: 3, color: '#38bdf8'},
+    {id: 'guardian', name: 'Hộ Công', abbreviation: 'HC', count: 2, max: 2, color: '#f87171'},
+    {id: 'rebel', name: 'Đấu Trường', abbreviation: 'ĐT', count: 2, max: 2, color: '#fb7185'},
+    {id: 'fortress', name: 'Tổng Lực', abbreviation: 'TL', count: 2, max: 2, color: '#34d399'},
+  ],
+  units: [
+    {
+      id: 'garen',
+      name: 'Garen',
+      cost: 1,
+      star: 2,
+      position: {row: 0, col: 1},
+      image: championIcon('TFT11_Garen.TFT_Set11.png'),
+    },
+    {
+      id: 'riven',
+      name: 'Riven',
+      cost: 3,
+      star: 2,
+      position: {row: 0, col: 3},
+      image: championIcon('TFT11_Riven.TFT_Set11.png'),
+      items: [
+        {id: 'bramble', name: 'Áo Choàng Gai', icon: itemIcon('TFT_Item_BrambleVest.png')},
+        {id: 'dragonclaw', name: 'Vuốt Rồng', icon: itemIcon('TFT_Item_DragonsClaw.png')},
+      ],
+    },
+    {
+      id: 'mordekaiser',
+      name: 'Mordekaiser',
+      cost: 4,
+      star: 2,
+      position: {row: 0, col: 5},
+      image: championIcon('TFT11_Mordekaiser.TFT_Set11.png'),
+      items: [
+        {id: 'redemption', name: 'Chuộc Tội', icon: itemIcon('TFT_Item_Redemption.png')},
+      ],
+    },
+    {
+      id: 'illaoi',
+      name: 'Urgot',
+      cost: 4,
+      star: 2,
+      position: {row: 1, col: 0},
+      image: championIcon('TFT11_Urgot.TFT_Set11.png'),
+    },
+    {
+      id: 'shen',
+      name: 'Shen',
+      cost: 2,
+      star: 2,
+      position: {row: 1, col: 2},
+      image: championIcon('TFT11_Shen.TFT_Set11.png'),
+    },
+    {
+      id: 'wukong',
+      name: 'Wukong',
+      cost: 2,
+      star: 2,
+      position: {row: 1, col: 4},
+      image: championIcon('TFT11_Wukong.TFT_Set11.png'),
+    },
+    {
+      id: 'irelia',
+      name: 'Irelia',
+      cost: 3,
+      star: 2,
+      position: {row: 1, col: 6},
+      image: championIcon('TFT11_Irelia.TFT_Set11.png'),
+    },
+    {
+      id: 'yone',
+      name: 'Yone',
+      cost: 4,
+      carry: true,
+      star: 2,
+      position: {row: 2, col: 3},
+      image: championIcon('TFT11_Yone.TFT_Set11.png'),
+      items: [
+        {id: 'rageblade', name: 'Cuồng Đao Guinsoo', icon: itemIcon('TFT_Item_GuinsoosRageblade.png')},
+        {id: 'handofjustice', name: 'Bàn Tay Công Lý', icon: itemIcon('TFT_Item_HandOfJustice.png')},
+        {id: 'deathblade', name: 'Kiếm Tử Thần', icon: itemIcon('TFT_Item_Deathblade.png')},
+      ],
+    },
+    {
+      id: 'janna',
+      name: 'Janna',
+      cost: 4,
+      star: 2,
+      position: {row: 2, col: 1},
+      image: championIcon('TFT11_Janna.TFT_Set11.png'),
+    },
+    {
+      id: 'leesin',
+      name: 'Lee Sin',
+      cost: 4,
+      star: 1,
+      position: {row: 2, col: 5},
+      image: championIcon('TFT11_LeeSin.TFT_Set11.png'),
+    },
+    {
+      id: 'ahri',
+      name: 'Ahri',
+      cost: 5,
+      star: 1,
+      position: {row: 3, col: 3},
+      image: championIcon('TFT11_Ahri.TFT_Set11.png'),
+    },
+  ],
+  bench: [
+    {
+      id: 'aatrox',
+      name: 'Aatrox',
+      cost: 4,
+      star: 1,
+      position: {row: 0, col: 0},
+      image: championIcon('TFT11_Aatrox.TFT_Set11.png'),
+    },
+    {
+      id: 'nasus',
+      name: 'Nasus',
+      cost: 2,
+      star: 2,
+      position: {row: 0, col: 0},
+      image: championIcon('TFT11_Nasus.TFT_Set11.png'),
+    },
+    {
+      id: 'seraphine',
+      name: 'Seraphine',
+      cost: 3,
+      star: 1,
+      position: {row: 0, col: 0},
+      image: championIcon('TFT11_Seraphine.TFT_Set11.png'),
+    },
+  ],
+  carryItems: [
+    {
+      championId: 'yone',
+      championName: 'Yone',
+      role: 'Chủ lực sát thương',
+      image: championIcon('TFT11_Yone.TFT_Set11.png'),
+      items: [
+        {id: 'rageblade', name: 'Guinsoo', icon: itemIcon('TFT_Item_GuinsoosRageblade.png')},
+        {id: 'hand', name: 'Bàn Tay', icon: itemIcon('TFT_Item_HandOfJustice.png')},
+        {id: 'deathblade', name: 'Kiếm Tử Thần', icon: itemIcon('TFT_Item_Deathblade.png')},
+      ],
+    },
+    {
+      championId: 'riven',
+      championName: 'Riven',
+      role: 'Chống chịu chính',
+      image: championIcon('TFT11_Riven.TFT_Set11.png'),
+      items: [
+        {id: 'bramble', name: 'Áo Choàng Gai', icon: itemIcon('TFT_Item_BrambleVest.png')},
+        {id: 'dclaw', name: 'Vuốt Rồng', icon: itemIcon('TFT_Item_DragonsClaw.png')},
+        {id: 'warmog', name: 'Giáp Máu', icon: itemIcon('TFT_Item_WarmogsArmor.png')},
+      ],
+    },
+  ],
+  notes: [
+    'Ưu tiên roll tìm Yone 2★ và đủ 7 Đại Cơ Giáp trước khi lên cấp 8.',
+    'Sau cấp 8 thêm Lee Sin để hoàn thiện Phi Công Công Nghệ, cân nhắc Ahri nếu cần sát thương phép.',
+    'Trang bị chống chịu nên dồn cho Riven hoặc Mordekaiser để bảo kê tuyến sau.',
+    'Nếu lobby nhiều phép, chuyển Vuốt Rồng sang Mordekaiser và lấy Khăn Giải Thuật cho Yone.',
+  ],
+};
 
 interface DetailScreenProps {
   route?: {
     params?: {
-      championId?: string;
+      team?: TeamComposition;
     };
   };
 }
@@ -24,353 +272,251 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   const route = useRoute();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const {width: windowWidth} = useWindowDimensions();
 
-  const championId =
-    (routeProp?.params?.championId ||
-      (route?.params as any)?.championId) as string;
+  const teamFromParams =
+    (routeProp?.params?.team ||
+      (route?.params as any)?.team) as TeamComposition | undefined;
 
-  const {
-    data: champion,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useChampionById(championId || '');
+  const team = teamFromParams || DEFAULT_TEAM;
+  const [isLateGame, setIsLateGame] = useState(team.isLateGame);
+
+  // Calculate hex size to fit 7 hexagons in a row
+  const hexSize = useMemo(() => {
+    const horizontalPadding = 32; // Total padding
+    const availableWidth = windowWidth - horizontalPadding;
+    const calculatedSize = (availableWidth / 7.8); // 7.8 to account for spacing
+    return Math.max(Math.min(calculatedSize, 70), 45); // Min 45, Max 70
+  }, [windowWidth]);
+
+  const boardRows = useMemo(() => {
+    return Array.from({length: team.boardSize.rows}).map((_, rowIndex) =>
+      Array.from({length: team.boardSize.cols}).map((_, colIndex) => {
+        return (
+          team.units.find(
+            champ =>
+              champ.position.row === rowIndex &&
+              champ.position.col === colIndex,
+          ) || null
+        );
+      }),
+    );
+  }, [team]);
 
   const renderBackButton = () => (
     <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
       <Icon
-        name="arrow-back"
+        name='arrow-back'
         type={IconType.Ionicons}
         color={colors.text}
-        size={24}
+        size={22}
       />
     </RNBounceable>
   );
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      {renderBackButton()}
-    </View>
-  );
-
-  const renderLoading = () => (
-    <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.loadingText}>
-        Loading champion...
-      </Text>
-    </View>
-  );
-
-  const renderError = () => (
-    <View style={styles.errorContainer}>
-      <Icon
-        name="alert-circle"
-        type={IconType.Ionicons}
-        color={colors.danger}
-        size={48}
-      />
-      <Text h4 color={colors.danger} style={styles.errorText}>
-        Error loading champion
-      </Text>
-      <Text color={colors.placeholder} style={styles.errorDescription}>
-        {error?.message || 'Something went wrong'}
-      </Text>
-      <RNBounceable style={styles.retryButton} onPress={() => refetch()}>
-        <Text color={colors.white} bold>
-          Retry
+  const renderSynergy = (synergy: TeamSynergy) => (
+    <View key={synergy.id} style={styles.synergyCard}>
+      <Hexagon
+        size={44}
+        backgroundColor={synergy.color + '20'}
+        borderColor={synergy.color + '66'}
+        borderWidth={2}>
+        <Text style={[styles.synergyIconText, {color: synergy.color}]}>
+          {synergy.abbreviation}
         </Text>
-      </RNBounceable>
+      </Hexagon>
+      <Text style={styles.synergyCount}>{synergy.count}</Text>
     </View>
   );
 
-  const renderCostBadge = () => {
-    if (!champion?.cost) return null;
-    return (
-      <View style={styles.badge}>
-        <Icon
-          name="diamond"
-          type={IconType.FontAwesome}
-          color={colors.primary}
-          size={18}
-        />
-        <Text style={styles.badgeText}>Cost: {champion.cost}</Text>
-      </View>
-    );
-  };
-
-  const renderSetBadge = () => {
-    if (!champion?.set) return null;
-    return (
-      <View style={[styles.badge, styles.badgeSecondary]}>
-        <Icon
-          name="tag"
-          type={IconType.FontAwesome}
-          color={colors.text}
-          size={16}
-        />
-        <Text style={styles.badgeTextSecondary}>{champion.set}</Text>
-      </View>
-    );
-  };
-
-  const renderTraits = () => {
-    // Use traitDetails if available, otherwise fallback to traits
-    const displayTraits = champion?.traitDetails && champion.traitDetails.length > 0
-      ? champion.traitDetails
-      : champion?.traits || [];
+  const renderUnit = (unit: TeamUnit) => {
+    const avatarSize = hexSize * 0.7;
+    const costBadgeSize = hexSize * 0.35;
+    const itemIconSize = hexSize * 0.28;
     
-    if (!displayTraits || displayTraits.length === 0) return null;
-
-    const isTraitObject = (trait: string | ITrait): trait is ITrait => {
-      return typeof trait === 'object' && trait !== null && 'name' in trait;
-    };
-
-    const handleTraitPress = (trait: string | ITrait) => {
-      if (isTraitObject(trait)) {
-        NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: trait.id});
-      }
-    };
-
-    const getTraitName = (trait: string | ITrait): string => {
-      if (typeof trait === 'string') return trait;
-      if (isTraitObject(trait)) return trait.name;
-      return String(trait);
-    };
-
-    const getTraitType = (trait: string | ITrait): 'origin' | 'class' | null => {
-      if (isTraitObject(trait)) return trait.type;
-      return null;
-    };
-
     return (
-      <View style={styles.section}>
-        <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-          Traits
-        </Text>
-        <View style={styles.traitsContainer}>
-          {displayTraits.map((trait, index) => {
-            // If traitDetails is available, traits are already ITrait objects
-            const isTraitDetail = champion?.traitDetails && champion.traitDetails.length > 0;
-            const traitObj = isTraitDetail ? (trait as ITrait) : null;
-            const traitName = traitObj 
-              ? traitObj.name 
-              : getTraitName(trait as string | ITrait);
-            const traitType = traitObj ? traitObj.type : getTraitType(trait as string | ITrait);
-            const isOrigin = traitType === 'origin';
+      <>
+        <View
+          style={[
+            styles.unitRing,
+            {
+              width: avatarSize,
+              height: avatarSize,
+              borderRadius: avatarSize / 2,
+              borderColor: COST_COLORS[unit.cost] || colors.primary,
+            },
+          ]}>
+          <Image 
+            source={{uri: unit.image}} 
+            style={{
+              width: avatarSize - 6,
+              height: avatarSize - 6,
+              borderRadius: (avatarSize - 6) / 2,
+            }} 
+          />
+        </View>
+        {unit.star ? (
+          <View style={[styles.starBadge, {top: -hexSize * 0.1}]}>
+            <Text style={[styles.starText, {fontSize: hexSize * 0.16}]}>
+              {'★'.repeat(unit.star)}
+            </Text>
+          </View>
+        ) : null}
+        <View style={[
+          styles.costBadge,
+          {
+            width: costBadgeSize,
+            height: costBadgeSize,
+            borderRadius: costBadgeSize / 2,
+            bottom: -hexSize * 0.12,
+          }
+        ]}>
+          <Text style={[styles.costText, {fontSize: hexSize * 0.18}]}>{unit.cost}</Text>
+        </View>
+        {unit.carry ? (
+          <View style={[
+            styles.carryBadge,
+            {
+              width: costBadgeSize,
+              height: costBadgeSize,
+              borderRadius: costBadgeSize / 2,
+              top: -hexSize * 0.12,
+              right: -hexSize * 0.12,
+            }
+          ]}>
+            <Text style={[styles.carryText, {fontSize: hexSize * 0.18}]}>C</Text>
+          </View>
+        ) : null}
+        {unit.items && unit.items.length > 0 ? (
+          <View style={[styles.itemRow, {bottom: -hexSize * 0.4}]}>
+            {unit.items.map(item => (
+              <Image 
+                key={item.id} 
+                source={{uri: item.icon}} 
+                style={{
+                  width: itemIconSize,
+                  height: itemIconSize,
+                  borderRadius: 4,
+                  marginHorizontal: 2,
+                }} 
+              />
+            ))}
+          </View>
+        ) : null}
+      </>
+    );
+  };
 
-            return (
-              <RNBounceable
-                key={traitObj ? traitObj.id : index}
-                onPress={() => handleTraitPress(trait as string | ITrait)}
-                disabled={!traitObj}>
-                <View
-                  style={[
-                    styles.traitBadge,
-                    traitObj && {
-                      backgroundColor: isOrigin
-                        ? colors.primary + '20'
-                        : colors.danger + '20',
-                      borderColor: isOrigin
-                        ? colors.primary + '40'
-                        : colors.danger + '40',
-                    },
-                  ]}>
-                  {traitObj && (
-                    <View
-                      style={[
-                        styles.traitTypeIndicator,
-                        {
-                          backgroundColor: isOrigin
-                            ? colors.primary
-                            : colors.danger,
-                        },
-                      ]}
-                    />
-                  )}
-                  <Text
-                    style={[
-                      styles.traitText,
-                      traitObj && {
-                        color: isOrigin ? colors.primary : colors.danger,
-                      },
-                    ]}>
-                    {traitName}
-                  </Text>
-                </View>
-              </RNBounceable>
-            );
-          })}
+  const renderBoard = () => (
+    <View style={styles.boardWrapper}>
+      <View style={styles.board}>
+        {boardRows.map((row, rowIndex) => (
+          <View
+            key={`row-${rowIndex}`}
+            style={[
+              styles.boardRow,
+              rowIndex % 2 !== 0 && {marginLeft: hexSize * 0.5},
+            ]}>
+            {row.map((unit, colIndex) => (
+              <View
+                key={`cell-${rowIndex}-${colIndex}`}
+                style={styles.hexCellContainer}>
+                <Hexagon
+                  size={hexSize}
+                  backgroundColor={unit ? '#252836' : '#1e2130'}
+                  borderColor={unit ? '#3a3d4a' : '#2a2d3a'}
+                  borderWidth={2}>
+                  {unit ? renderUnit(unit) : null}
+                </Hexagon>
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderCarryCard = () => (
+    <View style={styles.carryCard}>
+      <Text style={styles.sectionLabel}>Trang bị chủ lực</Text>
+      {team.carryItems.map(carry => (
+        <View key={carry.championId} style={styles.carryRow}>
+          <View style={styles.carryChampion}>
+            <Image source={{uri: carry.image}} style={styles.carryAvatar} />
+            <View>
+              <Text style={styles.carryName}>{carry.championName}</Text>
+              <Text style={styles.carryRole}>{carry.role}</Text>
+            </View>
+          </View>
+          <View style={styles.carryItemsRow}>
+            {carry.items.map(item => (
+              <Image key={item.id} source={{uri: item.icon}} style={styles.carryItemIcon} />
+            ))}
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+
+  const renderNotes = () => (
+    <View style={styles.highlightsCard}>
+      <Text style={styles.sectionLabel}>Ghi chú vận hành</Text>
+      {team.notes.map(note => (
+        <View key={note} style={styles.highlightItem}>
+          <View style={styles.highlightBullet} />
+          <Text style={styles.highlightText}>{note}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.topHeader}>
+        {renderBackButton()}
+        <View style={styles.headerContent}>
+          <Text h2 bold color={colors.text} style={styles.headerTitle}>
+            {team.name}
+          </Text>
+          <Text color={colors.text} style={styles.headerPlan}>
+            {team.plan}
+          </Text>
+          <View style={[styles.metaPill, styles.metaPillSecondary]}>
+            <Text style={styles.metaPillText}>{team.difficulty}</Text>
+          </View>
+          <Text style={styles.toggleLabel}>Cuối game</Text>
+          <Switch
+            value={isLateGame}
+            onValueChange={setIsLateGame}
+            trackColor={{
+              false: colors.borderColor,
+              true: '#facc15' + '80',
+            }}
+            thumbColor={isLateGame ? '#facc15' : colors.placeholder}
+          />
         </View>
       </View>
-    );
-  };
 
-  const renderContent = () => {
-    if (isLoading && !champion) {
-      return renderLoading();
-    }
-
-    if (isError || !champion) {
-      return renderError();
-    }
-
-    return (
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        {/* Hero Image */}
-        {(() => {
-          // Use image.path if available, otherwise fallback to imageUrl
-          const imageSource = champion.image?.path || champion.imageUrl;
-          if (!imageSource) return null;
-          
-          // If image.path is relative, prepend base URL
-          const imageUri = champion.image?.path?.startsWith('http')
-            ? champion.image.path
-            : champion.image?.path?.startsWith('/')
-              ? `http://localhost:3000${champion.image.path}`
-              : champion.imageUrl || imageSource;
-          
-          return (
-            <Image
-              source={{uri: imageUri}}
-              style={styles.heroImage}
-              resizeMode="cover"
-            />
-          );
-        })()}
+        <View style={styles.synergyRow}>
+          {team.synergies.map(renderSynergy)}
+        </View>
 
-        {/* Content */}
-        <View style={styles.content}>
-          {/* Name and Badges */}
-          <View style={styles.titleSection}>
-            <Text h1 bold color={colors.text} style={styles.title}>
-              {champion.name}
-            </Text>
-            <View style={styles.badgesRow}>
-              {renderCostBadge()}
-              {renderSetBadge()}
-            </View>
-          </View>
-
-          {/* Description */}
-          {champion.description && (
-            <View style={styles.section}>
-              <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-                Description
-              </Text>
-              <Text color={colors.placeholder} style={styles.description}>
-                {champion.description}
-              </Text>
-            </View>
-          )}
-
-          {/* Ability */}
-          {champion.abilityName && (
-            <View style={styles.section}>
-              <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-                {champion.abilityName}
-              </Text>
-              {champion.abilityDescription && (
-                <Text color={colors.placeholder} style={styles.description}>
-                  {champion.abilityDescription}
-                </Text>
-              )}
-            </View>
-          )}
-
-          {/* Traits */}
-          {renderTraits()}
-
-          {/* Stats */}
-          {(champion.health || champion.armor || champion.magicResist || 
-            champion.attackDamage || champion.attackSpeed || champion.attackRange ||
-            champion.startingMana || champion.maxMana) && (
-            <View style={styles.section}>
-              <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-                Stats
-              </Text>
-              <View style={styles.statsContainer}>
-                {champion.health !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Health:</Text>
-                    <Text style={styles.infoValue}>{champion.health}</Text>
-                  </View>
-                )}
-                {champion.armor !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Armor:</Text>
-                    <Text style={styles.infoValue}>{champion.armor}</Text>
-                  </View>
-                )}
-                {champion.magicResist !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Magic Resist:</Text>
-                    <Text style={styles.infoValue}>{champion.magicResist}</Text>
-                  </View>
-                )}
-                {champion.attackDamage !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Attack Damage:</Text>
-                    <Text style={styles.infoValue}>{champion.attackDamage}</Text>
-                  </View>
-                )}
-                {champion.attackSpeed !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Attack Speed:</Text>
-                    <Text style={styles.infoValue}>{champion.attackSpeed}</Text>
-                  </View>
-                )}
-                {champion.attackRange !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Attack Range:</Text>
-                    <Text style={styles.infoValue}>{champion.attackRange}</Text>
-                  </View>
-                )}
-                {champion.startingMana !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Starting Mana:</Text>
-                    <Text style={styles.infoValue}>{champion.startingMana}</Text>
-                  </View>
-                )}
-                {champion.maxMana !== undefined && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Max Mana:</Text>
-                    <Text style={styles.infoValue}>{champion.maxMana}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
-
-          {/* Additional Info */}
-          <View style={styles.section}>
-            <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-              Information
-            </Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Key:</Text>
-              <Text style={styles.infoValue}>{champion.key}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>ID:</Text>
-              <Text style={styles.infoValue}>{champion.id}</Text>
-            </View>
+        <View style={styles.mainLayout}>
+          <View style={styles.boardColumn}>
+            {renderBoard()}
           </View>
         </View>
-      </ScrollView>
-    );
-  };
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {renderHeader()}
-      {renderContent()}
+        {renderCarryCard()}
+        {renderNotes()}
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default DetailScreen;
+

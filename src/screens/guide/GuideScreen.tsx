@@ -5,14 +5,14 @@ import {useTheme} from '@react-navigation/native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideScreen.style';
-import ChampionsTab from './tabs/ChampionsTab';
+import UnitsTab from './tabs/UnitsTab';
 import TraitsTab from './tabs/TraitsTab';
 import ItemsTab from './tabs/ItemsTab';
 import UpgradesTab from './tabs/UpgradesTab';
 import AugmentsTab from './tabs/AugmentsTab';
 
 const renderScene = SceneMap({
-  champions: ChampionsTab,
+  units: UnitsTab,
   traits: TraitsTab,
   items: ItemsTab,
   upgrades: UpgradesTab,
@@ -27,7 +27,7 @@ const GuideScreen: React.FC = () => {
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    {key: 'champions', title: 'Champion'},
+    {key: 'units', title: 'Units'},
     {key: 'traits', title: 'Tộc/Hệ'},
     {key: 'items', title: 'Item'},
     {key: 'upgrades', title: 'Nâng cấp'},

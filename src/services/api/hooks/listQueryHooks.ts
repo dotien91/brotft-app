@@ -9,6 +9,12 @@ import {
 } from '../champions';
 import {getTraits, getTraitById} from '../traits';
 import {getItems, getItemById, getItemByApiName} from '../items';
+import {
+  getTftUnits,
+  getTftUnitById,
+  getTftUnitByApiName,
+  getTftUnitsByCost,
+} from '../tft-units';
 import type {
   IChampionsQueryParams,
   IChampion,
@@ -23,6 +29,10 @@ import type {
   IItemsFilters,
   IItem,
 } from '@services/models/item';
+import type {
+  ITftUnitsQueryParams,
+  ITftUnit,
+} from '@services/models/tft-unit';
 
 // Query keys
 export const championKeys = {
@@ -268,6 +278,171 @@ export const useChampionsByTrait = (
     queryFn: getChampionsByTrait,
     enabled: (traitKey?: string) => !!traitKey,
   })(traitKey, queryOptions);
+};
+
+// ============= TFT UNITS HOOKS =============
+
+// Query keys for TFT units
+export const tftUnitKeys = {
+  all: ['tft-units'] as const,
+  lists: () => [...tftUnitKeys.all, 'list'] as const,
+  list: (params?: ITftUnitsQueryParams) =>
+    [...tftUnitKeys.lists(), params] as const,
+  details: () => [...tftUnitKeys.all, 'detail'] as const,
+  detail: (id: string) => [...tftUnitKeys.details(), id] as const,
+  byApiName: (apiName: string) => [...tftUnitKeys.all, 'apiName', apiName] as const,
+  byCost: (cost: number) => [...tftUnitKeys.all, 'cost', cost] as const,
+};
+
+// Get all TFT units with pagination and filters
+export const useTftUnits = (
+  params?: ITftUnitsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftUnits>>,
+      Error,
+      Awaited<ReturnType<typeof getTftUnits>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createOptionalListQueryHook<
+    ITftUnitsQueryParams,
+    Awaited<ReturnType<typeof getTftUnits>>,
+    Awaited<ReturnType<typeof getTftUnits>>
+  >({
+    queryKey: tftUnitKeys.list,
+    queryFn: getTftUnits,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for TFT units
+export const useTftUnitsWithPagination = (limit: number = 10) => {
+  const [page, setPage] = useState(1);
+  const [allTftUnits, setAllTftUnits] = useState<ITftUnit[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data: tftUnitsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useTftUnits({page, limit});
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    if (tftUnitsData?.data) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllTftUnits(tftUnitsData.data);
+      } else {
+        // Append new data when loading more
+        setAllTftUnits(prev => [...prev, ...tftUnitsData.data]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (tftUnitsData.hasNextPage !== undefined) {
+        setHasMore(tftUnitsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [tftUnitsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      tftUnitsData?.hasNextPage !== undefined
+        ? tftUnitsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && tftUnitsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllTftUnits([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allTftUnits,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get TFT unit by ID
+export const useTftUnitById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftUnitById>>,
+      Error,
+      Awaited<ReturnType<typeof getTftUnitById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftUnitKeys.detail(id),
+    queryFn: () => getTftUnitById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// Get TFT unit by API name
+export const useTftUnitByApiName = (
+  apiName: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftUnitByApiName>>,
+      Error,
+      Awaited<ReturnType<typeof getTftUnitByApiName>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftUnitKeys.byApiName(apiName),
+    queryFn: () => getTftUnitByApiName(apiName),
+    enabled: !!apiName,
+    ...queryOptions,
+  });
+};
+
+// Get TFT units by cost
+export const useTftUnitsByCost = (
+  cost: number,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftUnitsByCost>>,
+      Error,
+      Awaited<ReturnType<typeof getTftUnitsByCost>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return createListQueryHook({
+    queryKey: tftUnitKeys.byCost,
+    queryFn: getTftUnitsByCost,
+    enabled: (cost?: number) => !!cost && cost >= 1 && cost <= 5,
+  })(cost, queryOptions);
 };
 
 // ============= TRAITS HOOKS =============

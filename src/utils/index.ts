@@ -5,3 +5,5 @@ export const capitalizeFirstLetter = (str: string) => {
 export const generateRandomNumber = (min: number, max: number) => {
   return Math.floor(min + Math.random() * (max + 1 - min));
 };
+
+export * from './metatft';

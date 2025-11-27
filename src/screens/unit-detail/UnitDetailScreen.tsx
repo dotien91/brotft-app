@@ -9,7 +9,7 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl, getUnitSplashUrl} from '../../utils/metatft';
+import {getUnitAvatarUrl, getUnitSplashUrl, getTraitIconUrl} from '../../utils/metatft';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -104,17 +104,26 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
 
     return displayTraits.map((trait, index) => {
       const traitName = typeof trait === 'string' ? trait : String(trait);
+      const traitIconUrl = getTraitIconUrl(traitName, 20);
 
       return (
         <RNBounceable
           key={index}
           style={styles.traitBadge}>
-          <Icon
-            name="shield"
-            type={IconType.Ionicons}
-            color={colors.primary}
-            size={16}
-          />
+          {traitIconUrl ? (
+            <Image
+              source={{uri: traitIconUrl}}
+              style={styles.traitIcon}
+              resizeMode="contain"
+            />
+          ) : (
+            <Icon
+              name="shield"
+              type={IconType.Ionicons}
+              color={colors.primary}
+              size={16}
+            />
+          )}
           <Text style={styles.traitText}>{traitName}</Text>
         </RNBounceable>
       );

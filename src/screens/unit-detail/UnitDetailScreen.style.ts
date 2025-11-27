@@ -18,6 +18,7 @@ interface Style {
   unitName: TextStyle;
   traitsRow: ViewStyle;
   traitBadge: ViewStyle;
+  traitIcon: ImageStyle;
   traitText: TextStyle;
   costBadgeContainer: ViewStyle;
   costBadgeText: TextStyle;
@@ -154,6 +155,10 @@ export default (theme: ExtendedTheme) => {
       gap: 4,
       borderWidth: 1,
       borderColor: '#2a2d3a',
+    },
+    traitIcon: {
+      width: 16,
+      height: 16,
     },
     traitText: {
       fontSize: 11,

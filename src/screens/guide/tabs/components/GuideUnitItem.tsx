@@ -1,11 +1,11 @@
 import React, {useMemo} from 'react';
-import {View, TouchableOpacity} from 'react-native';
+import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl} from '../../../../utils/metatft';
+import {getUnitAvatarUrl, getTraitIconUrl} from '../../../../utils/metatft';
 import createStyles from './GuideUnitItem.style';
 
 interface GuideUnitItemProps {
@@ -70,15 +70,24 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
       <View style={styles.traitsContainer}>
         {displayTraits.slice(0, 3).map((trait, index) => {
           const traitName = typeof trait === 'string' ? trait : String(trait);
+          const traitIconUrl = getTraitIconUrl(traitName, 14);
           
           return (
             <View key={index} style={styles.traitItem}>
-              <Icon
-                name="shield"
-                type={IconType.Ionicons}
-                color={colors.primary}
-                size={14}
-              />
+              {traitIconUrl ? (
+                <Image
+                  source={{uri: traitIconUrl}}
+                  style={styles.traitIcon}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Icon
+                  name="shield"
+                  type={IconType.Ionicons}
+                  color={colors.primary}
+                  size={14}
+                />
+              )}
               <Text style={styles.traitText} numberOfLines={1}>
                 {traitName}
               </Text>

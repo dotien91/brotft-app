@@ -1,4 +1,4 @@
-import {StyleSheet, TextStyle, ViewStyle} from 'react-native';
+import {StyleSheet, TextStyle, ViewStyle, ImageStyle} from 'react-native';
 import {ExtendedTheme} from '@react-navigation/native';
 
 interface Style {
@@ -10,6 +10,7 @@ interface Style {
   costText: TextStyle;
   traitsContainer: ViewStyle;
   traitItem: ViewStyle;
+  traitIcon: ImageStyle;
   traitText: TextStyle;
   traitMoreText: TextStyle;
 }
@@ -60,6 +61,10 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       gap: 4,
       maxWidth: '48%',
+    },
+    traitIcon: {
+      width: 14,
+      height: 14,
     },
     traitText: {
       fontSize: 11,

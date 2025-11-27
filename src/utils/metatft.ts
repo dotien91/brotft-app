@@ -67,3 +67,30 @@ export const getUnitAbilityIconUrl = (
   return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/https://cdn.metatft.com/file/metatft/champions/${formattedKey}.png`;
 };
 
+/**
+ * Format trait name for MetaTFT CDN
+ * @param traitName - Trait name (e.g., "Darkin Weapon" or "darkinweapon")
+ * @returns Formatted trait name (e.g., "darkinweapon")
+ */
+export const formatTraitNameForMetaTft = (traitName?: string | null): string => {
+  if (!traitName) return '';
+  // Remove spaces, convert to lowercase
+  return traitName.toLowerCase().replace(/\s+/g, '');
+};
+
+/**
+ * Get trait icon URL from MetaTFT CDN
+ * @param traitName - Trait name
+ * @param size - Image size (default: 24)
+ * @returns Trait icon URL
+ */
+export const getTraitIconUrl = (
+  traitName?: string | null,
+  size: number = 24,
+): string => {
+  const formattedTrait = formatTraitNameForMetaTft(traitName);
+  if (!formattedTrait) return '';
+  
+  return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/https://cdn.metatft.com/file/metatft/traits/${formattedTrait}.png`;
+};
+

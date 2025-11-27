@@ -8,6 +8,8 @@ interface Style {
   infoContainer: ViewStyle;
   itemName: TextStyle;
   itemDescription: TextStyle;
+  uniqueBadge: ViewStyle;
+  uniqueText: TextStyle;
   componentsContainer: ViewStyle;
   componentBadge: ViewStyle;
   componentText: TextStyle;
@@ -54,6 +56,22 @@ export default (theme: ExtendedTheme) => {
       fontSize: 12,
       color: colors.placeholder,
       lineHeight: 16,
+      marginBottom: 4,
+    },
+    uniqueBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primary + '20',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.primary + '40',
+      marginTop: 4,
+    },
+    uniqueText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.primary,
     },
     componentsContainer: {
       flexDirection: 'row',

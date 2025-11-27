@@ -15,6 +15,16 @@ import {
   getTftUnitByApiName,
   getTftUnitsByCost,
 } from '../tft-units';
+import {
+  getTftTraits,
+  getTftTraitById,
+  getTftTraitByApiName,
+} from '../tft-traits';
+import {
+  getTftItems,
+  getTftItemById,
+  getTftItemByApiName,
+} from '../tft-items';
 import type {
   IChampionsQueryParams,
   IChampion,
@@ -33,6 +43,14 @@ import type {
   ITftUnitsQueryParams,
   ITftUnit,
 } from '@services/models/tft-unit';
+import type {
+  ITftTraitsQueryParams,
+  ITftTrait,
+} from '@services/models/tft-trait';
+import type {
+  ITftItemsQueryParams,
+  ITftItem,
+} from '@services/models/tft-item';
 
 // Query keys
 export const championKeys = {
@@ -445,7 +463,297 @@ export const useTftUnitsByCost = (
   })(cost, queryOptions);
 };
 
-// ============= TRAITS HOOKS =============
+// ============= TFT TRAITS HOOKS =============
+
+// Query keys for TFT traits
+export const tftTraitKeys = {
+  all: ['tft-traits'] as const,
+  lists: () => [...tftTraitKeys.all, 'list'] as const,
+  list: (params?: ITftTraitsQueryParams) =>
+    [...tftTraitKeys.lists(), params] as const,
+  details: () => [...tftTraitKeys.all, 'detail'] as const,
+  detail: (id: string) => [...tftTraitKeys.details(), id] as const,
+  byApiName: (apiName: string) => [...tftTraitKeys.all, 'apiName', apiName] as const,
+};
+
+// Get all TFT traits with pagination and filters
+export const useTftTraits = (
+  params?: ITftTraitsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftTraits>>,
+      Error,
+      Awaited<ReturnType<typeof getTftTraits>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createOptionalListQueryHook<
+    ITftTraitsQueryParams,
+    Awaited<ReturnType<typeof getTftTraits>>,
+    Awaited<ReturnType<typeof getTftTraits>>
+  >({
+    queryKey: tftTraitKeys.list,
+    queryFn: getTftTraits,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for TFT traits
+export const useTftTraitsWithPagination = (limit: number = 20) => {
+  const [page, setPage] = useState(1);
+  const [allTftTraits, setAllTftTraits] = useState<ITftTrait[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data: tftTraitsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useTftTraits({page, limit});
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    if (tftTraitsData?.data) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllTftTraits(tftTraitsData.data);
+      } else {
+        // Append new data when loading more
+        setAllTftTraits(prev => [...prev, ...tftTraitsData.data]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (tftTraitsData.hasNextPage !== undefined) {
+        setHasMore(tftTraitsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [tftTraitsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      tftTraitsData?.hasNextPage !== undefined
+        ? tftTraitsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && tftTraitsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllTftTraits([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allTftTraits,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get TFT trait by ID
+export const useTftTraitById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftTraitById>>,
+      Error,
+      Awaited<ReturnType<typeof getTftTraitById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftTraitKeys.detail(id),
+    queryFn: () => getTftTraitById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// Get TFT trait by API name
+export const useTftTraitByApiName = (
+  apiName: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftTraitByApiName>>,
+      Error,
+      Awaited<ReturnType<typeof getTftTraitByApiName>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftTraitKeys.byApiName(apiName),
+    queryFn: () => getTftTraitByApiName(apiName),
+    enabled: !!apiName,
+    ...queryOptions,
+  });
+};
+
+// ============= TFT ITEMS HOOKS =============
+
+// Query keys for TFT items
+export const tftItemKeys = {
+  all: ['tft-items'] as const,
+  lists: () => [...tftItemKeys.all, 'list'] as const,
+  list: (params?: ITftItemsQueryParams) =>
+    [...tftItemKeys.lists(), params] as const,
+  details: () => [...tftItemKeys.all, 'detail'] as const,
+  detail: (id: string) => [...tftItemKeys.details(), id] as const,
+  byApiName: (apiName: string) => [...tftItemKeys.all, 'apiName', apiName] as const,
+};
+
+// Get all TFT items with pagination and filters
+export const useTftItems = (
+  params?: ITftItemsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftItems>>,
+      Error,
+      Awaited<ReturnType<typeof getTftItems>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createOptionalListQueryHook<
+    ITftItemsQueryParams,
+    Awaited<ReturnType<typeof getTftItems>>,
+    Awaited<ReturnType<typeof getTftItems>>
+  >({
+    queryKey: tftItemKeys.list,
+    queryFn: getTftItems,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for TFT items
+export const useTftItemsWithPagination = (limit: number = 20) => {
+  const [page, setPage] = useState(1);
+  const [allTftItems, setAllTftItems] = useState<ITftItem[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data: tftItemsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useTftItems({page, limit});
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    if (tftItemsData?.data) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllTftItems(tftItemsData.data);
+      } else {
+        // Append new data when loading more
+        setAllTftItems(prev => [...prev, ...tftItemsData.data]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (tftItemsData.hasNextPage !== undefined) {
+        setHasMore(tftItemsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [tftItemsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      tftItemsData?.hasNextPage !== undefined
+        ? tftItemsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && tftItemsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllTftItems([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allTftItems,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get TFT item by ID
+export const useTftItemById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftItemById>>,
+      Error,
+      Awaited<ReturnType<typeof getTftItemById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftItemKeys.detail(id),
+    queryFn: () => getTftItemById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// Get TFT item by API name
+export const useTftItemByApiName = (
+  apiName: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftItemByApiName>>,
+      Error,
+      Awaited<ReturnType<typeof getTftItemByApiName>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftItemKeys.byApiName(apiName),
+    queryFn: () => getTftItemByApiName(apiName),
+    enabled: !!apiName,
+    ...queryOptions,
+  });
+};
+
+// ============= TRAITS HOOKS (Legacy) =============
 
 // Query keys for traits
 export const traitKeys = {

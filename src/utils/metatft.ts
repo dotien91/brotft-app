@@ -80,17 +80,20 @@ export const formatTraitNameForMetaTft = (traitName?: string | null): string => 
 
 /**
  * Get trait icon URL from MetaTFT CDN
- * @param traitName - Trait name
- * @param size - Image size (default: 24)
- * @returns Trait icon URL
+ * @param traitName - Trait name (e.g., "Huntress" or "TFT16_Huntress")
+ * @param size - Image size (optional, not used for traits - kept for compatibility)
+ * @returns Trait icon URL (direct URL without CDN optimization)
  */
 export const getTraitIconUrl = (
   traitName?: string | null,
-  size: number = 24,
+  size?: number,
 ): string => {
   const formattedTrait = formatTraitNameForMetaTft(traitName);
   if (!formattedTrait) return '';
   
-  return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/https://cdn.metatft.com/file/metatft/traits/${formattedTrait}.png`;
+  // Remove tft16_ prefix if present
+  const cleanTrait = formattedTrait.replace(/^tft\d+_/, '');
+  
+  return `https://cdn.metatft.com/file/metatft/traits/${cleanTrait}.png`;
 };
 

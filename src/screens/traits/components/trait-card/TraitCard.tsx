@@ -129,7 +129,6 @@ const TraitCard: React.FC<ITraitCardProps> = ({
       </View>
     );
   };
-
   return (
     <RNBounceable style={[styles.container, style]} onPress={onPress}>
       <View style={styles.contentWrapper}>

@@ -9,7 +9,7 @@ import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideItemItem from './components/GuideItemItem';
-import {useItemsWithPagination} from '@services/api/hooks/listQueryHooks';
+import {useTftItemsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
 import createStyles from './TabContent.style';
 
@@ -28,10 +28,10 @@ const ItemsTab: React.FC = () => {
     loadMore,
     refresh,
     isRefetching,
-  } = useItemsWithPagination(20);
+  } = useTftItemsWithPagination(20);
 
-  const handleItemPress = (itemId?: string) => {
-    NavigationService.push(SCREENS.ITEM_DETAIL, {itemId});
+  const handleItemPress = (itemId?: string | number) => {
+    NavigationService.push(SCREENS.ITEM_DETAIL, {itemId: String(itemId)});
   };
 
   const renderLoading = () => (
@@ -80,10 +80,10 @@ const ItemsTab: React.FC = () => {
       renderItem={({item}) => (
         <GuideItemItem
           data={item}
-          onPress={() => handleItemPress(item.id || item._id)}
+          onPress={() => handleItemPress(item.id)}
         />
       )}
-      keyExtractor={item => item.id || item._id || item.apiName}
+      keyExtractor={item => String(item.id)}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
       refreshControl={

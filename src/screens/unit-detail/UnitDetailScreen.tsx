@@ -7,7 +7,7 @@ import createStyles from './UnitDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {useTftUnitById} from '@services/api/hooks/listQueryHooks';
+import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl, getUnitSplashUrl, getTraitIconUrl} from '../../utils/metatft';
 
@@ -15,6 +15,7 @@ interface UnitDetailScreenProps {
   route?: {
     params?: {
       unitId?: string;
+      unitApiName?: string;
     };
   };
 }
@@ -28,19 +29,42 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const unitId =
     (routeProp?.params?.unitId ||
       (route?.params as any)?.unitId) as string;
+  const unitApiName =
+    (routeProp?.params?.unitApiName ||
+      (route?.params as any)?.unitApiName) as string;
 
   // Debug logging
   React.useEffect(() => {
     console.log('[UnitDetailScreen] unitId:', unitId);
-  }, [unitId]);
+    console.log('[UnitDetailScreen] unitApiName:', unitApiName);
+  }, [unitId, unitApiName]);
+
+  // Use unitApiName if available, otherwise use unitId
+  const {
+    data: unitById,
+    isLoading: isLoadingById,
+    isError: isErrorById,
+    error: errorById,
+    refetch: refetchById,
+  } = useTftUnitById(unitId || '', {
+    enabled: !!unitId && !unitApiName,
+  });
 
   const {
-    data: unit,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useTftUnitById(unitId || '');
+    data: unitByApiName,
+    isLoading: isLoadingByApiName,
+    isError: isErrorByApiName,
+    error: errorByApiName,
+    refetch: refetchByApiName,
+  } = useTftUnitByApiName(unitApiName || '', {
+    enabled: !!unitApiName,
+  });
+
+  const unit = unitApiName ? unitByApiName : unitById;
+  const isLoading = unitApiName ? isLoadingByApiName : isLoadingById;
+  const isError = unitApiName ? isErrorByApiName : isErrorById;
+  const error = unitApiName ? errorByApiName : errorById;
+  const refetch = unitApiName ? refetchByApiName : refetchById;
 
   // Debug logging for unit data
   React.useEffect(() => {

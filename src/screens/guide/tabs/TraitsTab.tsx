@@ -8,8 +8,8 @@ import {
 import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import TraitCard from '@screens/traits/components/trait-card/TraitCard';
-import {useTraitsWithPagination} from '@services/api/hooks/listQueryHooks';
+import GuideTraitItem from './components/GuideTraitItem';
+import {useTftTraitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
 import createStyles from './TabContent.style';
 
@@ -28,10 +28,10 @@ const TraitsTab: React.FC = () => {
     loadMore,
     refresh,
     isRefetching,
-  } = useTraitsWithPagination(20);
+  } = useTftTraitsWithPagination(20);
 
-  const handleItemPress = (traitId?: string) => {
-    NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId});
+  const handleItemPress = (traitId?: string | number) => {
+    NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: String(traitId)});
   };
 
   const renderLoading = () => (
@@ -78,9 +78,9 @@ const TraitsTab: React.FC = () => {
     <FlatList
       data={allTraits}
       renderItem={({item}) => (
-        <TraitCard data={item} onPress={() => handleItemPress(item.id)} />
+        <GuideTraitItem data={item} onPress={() => handleItemPress(item.id)} />
       )}
-      keyExtractor={item => item.id}
+      keyExtractor={item => String(item.id)}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
       refreshControl={

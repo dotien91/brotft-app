@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {View, ScrollView, ActivityIndicator} from 'react-native';
+import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import * as NavigationService from 'react-navigation-helpers';
@@ -7,9 +7,9 @@ import createStyles from './TraitDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {useTraitById} from '@services/api/hooks/listQueryHooks';
+import {useTftTraitById} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
-import type {IChampion} from '@services/models/champion';
+import {getTraitIconUrl} from '../../utils/metatft';
 
 interface TraitDetailScreenProps {
   route?: {
@@ -37,7 +37,7 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
     isError,
     error,
     refetch,
-  } = useTraitById(traitId || '');
+  } = useTftTraitById(traitId || '');
 
   const renderBackButton = () => (
     <RNBounceable
@@ -89,84 +89,37 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
     </View>
   );
 
-  const renderTypeBadge = () => {
-    if (!trait?.type) return null;
-    const isOrigin = trait.type === 'origin';
-    return (
-      <View
-        style={[
-          styles.typeBadge,
-          {
-            backgroundColor: isOrigin
-              ? colors.primary + '20'
-              : colors.danger + '20',
-            borderColor: isOrigin
-              ? colors.primary + '40'
-              : colors.danger + '40',
-          },
-        ]}>
-        <Icon
-          name={isOrigin ? 'people' : 'sparkles'}
-          type={IconType.Ionicons}
-          color={isOrigin ? colors.primary : colors.danger}
-          size={18}
-        />
-        <Text
-          style={[
-            styles.typeBadgeText,
-            {
-              color: isOrigin ? colors.primary : colors.danger,
-            },
-          ]}>
-          {isOrigin ? 'Tộc' : 'Hệ'}
-        </Text>
-      </View>
-    );
-  };
-
-  const renderSetBadge = () => {
-    if (!trait?.set) return null;
+  const renderApiNameBadge = () => {
+    if (!trait?.apiName) return null;
     return (
       <View style={[styles.badge, styles.badgeSecondary]}>
         <Icon
-          name="tag"
-          type={IconType.FontAwesome}
-          color={colors.text}
-          size={16}
-        />
-        <Text style={styles.badgeTextSecondary}>{trait.set}</Text>
-      </View>
-    );
-  };
-
-  const renderKeyBadge = () => {
-    if (!trait?.key) return null;
-    return (
-      <View style={[styles.badge, styles.badgeSecondary]}>
-        <Icon
-          name="key"
+          name="code"
           type={IconType.Ionicons}
           color={colors.text}
           size={16}
         />
-        <Text style={styles.badgeTextSecondary}>{trait.key}</Text>
+        <Text style={styles.badgeTextSecondary}>{trait.apiName}</Text>
       </View>
     );
   };
 
-  const renderTiers = () => {
-    if (!trait?.tiers || trait.tiers.length === 0) return null;
+  const renderEffects = () => {
+    if (!trait?.effects || trait.effects.length === 0) return null;
     return (
       <View style={styles.section}>
         <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-          Cấp độ Trait
+          Hiệu ứng Trait
         </Text>
-        {trait.tiers.map((tier, index) => (
+        {trait.effects.map((effect, index) => (
           <View key={index} style={styles.tierCard}>
             <View style={styles.tierHeader}>
               <View style={styles.tierCountBadge}>
-                <Text style={styles.tierCountText}>{tier.count}</Text>
-                <Text style={styles.tierCountLabel}>champions</Text>
+                <Text style={styles.tierCountText}>
+                  {effect.minUnits || 0}
+                  {effect.maxUnits ? `-${effect.maxUnits}` : '+'}
+                </Text>
+                <Text style={styles.tierCountLabel}>units</Text>
               </View>
               <View style={styles.tierEffectContainer}>
                 <Icon
@@ -175,40 +128,51 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
                   color={colors.primary}
                   size={20}
                 />
-                <Text style={styles.tierEffectText}>{tier.effect}</Text>
+                <Text style={styles.tierEffectText}>
+                  Style: {effect.style || 'N/A'}
+                </Text>
               </View>
             </View>
+            {effect.variableMatches && effect.variableMatches.length > 0 && (
+              <View style={styles.variablesContainer}>
+                {effect.variableMatches.map((match, matchIndex) => (
+                  <View key={matchIndex} style={styles.variableItem}>
+                    <Text style={styles.variableText}>
+                      {match.match || match.type}: {match.value || 'N/A'}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         ))}
       </View>
     );
   };
 
-  const renderChampions = () => {
-    // Use championDetails if available, otherwise fallback to champions IDs
-    const champions = trait?.championDetails || [];
-    const championsCount = trait?.champions?.length || 0;
+  const renderUnits = () => {
+    const units = trait?.units || [];
+    const unitsCount = units.length;
 
-    if (championsCount === 0) return null;
+    if (unitsCount === 0) return null;
 
-    const handleChampionPress = (championId: string) => {
-      NavigationService.push(SCREENS.DETAIL, {championId});
+    const handleUnitPress = (unitApiName: string) => {
+      NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName});
     };
 
-    // If we have championDetails, show full info
-    if (trait?.championDetails && trait.championDetails.length > 0) {
-      return (
-        <View style={styles.section}>
-          <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-            Champions ({championsCount})
-          </Text>
-          <View style={styles.championsContainer}>
-            {trait.championDetails.map((champion) => (
-              <RNBounceable
-                key={champion.id}
-                style={styles.championBadge}
-                onPress={() => handleChampionPress(champion.id)}>
-                <View style={styles.championContent}>
+    return (
+      <View style={styles.section}>
+        <Text h4 bold color={colors.text} style={styles.sectionTitle}>
+          Units ({unitsCount})
+        </Text>
+        <View style={styles.championsContainer}>
+          {units.map((unit, index) => (
+            <RNBounceable
+              key={unit.unit || index}
+              style={styles.championBadge}
+              onPress={() => handleUnitPress(unit.unit)}>
+              <View style={styles.championContent}>
+                {unit.unit_cost && (
                   <View style={styles.championCostBadge}>
                     <Icon
                       name="diamond"
@@ -216,38 +180,11 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
                       color={colors.primary}
                       size={12}
                     />
-                    <Text style={styles.championCostText}>{champion.cost}</Text>
+                    <Text style={styles.championCostText}>
+                      {unit.unit_cost}
+                    </Text>
                   </View>
-                  <Icon
-                    name="person"
-                    type={IconType.Ionicons}
-                    color={colors.primary}
-                    size={16}
-                  />
-                  <Text style={styles.championText} numberOfLines={1}>
-                    {champion.name}
-                  </Text>
-                </View>
-              </RNBounceable>
-            ))}
-          </View>
-        </View>
-      );
-    }
-
-    // Fallback: show IDs if championDetails not available
-    return (
-      <View style={styles.section}>
-        <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-          Champions ({championsCount})
-        </Text>
-        <View style={styles.championsContainer}>
-          {trait?.champions?.map((championId, index) => (
-            <RNBounceable
-              key={championId || index}
-              style={styles.championBadge}
-              onPress={() => handleChampionPress(championId)}>
-              <View style={styles.championContent}>
+                )}
                 <Icon
                   name="person"
                   type={IconType.Ionicons}
@@ -255,7 +192,7 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
                   size={16}
                 />
                 <Text style={styles.championText} numberOfLines={1}>
-                  ID: {championId.slice(-8)}
+                  {unit.unit}
                 </Text>
               </View>
             </RNBounceable>
@@ -281,24 +218,25 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
         showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.headerSection}>
-          <View
-            style={[
-              styles.typeIndicator,
-              {
-                backgroundColor:
-                  trait.type === 'origin'
-                    ? colors.primary + '15'
-                    : colors.danger + '15',
-              },
-            ]}>
-            <Icon
-              name={trait.type === 'origin' ? 'people' : 'sparkles'}
-              type={IconType.Ionicons}
-              color={
-                trait.type === 'origin' ? colors.primary : colors.danger
-              }
-              size={32}
-            />
+          <View style={[styles.typeIndicator, {backgroundColor: colors.primary + '15'}]}>
+            {trait.icon || trait.apiName ? (
+              <Image
+                source={{
+                  uri: trait.icon?.startsWith('http')
+                    ? trait.icon
+                    : getTraitIconUrl(trait.apiName || trait.name, 64),
+                }}
+                style={styles.traitIcon}
+                resizeMode="contain"
+              />
+            ) : (
+              <Icon
+                name="shield"
+                type={IconType.Ionicons}
+                color={colors.primary}
+                size={32}
+              />
+            )}
           </View>
         </View>
 
@@ -309,30 +247,33 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
             <Text h1 bold color={colors.text} style={styles.title}>
               {trait.name}
             </Text>
+            {trait.enName && trait.enName !== trait.name && (
+              <Text h5 color={colors.placeholder} style={styles.enName}>
+                {trait.enName}
+              </Text>
+            )}
             <View style={styles.badgesRow}>
-              {renderTypeBadge()}
-              {renderSetBadge()}
-              {renderKeyBadge()}
+              {renderApiNameBadge()}
             </View>
           </View>
 
           {/* Description */}
-          {trait.description && (
+          {trait.desc && (
             <View style={styles.section}>
               <Text h4 bold color={colors.text} style={styles.sectionTitle}>
                 Mô tả
               </Text>
               <Text color={colors.placeholder} style={styles.description}>
-                {trait.description}
+                {trait.desc}
               </Text>
             </View>
           )}
 
-          {/* Tiers */}
-          {renderTiers()}
+          {/* Effects */}
+          {renderEffects()}
 
-          {/* Champions */}
-          {renderChampions()}
+          {/* Units */}
+          {renderUnits()}
 
           {/* Additional Info */}
           <View style={styles.section}>
@@ -344,25 +285,27 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
               <Text style={styles.infoValue}>{trait.id}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Key:</Text>
-              <Text style={styles.infoValue}>{trait.key}</Text>
+              <Text style={styles.infoLabel}>API Name:</Text>
+              <Text style={styles.infoValue}>{trait.apiName}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Type:</Text>
-              <Text style={styles.infoValue}>
-                {trait.type === 'origin' ? 'Tộc' : 'Hệ'}
-              </Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Set:</Text>
-              <Text style={styles.infoValue}>{trait.set}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Active:</Text>
-              <Text style={styles.infoValue}>
-                {trait.isActive ? 'Có' : 'Không'}
-              </Text>
-            </View>
+            {trait.enName && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>English Name:</Text>
+                <Text style={styles.infoValue}>{trait.enName}</Text>
+              </View>
+            )}
+            {trait.effects && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Effects Count:</Text>
+                <Text style={styles.infoValue}>{trait.effects.length}</Text>
+              </View>
+            )}
+            {trait.units && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Units Count:</Text>
+                <Text style={styles.infoValue}>{trait.units.length}</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>

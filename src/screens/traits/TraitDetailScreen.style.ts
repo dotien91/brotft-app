@@ -1,4 +1,4 @@
-import {StyleSheet, TextStyle, ViewStyle} from 'react-native';
+import {StyleSheet, TextStyle, ViewStyle, ImageStyle} from 'react-native';
 import {ExtendedTheme} from '@react-navigation/native';
 import {ScreenWidth} from '@freakycoder/react-native-helpers';
 
@@ -10,9 +10,11 @@ interface Style {
   scrollContent: ViewStyle;
   headerSection: ViewStyle;
   typeIndicator: ViewStyle;
+  traitIcon: ImageStyle;
   content: ViewStyle;
   titleSection: ViewStyle;
   title: TextStyle;
+  enName: TextStyle;
   badgesRow: ViewStyle;
   typeBadge: ViewStyle;
   typeBadgeText: TextStyle;
@@ -30,8 +32,14 @@ interface Style {
   tierCountLabel: TextStyle;
   tierEffectContainer: ViewStyle;
   tierEffectText: TextStyle;
+  variablesContainer: ViewStyle;
+  variableItem: ViewStyle;
+  variableText: TextStyle;
   championsContainer: ViewStyle;
   championBadge: ViewStyle;
+  championContent: ViewStyle;
+  championCostBadge: ViewStyle;
+  championCostText: TextStyle;
   championText: TextStyle;
   championsNote: TextStyle;
   infoRow: ViewStyle;
@@ -98,6 +106,10 @@ export default (theme: ExtendedTheme) => {
       shadowRadius: 8,
       elevation: 4,
     },
+    traitIcon: {
+      width: 80,
+      height: 80,
+    },
     content: {
       padding: 24,
       paddingTop: 20,
@@ -108,8 +120,14 @@ export default (theme: ExtendedTheme) => {
     },
     title: {
       fontSize: 36,
-      marginBottom: 20,
+      marginBottom: 8,
       letterSpacing: -0.5,
+      textAlign: 'center',
+    },
+    enName: {
+      fontSize: 18,
+      marginBottom: 20,
+      opacity: 0.7,
       textAlign: 'center',
     },
     badgesRow: {
@@ -251,6 +269,24 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
       lineHeight: 22,
       fontWeight: '600',
+    },
+    variablesContainer: {
+      marginTop: 16,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: '#2a2d3a',
+    },
+    variableItem: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      backgroundColor: '#1a1d29',
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    variableText: {
+      fontSize: 13,
+      color: colors.placeholder,
+      lineHeight: 18,
     },
     championsContainer: {
       flexDirection: 'row',

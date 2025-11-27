@@ -5,3 +5,5 @@ export interface IUser {
 
 export * from './champion';
 export * from './tft-unit';
+export * from './tft-trait';
+export * from './tft-item';

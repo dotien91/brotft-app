@@ -6,6 +6,7 @@ import createStyles from './HomeScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
+import Hexagon from '@screens/detail/components/Hexagon';
 import {SCREENS} from '@shared-constants';
 
 const TFT_IMAGE_VERSION = '14.15.1';
@@ -219,10 +220,13 @@ const HomeScreen: React.FC = () => {
 
       <View style={styles.championsRow}>
         {item.champions.map((champion, index) => (
-          <Image
+          <Hexagon
             key={`${champion.id}-${index}`}
-            source={{uri: champion.image}}
-            style={styles.championAvatar}
+            size={40}
+            backgroundColor="#252836"
+            borderColor="#3a3d4a"
+            borderWidth={2}
+            imageUri={champion.image}
           />
         ))}
       </View>

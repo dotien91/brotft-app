@@ -14,6 +14,7 @@ import ChampionDetailScreen from '@screens/champion-detail/ChampionDetailScreen'
 import GuideScreen from '@screens/guide/GuideScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
 import TraitDetailScreen from '@screens/traits/TraitDetailScreen';
+import ItemDetailScreen from '@screens/item-detail/ItemDetailScreen';
 
 // ? If you want to use stack or tab or both
 const Tab = createBottomTabNavigator();
@@ -109,6 +110,9 @@ const Navigation = () => {
         </Stack.Screen>
         <Stack.Screen name={SCREENS.TRAIT_DETAIL}>
           {props => <TraitDetailScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name={SCREENS.ITEM_DETAIL}>
+          {props => <ItemDetailScreen {...props} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

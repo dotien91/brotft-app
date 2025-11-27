@@ -1,6 +1,6 @@
-import React from 'react';
-import {View, StyleSheet} from 'react-native';
-import Svg, {Polygon} from 'react-native-svg';
+import React, {useMemo} from 'react';
+import {View, StyleSheet, Image} from 'react-native';
+import Svg, {Polygon, Defs, ClipPath, Image as SvgImage} from 'react-native-svg';
 
 interface HexagonProps {
   size?: number;
@@ -8,6 +8,7 @@ interface HexagonProps {
   backgroundColor?: string;
   borderWidth?: number;
   children?: React.ReactNode;
+  imageUri?: string;
 }
 
 const Hexagon: React.FC<HexagonProps> = ({
@@ -16,9 +17,13 @@ const Hexagon: React.FC<HexagonProps> = ({
   backgroundColor = '#1e2130',
   borderWidth = 2,
   children,
+  imageUri,
 }) => {
   const width = size;
   const height = size * 1.15; // Hexagon height ratio
+  
+  // Generate unique ID for clipPath
+  const clipId = useMemo(() => `hexagon-clip-${Math.random().toString(36).substr(2, 9)}`, []);
   
   // Calculate hexagon points (flat-top hexagon)
   const centerX = width / 2;
@@ -37,6 +42,11 @@ const Hexagon: React.FC<HexagonProps> = ({
   return (
     <View style={[styles.container, {width, height}]}>
       <Svg width={width} height={height} style={styles.svg}>
+        <Defs>
+          <ClipPath id={clipId}>
+            <Polygon points={points} />
+          </ClipPath>
+        </Defs>
         {/* Background hexagon */}
         <Polygon
           points={points}
@@ -44,6 +54,18 @@ const Hexagon: React.FC<HexagonProps> = ({
           stroke={borderColor}
           strokeWidth={borderWidth}
         />
+        {/* Image clipped to hexagon shape */}
+        {imageUri && (
+          <SvgImage
+            href={{uri: imageUri}}
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            clipPath={`url(#${clipId})`}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        )}
       </Svg>
       <View style={styles.content}>
         {children}

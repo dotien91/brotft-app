@@ -8,6 +8,7 @@ import {
   getChampionsByTrait,
 } from '../champions';
 import {getTraits, getTraitById} from '../traits';
+import {getItems, getItemById, getItemByApiName} from '../items';
 import type {
   IChampionsQueryParams,
   IChampion,
@@ -17,6 +18,11 @@ import type {
   ITraitsFilters,
   ITrait,
 } from '@services/models/trait';
+import type {
+  IItemsQueryParams,
+  IItemsFilters,
+  IItem,
+} from '@services/models/item';
 
 // Query keys
 export const championKeys = {
@@ -436,6 +442,151 @@ export const useTraitById = (
     queryKey: traitKeys.detail(id),
     queryFn: () => getTraitById(id),
     enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// ============= ITEMS HOOKS =============
+
+// Query keys for items
+export const itemKeys = {
+  all: ['items'] as const,
+  lists: () => [...itemKeys.all, 'list'] as const,
+  list: (params?: IItemsQueryParams) =>
+    [...itemKeys.lists(), params] as const,
+  details: () => [...itemKeys.all, 'detail'] as const,
+  detail: (id: string) => [...itemKeys.details(), id] as const,
+  byApiName: (apiName: string) => [...itemKeys.all, 'apiName', apiName] as const,
+};
+
+// Get all items with pagination and filters
+export const useItems = (
+  params?: IItemsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getItems>>,
+      Error,
+      Awaited<ReturnType<typeof getItems>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createOptionalListQueryHook<
+    IItemsQueryParams,
+    Awaited<ReturnType<typeof getItems>>,
+    Awaited<ReturnType<typeof getItems>>
+  >({
+    queryKey: itemKeys.list,
+    queryFn: getItems,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for items
+export const useItemsWithPagination = (limit: number = 20) => {
+  const [page, setPage] = useState(1);
+  const [allItems, setAllItems] = useState<IItem[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data: itemsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useItems({page, limit});
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    if (itemsData?.data) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllItems(itemsData.data);
+      } else {
+        // Append new data when loading more
+        setAllItems(prev => [...prev, ...itemsData.data]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (itemsData.hasNextPage !== undefined) {
+        setHasMore(itemsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [itemsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      itemsData?.hasNextPage !== undefined
+        ? itemsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && itemsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllItems([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allItems,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get item by ID
+export const useItemById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getItemById>>,
+      Error,
+      Awaited<ReturnType<typeof getItemById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: itemKeys.detail(id),
+    queryFn: () => getItemById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// Get item by API name
+export const useItemByApiName = (
+  apiName: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getItemByApiName>>,
+      Error,
+      Awaited<ReturnType<typeof getItemByApiName>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: itemKeys.byApiName(apiName),
+    queryFn: () => getItemByApiName(apiName),
+    enabled: !!apiName,
     ...queryOptions,
   });
 };

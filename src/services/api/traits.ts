@@ -4,7 +4,6 @@ import type {
   ITraitsQueryParams,
   ITraitsResponse,
 } from '@services/models/trait';
-import {API_BASE_URL} from '@shared-constants';
 
 // Get all traits with pagination and filters
 export const getTraits = async (
@@ -52,15 +51,6 @@ export const getTraits = async (
     else if (!response.data.data && response.data.results && Array.isArray(response.data.results)) {
       responseData = { data: response.data.results };
     }
-  }
-  
-  console.log('[getTraits] Processed response data:', responseData);
-  console.log('[getTraits] Response count:', responseData?.data?.length);
-  if (responseData?.data && responseData.data.length > 0) {
-    const types = responseData.data.map(t => t.type);
-    const uniqueTypes = [...new Set(types)];
-    console.log('[getTraits] Response types:', types);
-    console.log('[getTraits] Unique types:', uniqueTypes);
   }
   
   return responseData;

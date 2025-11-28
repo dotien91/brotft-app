@@ -8,6 +8,8 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import useStore, {StoreState} from '@services/zustand/store';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {translations} from '../../shared/localization';
+import {queryClient} from '@services/api/react-query';
+import {checkAndFetchDataByLocale} from '@services/api/data';
 
 interface ProfileScreenProps {}
 
@@ -40,10 +42,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     setDarkMode(!isDarkMode);
   };
 
-  const handleLanguageChange = (lang: string) => {
+  const handleLanguageChange = async (lang: string) => {
     setLanguage(lang);
     translations.setLanguage(lang);
     setIsLanguageDropdownOpen(false);
+
+    // Check and fetch data by locale in background
+    try {
+      await checkAndFetchDataByLocale(lang);
+      
+      // Invalidate all queries to refetch with new locale
+      await queryClient.invalidateQueries();
+    } catch (error) {
+      // Don't block UI if API calls fail
+    }
   };
 
   const getCurrentLanguageLabel = () => {

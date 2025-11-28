@@ -30,11 +30,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     (routeProp?.params?.unitId ||
       (route?.params as any)?.unitId) as string;
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('[UnitDetailScreen] unitId:', unitId);
-  }, [unitId]);
-
   const {
     data: unit,
     isLoading,
@@ -42,18 +37,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     error,
     refetch,
   } = useTftUnitById(unitId || '');
-
-  // Debug logging for unit data
-  React.useEffect(() => {
-    console.log('[UnitDetailScreen] Unit data:', {
-      hasUnit: !!unit,
-      unitId: unit?.id,
-      unitName: unit?.name,
-      isLoading,
-      isError,
-      error: error?.message,
-    });
-  }, [unit, isLoading, isError, error]);
 
   const renderBackButton = () => (
     <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
@@ -148,7 +131,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     };
 
     const avatarUri = getTftUnitAvatarUrl();
-    console.log('avatarUri', avatarUri);
     // Get splash art for background from metatft.com
     // Size: 768x456 for better quality on larger screens
     const getSplashArtUrl = () => {

@@ -58,9 +58,6 @@ const TraitsList: React.FC<TraitsListProps> = ({
     };
   }, [apiFilters]);
 
-  console.log(`[TraitsList-${filterType}] filterType:`, filterType);
-  console.log(`[TraitsList-${filterType}] listParams:`, JSON.stringify(listParams, null, 2));
-
   const {
     listData,
     isLoading,
@@ -69,9 +66,6 @@ const TraitsList: React.FC<TraitsListProps> = ({
     refreshControl,
     renderFooterComponent,
   } = useListData<ITrait>(listParams, getTraitsForList, [], filterType);
-
-  console.log(`[TraitsList-${filterType}] listData count:`, listData.length);
-  console.log(`[TraitsList-${filterType}] listData types:`, listData.map((t: ITrait) => t.type));
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
@@ -138,7 +132,6 @@ const TraitsScreen: React.FC = () => {
   const renderScene = useCallback(
     ({route}: any) => {
       const filterType = route.key as FilterType;
-      console.log('[TraitsScreen] Rendering scene for filterType:', filterType);
       return (
         <TraitsList
           key={`traits-list-${filterType}`}

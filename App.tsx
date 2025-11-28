@@ -8,6 +8,7 @@ import Navigation from './src/navigation';
 import {queryClient} from '@services/api/react-query';
 import useStore from './src/services/zustand/store';
 import {translations} from './src/shared/localization';
+import {checkAndFetchDataByLocale} from './src/services/api/data';
 
 LogBox.ignoreAllLogs();
 
@@ -21,6 +22,11 @@ const App = () => {
       translations.setLanguage(language);
     }
   }, []);
+
+  // Check and fetch data by locale on app startup
+  React.useEffect(() => {
+    checkAndFetchDataByLocale(language);
+  }, [language]);
 
   React.useEffect(() => {
     StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');

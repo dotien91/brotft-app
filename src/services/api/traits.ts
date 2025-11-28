@@ -35,25 +35,11 @@ export const getTraits = async (
   }
 
   const url = `/origins?${queryParams.toString()}`;
-  console.log('=====================================');
-  console.log('[getTraits] API URL:', url);
-  console.log('[getTraits] Full URL:', `${API_BASE_URL}/api/v1${url}`);
-  console.log('[getTraits] Params object:', JSON.stringify(params, null, 2));
-  console.log('[getTraits] Query String:', queryParams.toString());
-  console.log('[getTraits] Has filters:', !!params?.filters);
   if (params?.filters) {
-    console.log('[getTraits] Filter type:', params.filters.type);
-    console.log('[getTraits] Filter name:', params.filters.name);
-    console.log('[getTraits] Filter key:', params.filters.key);
-    console.log('[getTraits] Filter set:', params.filters.set);
   }
-  console.log('=====================================');
   
   const response = await axiosInstance.get<ITraitsResponse>(url);
   
-  console.log('[getTraits] Response status:', response.status);
-  console.log('[getTraits] Response headers:', response.headers);
-  console.log('[getTraits] Response data:', JSON.stringify(response.data, null, 2));
   
   // Handle different response formats
   let responseData = response.data;

@@ -16,26 +16,26 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     header: {
       paddingHorizontal: 20,
       paddingTop: 12,
       paddingBottom: 16,
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderBottomWidth: 1,
-      borderBottomColor: '#2a2d3a',
+      borderBottomColor: colors.border,
     },
     headerTitle: {
       fontSize: 28,
       letterSpacing: -0.5,
     },
     tabBar: {
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
       borderBottomWidth: 1,
-      borderBottomColor: '#2a2d3a',
+      borderBottomColor: colors.border,
     },
     tab: {
       width: 'auto',

@@ -12,9 +12,9 @@ import {translations} from '../../shared/localization';
 interface ProfileScreenProps {}
 
 const languages = [
-  {code: 'en', label: 'English'},
-  {code: 'tr-TR', label: 'Turkish'},
-  {code: 'vi', label: 'Vietnamese'},
+  {code: 'en', label: 'English', flag: '🇬🇧'},
+  {code: 'vi', label: 'Vietnamese', flag: '🇻🇳'},
+  {code: 'zh-CN', label: 'Chinese', flag: '🇨🇳'},
 ];
 
 const ProfileScreen: React.FC<ProfileScreenProps> = () => {
@@ -49,11 +49,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const getCurrentLanguageLabel = () => {
     const currentLang = languages.find(lang => lang.code === language);
     if (currentLang) {
-      if (currentLang.code === 'en') return translations.english;
-      if (currentLang.code === 'tr-TR') return translations.turkish;
-      if (currentLang.code === 'vi') return translations.vietnamese;
+      if (currentLang.code === 'en') return `${currentLang.flag} ${translations.english}`;
+      if (currentLang.code === 'vi') return `${currentLang.flag} ${translations.vietnamese}`;
+      if (currentLang.code === 'zh-CN') return `${currentLang.flag} ${translations.chinese}`;
     }
-    return translations.english;
+    return `${languages[0].flag} ${translations.english}`;
+  };
+
+  const getLanguageLabel = (code: string) => {
+    const lang = languages.find(l => l.code === code);
+    if (!lang) return '';
+    if (code === 'en') return `${lang.flag} ${translations.english}`;
+    if (code === 'vi') return `${lang.flag} ${translations.vietnamese}`;
+    if (code === 'zh-CN') return `${lang.flag} ${translations.chinese}`;
+    return `${lang.flag} ${lang.label}`;
   };
 
   return (
@@ -66,7 +75,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           
           {/* Header */}
           <View style={styles.header}>
-            <Text h1 color={colors.text} style={styles.title}>
+            <Text h2 bold color={colors.text} style={styles.headerTitle}>
               {translations.settings}
             </Text>
           </View>
@@ -85,7 +94,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
               </Text>
             </View>
             
-            <RNBounceable
+            <TouchableOpacity
               style={styles.optionItem}
               onPress={handleThemeToggle}>
               <View style={styles.optionContent}>
@@ -104,7 +113,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                   <View style={[styles.toggleThumb, isDarkMode && styles.toggleThumbActive]} />
                 </View>
               </View>
-            </RNBounceable>
+            </TouchableOpacity>
           </View>
 
           {/* Language Section */}
@@ -164,9 +173,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                         <Text
                           color={language === lang.code ? colors.primary : colors.text}
                           style={styles.dropdownItemText}>
-                          {lang.code === 'en' && translations.english}
-                          {lang.code === 'tr-TR' && translations.turkish}
-                          {lang.code === 'vi' && translations.vietnamese}
+                          {getLanguageLabel(lang.code)}
                         </Text>
                         {language === lang.code && (
                           <Icon

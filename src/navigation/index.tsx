@@ -23,7 +23,6 @@ const Stack = createStackNavigator();
 
 const Navigation = () => {
   const isDarkMode = useStore((state) => state.isDarkMode);
-  const language = useStore((state) => state.language);
 
   React.useEffect((): any => {
     return () => (isReadyRef.current = false);
@@ -61,6 +60,7 @@ const Navigation = () => {
   };
 
   const TabNavigation = () => {
+    const currentTheme = isDarkMode ? DarkTheme : LightTheme;
     return (
       <Tab.Navigator
         screenOptions={({route}) => ({
@@ -68,10 +68,10 @@ const Navigation = () => {
           tabBarIcon: ({focused, color, size}) =>
             renderTabIcon(route, focused, color, size),
           tabBarActiveTintColor: palette.primary,
-          tabBarInactiveTintColor: '#8e8e93',
+          tabBarInactiveTintColor: currentTheme.colors.placeholder,
           tabBarStyle: {
-            backgroundColor: '#1a1d29',
-            borderTopColor: '#2a2d3a',
+            backgroundColor: currentTheme.colors.background,
+            borderTopColor: currentTheme.colors.border,
             borderTopWidth: 1,
           },
         })}>
@@ -94,13 +94,15 @@ const Navigation = () => {
     );
   };
 
+  const currentTheme = isDarkMode ? DarkTheme : LightTheme;
+
   return (
     <NavigationContainer
       ref={navigationRef}
       onReady={() => {
         isReadyRef.current = true;
       }}
-      theme={isDarkMode ? DarkTheme : LightTheme}>
+      theme={currentTheme}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name={SCREENS.HOME_ROOT} component={TabNavigation} />
         <Stack.Screen name={SCREENS.DETAIL}>

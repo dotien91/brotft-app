@@ -7,7 +7,7 @@ interface Style {
   scrollView: ViewStyle;
   scrollContent: ViewStyle;
   header: ViewStyle;
-  title: TextStyle;
+  headerTitle: TextStyle;
   section: ViewStyle;
   sectionHeader: ViewStyle;
   sectionTitle: TextStyle;
@@ -32,7 +32,7 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     safeArea: {
       flex: 1,
@@ -45,12 +45,14 @@ export default (theme: ExtendedTheme) => {
     },
     header: {
       paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 24,
+      paddingTop: 12,
+      paddingBottom: 16,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
-    title: {
-      fontSize: 32,
-      fontWeight: '700',
+    headerTitle: {
+      fontSize: 28,
       letterSpacing: -0.5,
     },
     section: {
@@ -71,7 +73,7 @@ export default (theme: ExtendedTheme) => {
     optionItem: {
       marginBottom: 12,
       borderRadius: 12,
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       overflow: 'hidden',
     },
     optionContent: {
@@ -118,7 +120,7 @@ export default (theme: ExtendedTheme) => {
       paddingHorizontal: 20,
     },
     dropdownContainer: {
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderRadius: 12,
       minWidth: 200,
       maxWidth: 300,
@@ -126,10 +128,10 @@ export default (theme: ExtendedTheme) => {
     },
     dropdownItem: {
       borderBottomWidth: 1,
-      borderBottomColor: '#2a2d3a',
+      borderBottomColor: colors.border,
     },
     dropdownItemActive: {
-      backgroundColor: '#3a3d4a',
+      backgroundColor: colors.highlight,
     },
     dropdownItemContent: {
       flexDirection: 'row',

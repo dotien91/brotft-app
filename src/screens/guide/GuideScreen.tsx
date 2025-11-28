@@ -55,7 +55,7 @@ const GuideScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text h2 bold color={colors.text} style={styles.headerTitle}>
-          Guide
+          {translations.guide}
         </Text>
       </View>
 

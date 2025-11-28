@@ -222,8 +222,8 @@ const HomeScreen: React.FC = () => {
           <Hexagon
             key={`${champion.id}-${index}`}
             size={40}
-            backgroundColor="#252836"
-            borderColor="#3a3d4a"
+            backgroundColor={colors.card}
+            borderColor={colors.border}
             borderWidth={2}
             imageUri={champion.image}
           />

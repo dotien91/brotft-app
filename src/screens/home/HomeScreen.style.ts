@@ -20,19 +20,19 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     listContent: {
       padding: 16,
       paddingBottom: 32,
     },
     teamCard: {
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderRadius: 16,
       padding: 16,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.border,
     },
     teamHeader: {
       flexDirection: 'row',
@@ -50,13 +50,13 @@ export default (theme: ExtendedTheme) => {
     rankText: {
       fontSize: 14,
       fontWeight: '800',
-      color: '#ffffff',
+      color: colors.white,
       letterSpacing: 0.5,
     },
     teamName: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#ffffff',
+      color: colors.text,
       flex: 1,
     },
     championsRow: {

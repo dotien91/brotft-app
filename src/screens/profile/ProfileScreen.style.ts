@@ -95,7 +95,7 @@ export default (theme: ExtendedTheme) => {
       width: 50,
       height: 28,
       borderRadius: 14,
-      backgroundColor: '#3a3d4a',
+      backgroundColor: colors.border,
       padding: 2,
       justifyContent: 'center',
     },
@@ -106,7 +106,7 @@ export default (theme: ExtendedTheme) => {
       width: 24,
       height: 24,
       borderRadius: 12,
-      backgroundColor: '#fff',
+      backgroundColor: colors.white,
       alignSelf: 'flex-start',
     },
     toggleThumbActive: {

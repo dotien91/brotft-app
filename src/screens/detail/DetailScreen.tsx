@@ -330,31 +330,11 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   );
 
   const renderUnit = (unit: TeamUnit) => {
-    const avatarSize = hexSize * 0.7;
     const costBadgeSize = hexSize * 0.35;
     const itemIconSize = hexSize * 0.28;
     
     return (
       <>
-        <View
-          style={[
-            styles.unitRing,
-            {
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: avatarSize / 2,
-              borderColor: COST_COLORS[unit.cost] || colors.primary,
-            },
-          ]}>
-          <Image 
-            source={{uri: unit.image}} 
-            style={{
-              width: avatarSize - 6,
-              height: avatarSize - 6,
-              borderRadius: (avatarSize - 6) / 2,
-            }} 
-          />
-        </View>
         {unit.star ? (
           <View style={[styles.starBadge, {top: -hexSize * 0.1}]}>
             <Text style={[styles.starText, {fontSize: hexSize * 0.16}]}>
@@ -424,8 +404,9 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                 <Hexagon
                   size={hexSize}
                   backgroundColor={unit ? '#252836' : '#1e2130'}
-                  borderColor={unit ? '#3a3d4a' : '#2a2d3a'}
-                  borderWidth={2}>
+                  borderColor={unit ? COST_COLORS[unit.cost] || '#3a3d4a' : '#2a2d3a'}
+                  borderWidth={2}
+                  imageUri={unit?.image}>
                   {unit ? renderUnit(unit) : null}
                 </Hexagon>
               </View>

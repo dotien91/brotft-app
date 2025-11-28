@@ -10,10 +10,11 @@ import {DarkTheme, LightTheme, palette} from '@theme/themes';
 // ? Screens
 import HomeScreen from '@screens/home/HomeScreen';
 import DetailScreen from '@screens/detail/DetailScreen';
-import ChampionDetailScreen from '@screens/champion-detail/ChampionDetailScreen';
+import UnitDetailScreen from '@screens/unit-detail/UnitDetailScreen';
 import GuideScreen from '@screens/guide/GuideScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
 import TraitDetailScreen from '@screens/traits/TraitDetailScreen';
+import ItemDetailScreen from '@screens/item-detail/ItemDetailScreen';
 
 // ? If you want to use stack or tab or both
 const Tab = createBottomTabNavigator();
@@ -104,11 +105,14 @@ const Navigation = () => {
         <Stack.Screen name={SCREENS.DETAIL}>
           {props => <DetailScreen {...props} />}
         </Stack.Screen>
-        <Stack.Screen name={SCREENS.CHAMPION_DETAIL}>
-          {props => <ChampionDetailScreen {...props} />}
+        <Stack.Screen name={SCREENS.UNIT_DETAIL}>
+          {props => <UnitDetailScreen {...props} />}
         </Stack.Screen>
         <Stack.Screen name={SCREENS.TRAIT_DETAIL}>
           {props => <TraitDetailScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name={SCREENS.ITEM_DETAIL}>
+          {props => <ItemDetailScreen {...props} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

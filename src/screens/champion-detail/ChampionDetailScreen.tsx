@@ -191,13 +191,13 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.heroContent}>
             <View style={styles.championHeader}>
               <View style={styles.championAvatarContainer}>
-                <Hexagon size={70} backgroundColor="#252836" borderColor="#3a3d4a" borderWidth={2}>
-                  <Image
-                    source={{uri: imageUri}}
-                    style={styles.championAvatar}
-                    resizeMode="cover"
-                  />
-                </Hexagon>
+                <Hexagon 
+                  size={70} 
+                  backgroundColor="#252836" 
+                  borderColor="#3a3d4a" 
+                  borderWidth={2}
+                  imageUri={imageUri}
+                />
               </View>
               <View style={styles.championInfo}>
                 <Text h1 bold color={colors.text} style={styles.championName}>
@@ -213,7 +213,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                     color={colors.primary}
                     size={16}
                   />
-                  <Text style={styles.costBadgeText}>{champion.cost}</Text>
+                  <Text style={styles.costBadgeText}>{champion.cost ?? '---'}</Text>
                 </View>
               </View>
             </View>
@@ -225,19 +225,27 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Thứ hạng Tier</Text>
-              <Text style={styles.statValue}>#4.33</Text>
+              <Text style={styles.statValue}>
+                {(champion as any)?.tierRank ? `#${(champion as any).tierRank}` : '---'}
+              </Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Hạng 1</Text>
-              <Text style={styles.statValue}>13.6%</Text>
+              <Text style={styles.statValue}>
+                {(champion as any)?.firstPlaceRate != null ? `${(champion as any).firstPlaceRate}%` : '---'}
+              </Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Tỉ lệ Top 4</Text>
-              <Text style={styles.statValue}>53.28%</Text>
+              <Text style={styles.statValue}>
+                {(champion as any)?.top4Rate != null ? `${(champion as any).top4Rate}%` : '---'}
+              </Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Thứ hạng Trung bình</Text>
-              <Text style={styles.statValue}>247,600</Text>
+              <Text style={styles.statValue}>
+                {(champion as any)?.averageRank != null ? (champion as any).averageRank.toLocaleString() : '---'}
+              </Text>
             </View>
           </View>
         </View>
@@ -251,7 +259,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Text style={styles.statItemLabel}>Máu</Text>
               </View>
               <Text style={styles.statItemValue}>
-                {champion.health || 650} / {champion.health ? champion.health * 1.8 : 1170} / {champion.health ? Math.floor(champion.health * 3.24) : 2106}
+                {champion.health ? `${champion.health} / ${Math.floor(champion.health * 1.8)} / ${Math.floor(champion.health * 3.24)}` : '---'}
               </Text>
             </View>
             <View style={styles.statItem}>
@@ -259,7 +267,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Icon name="flash" type={IconType.Ionicons} color="#fbbf24" size={16} />
                 <Text style={styles.statItemLabel}>Tốc Độ Đánh</Text>
               </View>
-              <Text style={styles.statItemValue}>{champion.attackSpeed || 0.75}</Text>
+              <Text style={styles.statItemValue}>{champion.attackSpeed ?? '---'}</Text>
             </View>
           </View>
           <View style={styles.statsRow}>
@@ -269,7 +277,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Text style={styles.statItemLabel}>Sức Mạnh Công Kích</Text>
               </View>
               <Text style={styles.statItemValue}>
-                {champion.attackDamage || 55} / {champion.attackDamage ? Math.floor(champion.attackDamage * 1.5) : 83} / {champion.attackDamage ? Math.floor(champion.attackDamage * 2.25) : 124}
+                {champion.attackDamage ? `${champion.attackDamage} / ${Math.floor(champion.attackDamage * 1.5)} / ${Math.floor(champion.attackDamage * 2.25)}` : '---'}
               </Text>
             </View>
             <View style={styles.statItem}>
@@ -277,7 +285,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Icon name="shield" type={IconType.Ionicons} color="#fb7185" size={16} />
                 <Text style={styles.statItemLabel}>Giáp</Text>
               </View>
-              <Text style={styles.statItemValue}>{champion.armor || 30}</Text>
+              <Text style={styles.statItemValue}>{champion.armor ?? '---'}</Text>
             </View>
           </View>
           <View style={styles.statsRow}>
@@ -287,7 +295,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Text style={styles.statItemLabel}>DPS</Text>
               </View>
               <Text style={styles.statItemValue}>
-                {champion.attackDamage ? Math.floor(champion.attackDamage * 0.75) : 41} / {champion.attackDamage ? Math.floor(champion.attackDamage * 1.13) : 62} / {champion.attackDamage ? Math.floor(champion.attackDamage * 1.69) : 93}
+                {champion.attackDamage ? `${Math.floor(champion.attackDamage * 0.75)} / ${Math.floor(champion.attackDamage * 1.13)} / ${Math.floor(champion.attackDamage * 1.69)}` : '---'}
               </Text>
             </View>
             <View style={styles.statItem}>
@@ -295,7 +303,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Icon name="color-wand" type={IconType.Ionicons} color="#ec4899" size={16} />
                 <Text style={styles.statItemLabel}>Kháng Phép</Text>
               </View>
-              <Text style={styles.statItemValue}>{champion.magicResist || 30}</Text>
+              <Text style={styles.statItemValue}>{champion.magicResist ?? '---'}</Text>
             </View>
           </View>
           <View style={styles.statsRow}>
@@ -304,7 +312,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                 <Icon name="radio-button-on" type={IconType.Ionicons} color="#60a5fa" size={16} />
                 <Text style={styles.statItemLabel}>Tầm Đánh</Text>
               </View>
-              <Text style={styles.statItemValue}>{'■'.repeat(champion.attackRange || 4)}</Text>
+              <Text style={styles.statItemValue}>{champion.attackRange ? '■'.repeat(champion.attackRange) : '---'}</Text>
             </View>
           </View>
         </View>
@@ -332,7 +340,9 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
                   <View style={styles.abilityMeta}>
                     <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={14} />
                     <Text style={styles.abilityMetaText}>
-                      {champion.startingMana || 0} / {champion.maxMana || 60}
+                      {champion.startingMana != null && champion.maxMana != null 
+                        ? `${champion.startingMana} / ${champion.maxMana}` 
+                        : '---'}
                     </Text>
                   </View>
                 </View>

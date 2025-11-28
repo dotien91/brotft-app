@@ -8,7 +8,7 @@ import {
 import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import ChampionCard from '@screens/home/components/champion-card/ChampionCard';
+import GuideChampionItem from './components/GuideChampionItem';
 import {useChampionsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
 import createStyles from './TabContent.style';
@@ -78,7 +78,7 @@ const ChampionsTab: React.FC = () => {
     <FlatList
       data={allChampions}
       renderItem={({item}) => (
-        <ChampionCard
+        <GuideChampionItem
           data={item}
           onPress={() => handleItemPress(item.id)}
         />

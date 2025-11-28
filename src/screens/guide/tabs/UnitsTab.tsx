@@ -8,18 +8,18 @@ import {
 import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import GuideItemItem from './components/GuideItemItem';
-import {useItemsWithPagination} from '@services/api/hooks/listQueryHooks';
+import GuideUnitItem from './components/GuideUnitItem';
+import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
 import createStyles from './TabContent.style';
 
-const ItemsTab: React.FC = () => {
+const UnitsTab: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const {
-    data: allItems,
+    data: allUnits,
     isLoading,
     isError,
     error,
@@ -28,17 +28,17 @@ const ItemsTab: React.FC = () => {
     loadMore,
     refresh,
     isRefetching,
-  } = useItemsWithPagination(20);
+  } = useTftUnitsWithPagination(10);
 
-  const handleItemPress = (itemId?: string) => {
-    NavigationService.push(SCREENS.ITEM_DETAIL, {itemId});
+  const handleItemPress = (unitId?: string | number) => {
+    NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unitId)});
   };
 
   const renderLoading = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
       <Text color={colors.placeholder} style={styles.centerText}>
-        Loading items...
+        Loading units...
       </Text>
     </View>
   );
@@ -46,7 +46,7 @@ const ItemsTab: React.FC = () => {
   const renderError = () => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
-        Error loading items
+        Error loading units
       </Text>
       <Text color={colors.placeholder} style={styles.centerText}>
         {error?.message || 'Something went wrong'}
@@ -57,33 +57,33 @@ const ItemsTab: React.FC = () => {
   const renderEmpty = () => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.placeholder}>
-        No items found
+        No units found
       </Text>
     </View>
   );
 
-  if (isLoading && allItems.length === 0) {
+  if (isLoading && allUnits.length === 0) {
     return renderLoading();
   }
 
-  if (isError && allItems.length === 0) {
+  if (isError && allUnits.length === 0) {
     return renderError();
   }
 
-  if (allItems.length === 0 && !isLoading) {
+  if (allUnits.length === 0 && !isLoading) {
     return renderEmpty();
   }
 
   return (
     <FlatList
-      data={allItems}
+      data={allUnits}
       renderItem={({item}) => (
-        <GuideItemItem
+        <GuideUnitItem
           data={item}
-          onPress={() => handleItemPress(item.id || item._id)}
+          onPress={() => handleItemPress(item.id)}
         />
       )}
-      keyExtractor={item => item.id || item._id || item.apiName}
+      keyExtractor={item => String(item.id)}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
       refreshControl={
@@ -97,17 +97,17 @@ const ItemsTab: React.FC = () => {
       onEndReached={loadMore}
       onEndReachedThreshold={0.3}
       ListFooterComponent={
-        isLoadingMore || (isLoading && allItems.length > 0) ? (
+        isLoadingMore || (isLoading && allUnits.length > 0) ? (
           <View style={styles.footerLoader}>
             <ActivityIndicator size="small" color={colors.primary} />
             <Text color={colors.placeholder} style={styles.footerText}>
               Loading more...
             </Text>
           </View>
-        ) : !hasMore && allItems.length > 0 ? (
+        ) : !hasMore && allUnits.length > 0 ? (
           <View style={styles.footerLoader}>
             <Text color={colors.placeholder} style={styles.footerText}>
-              No more items to load
+              No more units to load
             </Text>
           </View>
         ) : null
@@ -116,5 +116,5 @@ const ItemsTab: React.FC = () => {
   );
 };
 
-export default ItemsTab;
+export default UnitsTab;
 

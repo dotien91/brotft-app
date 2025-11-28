@@ -4,4 +4,4 @@ export interface IUser {
 }
 
 export * from './champion';
-export * from './trait';
+export * from './tft-unit';

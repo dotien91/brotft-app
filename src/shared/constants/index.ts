@@ -5,9 +5,10 @@ export const SCREENS = {
   GUIDE: 'Guide',
   SETTINGS: 'Settings',
   DETAIL: 'Detail',
-  CHAMPION_DETAIL: 'ChampionDetail',
+  UNIT_DETAIL: 'UnitDetail',
   TRAITS: 'Traits',
   TRAIT_DETAIL: 'TraitDetail',
+  ITEM_DETAIL: 'ItemDetail',
   // Legacy screens (kept for compatibility)
   TOOL: 'Tool',
   SEARCH: 'Search',

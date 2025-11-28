@@ -10,6 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl, getUnitSplashUrl} from '../../utils/metatft';
+import {API_BASE_URL} from '@shared-constants';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -300,7 +301,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 <View style={styles.abilityIconContainer}>
                   {unit.ability.icon ? (
                     <Image
-                      source={{uri: unit.ability.icon.startsWith('http') ? unit.ability.icon : `http://localhost:3000${unit.ability.icon}`}}
+                      source={{uri: unit.ability.icon.startsWith('http') ? unit.ability.icon : `${API_BASE_URL}${unit.ability.icon}`}}
                       style={styles.abilityIcon}
                       resizeMode="cover"
                     />

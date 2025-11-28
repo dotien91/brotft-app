@@ -7,6 +7,7 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme} from '@react-navigation/native';
 import type {IChampion} from '@services/models/champion';
 import Text from '@shared-components/text-wrapper/TextWrapper';
+import {API_BASE_URL} from '@shared-constants';
 
 type CustomStyleProp = StyleProp<ViewStyle> | Array<StyleProp<ViewStyle>>;
 
@@ -96,7 +97,7 @@ const ChampionCard: React.FC<IChampionCardProps> = ({
     const imageUri = image?.path?.startsWith('http') 
       ? image.path 
       : image?.path?.startsWith('/') 
-        ? `http://localhost:3000${image.path}`
+        ? `${API_BASE_URL}${image.path}`
         : imageUrl || imageSource;
     
     return (

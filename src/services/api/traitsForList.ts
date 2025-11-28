@@ -4,6 +4,7 @@ import type {
   ITraitsQueryParams,
   ITraitsResponse,
 } from '@services/models/trait';
+import {API_BASE_URL} from '@shared-constants';
 
 // Adapter function for useListData hook
 // This function wraps getTraits to match useListData expected format
@@ -41,7 +42,7 @@ export const getTraitsForList = async (params: any): Promise<any> => {
 
     const url = `/origins?${queryParams.toString()}`;
     console.log('[getTraitsForList] API call:', url);
-    console.log('[getTraitsForList] Full URL:', `http://localhost:3000/api/v1${url}`);
+    console.log('[getTraitsForList] Full URL:', `${API_BASE_URL}/api/v1${url}`);
     console.log('[getTraitsForList] Params:', JSON.stringify(params, null, 2));
 
     const response = await axiosInstance.get<ITraitsResponse>(url);

@@ -4,6 +4,7 @@ import type {
   ITraitsQueryParams,
   ITraitsResponse,
 } from '@services/models/trait';
+import {API_BASE_URL} from '@shared-constants';
 
 // Get all traits with pagination and filters
 export const getTraits = async (
@@ -36,7 +37,7 @@ export const getTraits = async (
   const url = `/origins?${queryParams.toString()}`;
   console.log('=====================================');
   console.log('[getTraits] API URL:', url);
-  console.log('[getTraits] Full URL:', `http://localhost:3000/api/v1${url}`);
+  console.log('[getTraits] Full URL:', `${API_BASE_URL}/api/v1${url}`);
   console.log('[getTraits] Params object:', JSON.stringify(params, null, 2));
   console.log('[getTraits] Query String:', queryParams.toString());
   console.log('[getTraits] Has filters:', !!params?.filters);

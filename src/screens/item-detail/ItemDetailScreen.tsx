@@ -10,6 +10,7 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useItemById} from '@services/api/hooks/listQueryHooks';
 import type {IItem} from '@services/models/item';
+import {API_BASE_URL} from '@shared-constants';
 
 interface ItemDetailScreenProps {
   route?: {
@@ -100,7 +101,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         if (item.icon.startsWith('/') || item.icon.startsWith('ASSETS')) {
           // Try local server first
           if (item.icon.startsWith('/')) {
-            return `http://localhost:3000${item.icon}`;
+            return `${API_BASE_URL}${item.icon}`;
           }
         }
       }
@@ -110,7 +111,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
           return item.image.path;
         }
         if (item.image.path.startsWith('/')) {
-          return `http://localhost:3000${item.image.path}`;
+          return `${API_BASE_URL}${item.image.path}`;
         }
       }
       
@@ -139,7 +140,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
           return componentItem.image.path;
         }
         if (componentItem.image.path.startsWith('/')) {
-          return `http://localhost:3000${componentItem.image.path}`;
+          return `${API_BASE_URL}${componentItem.image.path}`;
         }
       }
       if (componentItem.imageUrl) {
@@ -155,7 +156,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     // Map of stat keys to icon URLs from backend
     const getStatIconUrl = (key: string): string | null => {
       const keyUpper = key.toUpperCase();
-      const backendBaseUrl = 'http://localhost:3000';
+      const backendBaseUrl = API_BASE_URL;
       
       // Normalize key to icon name
       let iconName = keyUpper;

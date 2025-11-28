@@ -208,7 +208,6 @@ const HomeScreen: React.FC = () => {
         return colors.primary;
     }
   };
-
   const renderTeamCard = ({item}: {item: TeamComp}) => (
     <RNBounceable style={styles.teamCard} onPress={() => handleTeamPress(item)}>
       <View style={styles.teamHeader}>

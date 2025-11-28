@@ -4,6 +4,7 @@ import {useTheme} from '@react-navigation/native';
 import type {IItem} from '@services/models/item';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideItemItem.style';
+import {API_BASE_URL} from '@shared-constants';
 
 interface GuideItemItemProps {
   data: IItem;
@@ -25,7 +26,7 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
         return icon;
       }
       if (icon.startsWith('/')) {
-        return `http://localhost:3000${icon}`;
+        return `${API_BASE_URL}${icon}`;
       }
     }
     
@@ -34,7 +35,7 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
         return image.path;
       }
       if (image.path.startsWith('/')) {
-        return `http://localhost:3000${image.path}`;
+        return `${API_BASE_URL}${image.path}`;
       }
     }
     

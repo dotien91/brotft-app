@@ -1,5 +1,4 @@
 import React from 'react';
-import {useColorScheme} from 'react-native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import {isReadyRef, navigationRef} from 'react-navigation-helpers';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -7,6 +6,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {SCREENS} from '@shared-constants';
 import {DarkTheme, LightTheme, palette} from '@theme/themes';
+import useStore from '@services/zustand/store';
+import {translations} from '../shared/localization';
 // ? Screens
 import HomeScreen from '@screens/home/HomeScreen';
 import DetailScreen from '@screens/detail/DetailScreen';
@@ -21,8 +22,8 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const Navigation = () => {
-  const scheme = useColorScheme();
-  const isDarkMode = scheme === 'dark';
+  const isDarkMode = useStore((state) => state.isDarkMode);
+  const language = useStore((state) => state.language);
 
   React.useEffect((): any => {
     return () => (isReadyRef.current = false);
@@ -77,17 +78,17 @@ const Navigation = () => {
         <Tab.Screen 
           name={SCREENS.HOME} 
           component={HomeScreen}
-          options={{tabBarLabel: 'Home'}}
+          options={{tabBarLabel: translations.home}}
         />
         <Tab.Screen 
           name={SCREENS.GUIDE} 
           component={GuideScreen}
-          options={{tabBarLabel: 'Guide'}}
+          options={{tabBarLabel: translations.guide}}
         />
         <Tab.Screen 
           name={SCREENS.SETTINGS} 
           component={ProfileScreen}
-          options={{tabBarLabel: 'Settings'}}
+          options={{tabBarLabel: translations.settings}}
         />
       </Tab.Navigator>
     );

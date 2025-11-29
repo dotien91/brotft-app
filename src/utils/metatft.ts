@@ -53,18 +53,89 @@ export const getUnitSplashUrl = (
 
 /**
  * Get unit ability icon URL from MetaTFT CDN
- * @param apiName - API name from unit
- * @param size - Image size (default: 50)
- * @returns Ability icon URL
+ * Supports multiple formats: tft16_{championName}_r.png (ultimate) or tft16_{championName}_e.png (ability E)
+ * @param apiName - API name from unit (e.g., "TFT16_Seraphine" or "Seraphine")
+ * @param size - Image size (default: 64)
+ * @param suffix - Ability suffix: 'r' for ultimate (default), 'e' for ability E, or null to try both
+ * @returns Ability icon URL (tries _r first, then _e if suffix is null)
  */
 export const getUnitAbilityIconUrl = (
   apiName?: string | null,
-  size: number = 50,
+  size: number = 64,
+  suffix: 'r' | 'e' | null = null,
 ): string => {
-  const formattedKey = formatApiNameForMetaTft(apiName);
-  if (!formattedKey) return '';
+  if (!apiName) return '';
   
-  return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/https://cdn.metatft.com/file/metatft/champions/${formattedKey}.png`;
+  // Format API name: TFT16_Seraphine -> tft16_seraphine
+  // Or Seraphine -> tft16_seraphine (assume TFT16 if no prefix)
+  let formattedKey = '';
+  if (apiName.toLowerCase().startsWith('tft')) {
+    formattedKey = apiName.toLowerCase();
+  } else {
+    formattedKey = `tft16_${apiName.toLowerCase()}`;
+  }
+  
+  // Use specified suffix or default to 'r' (ultimate)
+  const abilitySuffix = suffix || 'r';
+  const abilityKey = `${formattedKey}_${abilitySuffix}`;
+  
+  return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/https://cdn.metatft.com/file/metatft/champions/${abilityKey}.png`;
+};
+
+/**
+ * Parse icon path from API and extract filename
+ * Example: "ASSETS/Characters/TFT16_Sona/HUD/Icons2D/TFT16_Sona_Passive_Charged.TFT_Set16.tex"
+ * Returns: "TFT16_Sona_Passive_Charged"
+ * Example: "ASSETS/Characters/TFT16_Leonar/HUD/Icons2D/TFT16_Leonar.TFT_Set16.tex"
+ * Returns: "TFT16_Leonar"
+ */
+export const parseIconPath = (iconPath?: string | null): string | null => {
+  if (!iconPath) return null;
+  
+  // Extract filename from path (last part after /)
+  const parts = iconPath.split('/');
+  if (parts.length === 0) return null;
+  
+  const filename = parts[parts.length - 1];
+  if (!filename) return null;
+  
+  // Remove all extensions (handle multiple dots like .TFT_Set16.tex)
+  // Split by dot and take the first part (the actual filename)
+  const nameWithoutExt = filename.split('.')[0];
+  
+  // Also handle case where filename might have .TFT_Set16.tex pattern
+  // Remove .TFT_Set16 or similar patterns
+  const cleanedName = nameWithoutExt.replace(/\.TFT_Set\d+$/i, '');
+  
+  console.log('[parseIconPath] iconPath:', iconPath, 'filename:', filename, 'cleanedName:', cleanedName);
+  
+  return cleanedName || null;
+};
+
+/**
+ * Get unit ability icon URL from MetaTFT CDN based on icon path from API
+ * Example: "ASSETS/Characters/TFT16_Sona/HUD/Icons2D/TFT16_Sona_Passive_Charged.TFT_Set16.tex"
+ * -> "https://cdn.metatft.com/file/metatft/champions/tft16_sona_passive_charged.png"
+ * @param iconPath - Icon path from API
+ * @returns Ability icon URL
+ */
+export const getUnitAbilityIconUrlFromPath = (
+  iconPath?: string | null,
+): string | null => {
+  if (!iconPath) return null;
+  
+  // Parse icon path to get filename
+  const filename = parseIconPath(iconPath);
+  if (!filename) return null;
+  
+  // Format filename: TFT16_Sona_Passive_Charged -> tft16_sona_passive_charged
+  const formattedKey = filename.toLowerCase();
+  
+  const url = `https://cdn.metatft.com/file/metatft/champions/${formattedKey}.png`;
+  
+  console.log('[getUnitAbilityIconUrlFromPath] iconPath:', iconPath, 'filename:', filename, 'formattedKey:', formattedKey, 'URL:', url);
+  
+  return url;
 };
 
 /**

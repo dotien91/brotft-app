@@ -9,8 +9,7 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl, getUnitSplashUrl, getTraitIconUrl} from '../../utils/metatft';
-import {API_BASE_URL} from '@shared-constants';
+import {getUnitAvatarUrl, getUnitSplashUrl, getTraitIconUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
@@ -446,19 +445,39 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             <View style={styles.abilityCard}>
               <View style={styles.abilityHeader}>
                 <View style={styles.abilityIconContainer}>
-                  {unit.ability.icon ? (
-                    <Image
-                      source={{uri: unit.ability.icon.startsWith('http') ? unit.ability.icon : `${API_BASE_URL}${unit.ability.icon}`}}
-                      style={styles.abilityIcon}
-                      resizeMode="cover"
-                    />
-                  ) : avatarUri ? (
-                    <Image
-                      source={{uri: avatarUri}}
-                      style={styles.abilityIcon}
-                      resizeMode="cover"
-                    />
-                  ) : null}
+                  {(() => {
+                    // Priority 1: Parse icon path from API and get URL from metatft.com
+                    // Example: "ASSETS/Characters/TFT16_Sona/HUD/Icons2D/TFT16_Sona_Passive_Charged.TFT_Set16.tex"
+                    // -> "https://cdn.metatft.com/file/metatft/champions/tft16_sona_passive_charged.png"
+                    if (unit.ability?.icon) {
+                      const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
+                      if (abilityIconUrl) {
+                        return (
+                          <Image
+                            source={{uri: abilityIconUrl}}
+                            style={styles.abilityIcon}
+                            resizeMode="cover"
+                            onError={() => {
+                              console.log('[UnitDetailScreen] Failed to load ability icon from metatft.com:', abilityIconUrl);
+                            }}
+                          />
+                        );
+                      }
+                    }
+                    
+                    // Fallback to unit avatar
+                    if (avatarUri) {
+                      return (
+                        <Image
+                          source={{uri: avatarUri}}
+                          style={styles.abilityIcon}
+                          resizeMode="cover"
+                        />
+                      );
+                    }
+                    
+                    return null;
+                  })()}
                 </View>
                 <View style={styles.abilityInfo}>
                   <Text style={styles.abilityName}>

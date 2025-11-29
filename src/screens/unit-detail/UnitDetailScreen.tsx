@@ -16,6 +16,8 @@ import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import GoldIcon from '@shared-components/gold-icon/GoldIcon';
 import AbilityDescription from '../../shared/components/ability-description/AbilityDescription';
+import TooltipElements from '../../shared/components/tooltip-elements/TooltipElements';
+import {parseTextWithVariables} from '../../shared/utils/parseTextWithVariables';
 import {translations} from '../../shared/localization';
 
 interface UnitDetailScreenProps {
@@ -302,275 +304,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     
     const splashUri = getSplashArtUrl();
 
-    // Helper function to parse text with variables and icons (reusable for both description and tooltipElements)
-    const parseTextWithVariables = (text?: string | null, variables?: any[]) => {
-      if (!text) return null;
-      
-      let parsed = String(text);
-      
-      // Replace &nbsp; with space first
-      parsed = parsed.replace(/&nbsp;/g, ' ');
-      // Replace <br> with newline
-      parsed = parsed.replace(/<br\s*\/?>/gi, '\n');
-      
-      // Parse @ variables from ability.variables and calculations
-      const varsToUse = variables || unit.ability?.variables;
-      const calculations = unit.ability?.calculations;
-      
-      // Create a map of variable names to values (from both variables and calculations)
-      const variableMap: Record<string, any> = {};
-      
-      // Add variables from ability.variables
-      if (varsToUse && Array.isArray(varsToUse) && varsToUse.length > 0) {
-        varsToUse.forEach((variable) => {
-          if (variable.name) {
-            variableMap[variable.name] = variable.value;
-          }
-        });
-      }
-      
-      // Add calculations (merge with variables, calculations take precedence)
-      if (calculations && typeof calculations === 'object') {
-        Object.keys(calculations).forEach((key) => {
-          variableMap[key] = calculations[key];
-        });
-      }
-      
-      if (Object.keys(variableMap).length > 0) {
-        
-        // Helper function to format a value (handles arrays and single values)
-        const formatValue = (val: any): string => {
-          if (val === undefined || val === null) return '';
-          
-          // Handle arrays (stage values: [1⭐, 2⭐, 3⭐])
-          if (Array.isArray(val)) {
-            if (val.length === 0) return '';
-            
-            // Check if all values are the same
-            const uniqueValues = [...new Set(val)];
-            if (uniqueValues.length === 1) {
-              // If all values are the same, show only one value
-              const singleValue = uniqueValues[0];
-              if (typeof singleValue === 'number') {
-                if (singleValue < 1 && singleValue > 0) {
-                  return `${Math.round(singleValue * 100)}%`;
-                } else if (singleValue >= 1) {
-                  return String(Math.round(singleValue));
-                }
-                return String(singleValue);
-              }
-              return String(singleValue);
-            } else {
-              // Format each value and join with "/"
-              const formattedValues = val.map((v: any) => {
-                if (typeof v === 'number') {
-                  if (v < 1 && v > 0) {
-                    return `${Math.round(v * 100)}%`;
-                  } else if (v >= 1) {
-                    return String(Math.round(v));
-                  }
-                  return String(v);
-                }
-                return String(v);
-              });
-              return formattedValues.join('/');
-            }
-          }
-          
-          // Handle single number
-          if (typeof val === 'number') {
-            if (val < 1 && val > 0) {
-              return `${Math.round(val * 100)}%`;
-            } else if (val >= 1) {
-              return String(Math.round(val));
-            }
-            return String(val);
-          }
-          
-          return String(val);
-        };
-        
-        // Helper function to find variable value by name (with various matching strategies)
-        const findVariableValue = (key: string): any => {
-          // Try direct match
-          if (variableMap[key]) {
-            return variableMap[key];
-          }
-          
-          // Pattern 1: @ModifiedXXX@ -> look for XXX in variables
-          if (key.startsWith('Modified')) {
-            const baseKey = key.replace('Modified', '');
-            if (variableMap[baseKey]) {
-              return variableMap[baseKey];
-            }
-          }
-          
-          // Pattern 2: @TFTUnitProperty:KEY@ -> look for KEY in variables
-          if (key.startsWith('TFTUnitProperty:')) {
-            const baseKey = key.replace('TFTUnitProperty:', '');
-            if (variableMap[baseKey]) {
-              return variableMap[baseKey];
-            }
-          }
-          
-          // Pattern 3: For %i:scaleAD% -> try to find ADDamage, AD, scaleAD, etc.
-          const keys = Object.keys(variableMap);
-          const keyLower = key.toLowerCase();
-          
-          // Try exact case insensitive match
-          const exactMatch = keys.find(k => k.toLowerCase() === keyLower);
-          if (exactMatch) {
-            return variableMap[exactMatch];
-          }
-          
-          // Try removing "scale" prefix: scaleAD -> AD, scaleAP -> AP
-          if (keyLower.startsWith('scale')) {
-            const withoutScale = keyLower.replace(/^scale/, '');
-            const matchWithoutScale = keys.find(k => {
-              const kLower = k.toLowerCase();
-              return kLower === withoutScale || 
-                     kLower.includes(withoutScale) || 
-                     withoutScale.includes(kLower) ||
-                     kLower === `${withoutScale}damage` ||
-                     kLower === `damage${withoutScale}`;
-            });
-            if (matchWithoutScale) {
-              return variableMap[matchWithoutScale];
-            }
-          }
-          
-          // Try adding "Damage" suffix: scaleAD -> ADDamage, scaleAP -> APDamage
-          if (keyLower.includes('ad') || keyLower.includes('ap')) {
-            const adMatch = keys.find(k => {
-              const kLower = k.toLowerCase();
-              return (keyLower.includes('ad') && (kLower.includes('addamage') || kLower === 'ad' || kLower.includes('ad') && kLower.includes('damage'))) ||
-                     (keyLower.includes('ap') && (kLower.includes('apdamage') || kLower === 'ap' || kLower.includes('ap') && kLower.includes('damage')));
-            });
-            if (adMatch) {
-              return variableMap[adMatch];
-            }
-          }
-          
-          // Pattern 4: Try partial match
-          const normalizedKey = keyLower.replace(/^(modified|tftunitproperty:|scale)/i, '');
-          const partialMatch = keys.find(k => {
-            const normalizedK = k.toLowerCase();
-            return normalizedK === normalizedKey || 
-                   normalizedK.includes(normalizedKey) || 
-                   normalizedKey.includes(normalizedK) ||
-                   (normalizedKey.includes('ad') && normalizedK.includes('ad')) ||
-                   (normalizedKey.includes('ap') && normalizedK.includes('ap'));
-          });
-          if (partialMatch) {
-            return variableMap[partialMatch];
-          }
-          
-          return null;
-        };
-        
-        // Parse %i:variableName% patterns (e.g., %i:scaleAD%, %i:scaleAP%)
-        // First, handle adjacent patterns like (%i:scaleAD%%i:scaleAP%) that should be added together
-        const adjacentPercentPattern = /\(?%i:([^%]+)%(%i:([^%]+)%)\)?/g;
-        const adjacentMatches: Array<{match: string; index: number; firstKey: string; secondKey: string; firstIcon: string; secondIcon: string}> = [];
-        let adjacentMatch;
-        
-        while ((adjacentMatch = adjacentPercentPattern.exec(parsed)) !== null) {
-          const firstKey = adjacentMatch[1]; // e.g., "scaleAD"
-          const secondKey = adjacentMatch[3]; // e.g., "scaleAP"
-          const fullMatch = adjacentMatch[0];
-          
-          // Extract icon type from key (AD or AP)
-          const firstIcon = firstKey.toUpperCase().includes('AD') ? 'AD' : firstKey.toUpperCase().includes('AP') ? 'AP' : '';
-          const secondIcon = secondKey.toUpperCase().includes('AD') ? 'AD' : secondKey.toUpperCase().includes('AP') ? 'AP' : '';
-          
-          // Get both values
-          const firstValue = findVariableValue(firstKey);
-          const secondValue = findVariableValue(secondKey);
-          
-          // Always try to add if both values are found
-          if (firstValue !== null && secondValue !== null && firstIcon && secondIcon) {
-            adjacentMatches.push({
-              match: fullMatch,
-              index: adjacentMatch.index,
-              firstKey,
-              secondKey,
-              firstIcon,
-              secondIcon,
-            });
-          }
-        }
-        
-        // Replace adjacent patterns from end to start to preserve indices
-        adjacentMatches.reverse().forEach(({match, index, firstKey, secondKey, firstIcon, secondIcon}) => {
-          const firstValue = findVariableValue(firstKey);
-          const secondValue = findVariableValue(secondKey);
-          
-          if (firstValue !== null && secondValue !== null) {
-            // Add arrays element-wise or add numbers
-            let sumValue: any;
-            if (Array.isArray(firstValue) && Array.isArray(secondValue)) {
-              const maxLength = Math.max(firstValue.length, secondValue.length);
-              sumValue = Array.from({length: maxLength}, (_, i) => {
-                const val1 = firstValue[i] || 0;
-                const val2 = secondValue[i] || 0;
-                return (typeof val1 === 'number' ? val1 : 0) + (typeof val2 === 'number' ? val2 : 0);
-              });
-            } else if (typeof firstValue === 'number' && typeof secondValue === 'number') {
-              sumValue = firstValue + secondValue;
-            } else {
-              sumValue = firstValue;
-            }
-            
-            // Format the sum value
-            const formattedSum = formatValue(sumValue);
-            if (formattedSum) {
-              // Replace with formatted value + icon patterns (without parentheses)
-              const replacement = `${formattedSum} %i:${firstIcon}% %i:${secondIcon}%`;
-              parsed = parsed.substring(0, index) + replacement + parsed.substring(index + match.length);
-            }
-          }
-        });
-        
-        // Find all @...@ patterns
-        const variablePattern = /@([^@]+)@/g;
-        const matches = [...parsed.matchAll(variablePattern)];
-        
-        // Process matches from end to start to preserve indices
-        const matchesArray = Array.from(matches).reverse();
-        
-        matchesArray.forEach((match) => {
-          const fullMatch = match[0];
-          const variableKey = match[1];
-          const matchIndex = match.index || 0;
-          
-          // Find the variable value
-          const value = findVariableValue(variableKey);
-          
-          // Format the value
-          const formattedValue = formatValue(value);
-          
-          // Replace the pattern
-          if (formattedValue) {
-            parsed = parsed.substring(0, matchIndex) + formattedValue + parsed.substring(matchIndex + fullMatch.length);
-          }
-        });
-      }
-      
-      // Remove HTML tags after parsing
-      parsed = parsed.replace(/<[^>]*>/g, '');
-      
-      // Clean up whitespace
-      parsed = parsed.trim();
-      parsed = parsed.replace(/\s+/g, ' ');
-      parsed = parsed.replace(/\n\s*\n/g, '\n');
-      
-      return parsed || null;
-    };
-
     // Parse variables in ability description
     const parseAbilityDescription = (desc?: string | null) => {
-      if (!unit || !unit.ability) return parseTextWithVariables(desc);
-      return parseTextWithVariables(desc, unit.ability.variables);
+      if (!unit || !unit.ability) return parseTextWithVariables(desc, undefined, unit);
+      return parseTextWithVariables(desc, unit.ability.variables, unit);
     };
 
     return (
@@ -747,50 +484,17 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               )}
 
               {/* Ability Tooltip Elements from Localized Data */}
-              {localizedTooltipElements && localizedTooltipElements.length > 0 ? (
-                <View style={styles.abilityVariables}>
-                  {localizedTooltipElements.map((element: any, index: number) => {
-                    // Get text to parse from tooltipElement
-                    const elementText = element.text || element.value || element.values || '';
-                    const parsedText = parseTextWithVariables(
-                      typeof elementText === 'string' ? elementText : String(elementText),
-                      unit.ability?.variables
-                    );
-                    
-                    // Get display name
-                    const displayName = element.name || element.label || element.key || '';
-                    
-                    return (
-                      <View key={index} style={styles.variableItem}>
-                        {displayName && (
-                          <Text style={styles.variableName}>{displayName}:</Text>
-                        )}
-                        {parsedText ? (
-                          <AbilityDescription
-                            description={parsedText}
-                            style={styles.variableValue}
-                            textStyle={styles.variableValue}
-                          />
-                        ) : null}
-                      </View>
-                    );
-                  })}
-                </View>
-              ) : unit.ability.variables && unit.ability.variables.length > 0 ? (
-                // Fallback to API variables if no localized tooltipElements
-                <View style={styles.abilityVariables}>
-                  {unit.ability.variables.map((variable, index) => (
-                    <View key={index} style={styles.variableItem}>
-                      <Text style={styles.variableName}>{variable.name}:</Text>
-                      <Text style={styles.variableValue}>
-                        {Array.isArray(variable.value) 
-                          ? variable.value.join(' / ') 
-                          : variable.value}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
+              {localizedTooltipElements && localizedTooltipElements.length > 0 && (
+                <TooltipElements
+                  tooltipElements={localizedTooltipElements}
+                  unit={unit}
+                  styles={{
+                    abilityVariables: styles.abilityVariables,
+                    variableItem: styles.variableItem,
+                    variableValue: styles.variableValue,
+                  }}
+                />
+              )}
             </View>
           </View>
         )}

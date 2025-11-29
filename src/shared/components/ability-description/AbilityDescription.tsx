@@ -11,7 +11,7 @@ interface AbilityDescriptionProps {
 interface TextPart {
   type: 'text' | 'icon';
   content: string;
-  iconType?: 'AD' | 'AP';
+  iconType?: 'AD' | 'AP' | 'HP' | 'AR' | 'MR' | 'AS' | 'MANA' | 'CRIT' | string;
 }
 
 const AbilityDescription: React.FC<AbilityDescriptionProps> = ({
@@ -26,16 +26,45 @@ const AbilityDescription: React.FC<AbilityDescriptionProps> = ({
     const parts: TextPart[] = [];
     let currentIndex = 0;
     
-    // Pattern for %i:scaleAD% or %i:scaleAP% or %i:AD% or %i:AP%
-    // Also handle patterns like %i:scaleAD%%i:scaleAP% (adjacent)
-    // Match: %i:scaleAD%, %i:AD%, %i:scaleAP%, %i:AP%
-    const iconPattern = /%i:(scale)?(AD|AP)%/gi;
+    // Pattern for %i:scaleAD%, %i:scaleAP%, %i:AD%, %i:AP%, %i:HP%, %i:scaleHealth%, etc.
+    // Match: %i:anything%
+    const iconPattern = /%i:([^%]+)%/gi;
     let match;
-    const matches: Array<{index: number; length: number; iconType: 'AD' | 'AP'}> = [];
+    const matches: Array<{index: number; length: number; iconType: string}> = [];
+    
+    // Helper to determine icon type from key
+    const getIconType = (key: string): string => {
+      const keyUpper = key.toUpperCase();
+      if (keyUpper.includes('AD') || keyUpper.includes('DAMAGE')) {
+        return 'AD';
+      } else if (keyUpper.includes('AP') || keyUpper.includes('ABILITY')) {
+        return 'AP';
+      } else if (keyUpper.includes('HEALTH') || keyUpper.includes('HP')) {
+        return 'HP';
+      } else if (keyUpper.includes('ARMOR') || keyUpper === 'AR') {
+        return 'AR';
+      } else if (keyUpper.includes('MAGIC') || keyUpper === 'MR') {
+        return 'MR';
+      } else if (keyUpper.includes('ATTACKSPEED') || keyUpper === 'AS') {
+        return 'AS';
+      } else if (keyUpper.includes('MANA')) {
+        return 'MANA';
+      } else if (keyUpper.includes('CRIT')) {
+        return 'CRIT';
+      }
+      // If key is already a valid icon type, return it
+      if (['AD', 'AP', 'HP', 'AR', 'MR', 'AS', 'MANA', 'CRIT'].includes(keyUpper)) {
+        return keyUpper;
+      }
+      // Default: try to extract from key (e.g., "scaleAD" -> "AD")
+      const match = keyUpper.match(/(AD|AP|HP|AR|MR|AS|MANA|CRIT)/);
+      return match ? match[1] : keyUpper;
+    };
     
     // Collect all matches first
     while ((match = iconPattern.exec(desc)) !== null) {
-      const iconType = match[2].toUpperCase() as 'AD' | 'AP';
+      const iconKey = match[1]; // e.g., "scaleAD", "AD", "scaleHealth", "HP"
+      const iconType = getIconType(iconKey);
       matches.push({
         index: match.index,
         length: match[0].length,
@@ -90,9 +119,19 @@ const AbilityDescription: React.FC<AbilityDescriptionProps> = ({
               <View style={styles.iconWrapper}>
                 {part.iconType && (
                   <StatIcon 
-                    name={part.iconType} 
+                    name={part.iconType as any} 
                     size={14}
-                    color={part.iconType === 'AD' ? '#BD7E4C' : '#9BFFF7'}
+                    color={
+                      part.iconType === 'AD' ? '#BD7E4C' : 
+                      part.iconType === 'AP' ? '#9BFFF7' :
+                      part.iconType === 'HP' ? '#4ade80' :
+                      part.iconType === 'AR' ? '#fb7185' :
+                      part.iconType === 'MR' ? '#ec4899' :
+                      part.iconType === 'AS' ? '#fbbf24' :
+                      part.iconType === 'MANA' ? '#60a5fa' :
+                      part.iconType === 'CRIT' ? '#facc15' :
+                      '#9BFFF7'
+                    }
                   />
                 )}
               </View>

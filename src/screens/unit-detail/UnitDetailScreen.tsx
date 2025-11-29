@@ -14,6 +14,9 @@ import {API_BASE_URL} from '@shared-constants';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
+import GoldIcon from '@shared-components/gold-icon/GoldIcon';
+import AbilityDescription from '../../shared/components/ability-description/AbilityDescription';
+import {translations} from '../../shared/localization';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -34,6 +37,14 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const [localizedName, setLocalizedName] = useState<string | null>(null);
   const [localizedAbilityName, setLocalizedAbilityName] = useState<string | null>(null);
   const [localizedAbilityDesc, setLocalizedAbilityDesc] = useState<string | null>(null);
+  const [localizedTooltipElements, setLocalizedTooltipElements] = useState<any[] | null>(null);
+
+  // Update translations when language changes
+  useEffect(() => {
+    if (language && translations.getLanguage() !== language) {
+      translations.setLanguage(language);
+    }
+  }, [language]);
 
   const unitId =
     (routeProp?.params?.unitId ||
@@ -153,20 +164,30 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
           } else {
             setLocalizedAbilityDesc(null);
           }
+          
+          // Set localized tooltipElements
+          if (localizedUnit.ability.tooltipElements && Array.isArray(localizedUnit.ability.tooltipElements)) {
+            setLocalizedTooltipElements(localizedUnit.ability.tooltipElements);
+          } else {
+            setLocalizedTooltipElements(null);
+          }
         } else {
           setLocalizedAbilityName(null);
           setLocalizedAbilityDesc(null);
+          setLocalizedTooltipElements(null);
         }
       } else {
         setLocalizedName(null);
         setLocalizedAbilityName(null);
         setLocalizedAbilityDesc(null);
+        setLocalizedTooltipElements(null);
       }
     } catch (error) {
       console.error('Error loading localized unit data:', error);
       setLocalizedName(null);
       setLocalizedAbilityName(null);
       setLocalizedAbilityDesc(null);
+      setLocalizedTooltipElements(null);
     }
   }, [unit, language]);
 
@@ -185,7 +206,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
       <Text color={colors.placeholder} style={styles.loadingText}>
-        Loading unit...
+        {translations.loadingUnit}
       </Text>
     </View>
   );
@@ -199,14 +220,14 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         size={48}
       />
       <Text h4 color={colors.danger} style={styles.errorText}>
-        Error loading unit
+        {translations.errorLoadingUnit}
       </Text>
       <Text color={colors.placeholder} style={styles.errorDescription}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
       <RNBounceable style={styles.retryButton} onPress={() => refetch()}>
         <Text color={colors.white} bold>
-          Retry
+          {translations.retry}
         </Text>
       </RNBounceable>
     </View>
@@ -281,26 +302,41 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     
     const splashUri = getSplashArtUrl();
 
-    // Parse variables in ability description
-    const parseAbilityDescription = (desc?: string | null) => {
-      if (!desc) return null;
+    // Helper function to parse text with variables and icons (reusable for both description and tooltipElements)
+    const parseTextWithVariables = (text?: string | null, variables?: any[]) => {
+      if (!text) return null;
       
-      let parsed = desc;
+      let parsed = String(text);
       
       // Replace &nbsp; with space first
       parsed = parsed.replace(/&nbsp;/g, ' ');
       // Replace <br> with newline
       parsed = parsed.replace(/<br\s*\/?>/gi, '\n');
       
-      // Parse @ variables from ability.variables
-      if (unit.ability?.variables && Array.isArray(unit.ability.variables) && unit.ability.variables.length > 0) {
-        // Create a map of variable names to values
-        const variableMap: Record<string, any> = {};
-        unit.ability.variables.forEach((variable) => {
+      // Parse @ variables from ability.variables and calculations
+      const varsToUse = variables || unit.ability?.variables;
+      const calculations = unit.ability?.calculations;
+      
+      // Create a map of variable names to values (from both variables and calculations)
+      const variableMap: Record<string, any> = {};
+      
+      // Add variables from ability.variables
+      if (varsToUse && Array.isArray(varsToUse) && varsToUse.length > 0) {
+        varsToUse.forEach((variable) => {
           if (variable.name) {
             variableMap[variable.name] = variable.value;
           }
         });
+      }
+      
+      // Add calculations (merge with variables, calculations take precedence)
+      if (calculations && typeof calculations === 'object') {
+        Object.keys(calculations).forEach((key) => {
+          variableMap[key] = calculations[key];
+        });
+      }
+      
+      if (Object.keys(variableMap).length > 0) {
         
         // Helper function to format a value (handles arrays and single values)
         const formatValue = (val: any): string => {
@@ -378,7 +414,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
           }
           
           // Pattern 3: For %i:scaleAD% -> try to find ADDamage, AD, scaleAD, etc.
-          // For %i:scaleAP% -> try to find APDamage, AP, scaleAP, etc.
           const keys = Object.keys(variableMap);
           const keyLower = key.toLowerCase();
           
@@ -416,7 +451,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             }
           }
           
-          // Pattern 4: Try partial match (e.g., "ModifiedDamage" matches "Damage")
+          // Pattern 4: Try partial match
           const normalizedKey = keyLower.replace(/^(modified|tftunitproperty:|scale)/i, '');
           const partialMatch = keys.find(k => {
             const normalizedK = k.toLowerCase();
@@ -434,42 +469,39 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         };
         
         // Parse %i:variableName% patterns (e.g., %i:scaleAD%, %i:scaleAP%)
-        // First, handle adjacent patterns like %i:scaleAD%%i:scaleAP% that should be added together
-        const adjacentPercentPattern = /%i:([^%]+)%(%i:([^%]+)%)/g;
-        const adjacentMatches: Array<{match: string; index: number; firstKey: string; secondKey: string}> = [];
+        // First, handle adjacent patterns like (%i:scaleAD%%i:scaleAP%) that should be added together
+        const adjacentPercentPattern = /\(?%i:([^%]+)%(%i:([^%]+)%)\)?/g;
+        const adjacentMatches: Array<{match: string; index: number; firstKey: string; secondKey: string; firstIcon: string; secondIcon: string}> = [];
         let adjacentMatch;
         
         while ((adjacentMatch = adjacentPercentPattern.exec(parsed)) !== null) {
           const firstKey = adjacentMatch[1]; // e.g., "scaleAD"
           const secondKey = adjacentMatch[3]; // e.g., "scaleAP"
+          const fullMatch = adjacentMatch[0];
+          
+          // Extract icon type from key (AD or AP)
+          const firstIcon = firstKey.toUpperCase().includes('AD') ? 'AD' : firstKey.toUpperCase().includes('AP') ? 'AP' : '';
+          const secondIcon = secondKey.toUpperCase().includes('AD') ? 'AD' : secondKey.toUpperCase().includes('AP') ? 'AP' : '';
           
           // Get both values
           const firstValue = findVariableValue(firstKey);
           const secondValue = findVariableValue(secondKey);
           
-          // Debug log
-          console.log('[Parse] Adjacent pattern:', {
-            pattern: adjacentMatch[0],
-            firstKey,
-            secondKey,
-            firstValue,
-            secondValue,
-            variableMapKeys: Object.keys(variableMap),
-          });
-          
-          // Always try to add if both values are found (not just damage-related)
-          if (firstValue !== null && secondValue !== null) {
+          // Always try to add if both values are found
+          if (firstValue !== null && secondValue !== null && firstIcon && secondIcon) {
             adjacentMatches.push({
-              match: adjacentMatch[0],
+              match: fullMatch,
               index: adjacentMatch.index,
               firstKey,
               secondKey,
+              firstIcon,
+              secondIcon,
             });
           }
         }
         
         // Replace adjacent patterns from end to start to preserve indices
-        adjacentMatches.reverse().forEach(({match, index, firstKey, secondKey}) => {
+        adjacentMatches.reverse().forEach(({match, index, firstKey, secondKey, firstIcon, secondIcon}) => {
           const firstValue = findVariableValue(firstKey);
           const secondValue = findVariableValue(secondKey);
           
@@ -477,7 +509,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             // Add arrays element-wise or add numbers
             let sumValue: any;
             if (Array.isArray(firstValue) && Array.isArray(secondValue)) {
-              // Add arrays element-wise: [0.1, 0.15, 0.2] + [0.2, 0.25, 0.3] = [0.3, 0.4, 0.5]
               const maxLength = Math.max(firstValue.length, secondValue.length);
               sumValue = Array.from({length: maxLength}, (_, i) => {
                 const val1 = firstValue[i] || 0;
@@ -487,40 +518,17 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             } else if (typeof firstValue === 'number' && typeof secondValue === 'number') {
               sumValue = firstValue + secondValue;
             } else {
-              // Fallback: just use first value
               sumValue = firstValue;
             }
             
-            // Format and replace
+            // Format the sum value
             const formattedSum = formatValue(sumValue);
             if (formattedSum) {
-              parsed = parsed.substring(0, index) + formattedSum + parsed.substring(index + match.length);
+              // Replace with formatted value + icon patterns (without parentheses)
+              const replacement = `${formattedSum} %i:${firstIcon}% %i:${secondIcon}%`;
+              parsed = parsed.substring(0, index) + replacement + parsed.substring(index + match.length);
             }
           }
-        });
-        
-        // Now handle remaining %i:...% patterns (single patterns)
-        const percentPattern = /%i:([^%]+)%/g;
-        const percentMatches: Array<{match: string; index: number; key: string}> = [];
-        let percentMatch;
-        
-        while ((percentMatch = percentPattern.exec(parsed)) !== null) {
-          percentMatches.push({
-            match: percentMatch[0],
-            index: percentMatch.index,
-            key: percentMatch[1],
-          });
-        }
-        
-        // Replace from end to start to preserve indices
-        percentMatches.reverse().forEach(({match, index, key}) => {
-          const value = findVariableValue(key);
-          const formattedValue = formatValue(value);
-          
-          if (formattedValue) {
-            parsed = parsed.substring(0, index) + formattedValue + parsed.substring(index + match.length);
-          }
-          // If no value found, keep the pattern
         });
         
         // Find all @...@ patterns
@@ -531,8 +539,8 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         const matchesArray = Array.from(matches).reverse();
         
         matchesArray.forEach((match) => {
-          const fullMatch = match[0]; // e.g., "@ModifiedDamage@"
-          const variableKey = match[1]; // e.g., "ModifiedDamage"
+          const fullMatch = match[0];
+          const variableKey = match[1];
           const matchIndex = match.index || 0;
           
           // Find the variable value
@@ -544,14 +552,8 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
           // Replace the pattern
           if (formattedValue) {
             parsed = parsed.substring(0, matchIndex) + formattedValue + parsed.substring(matchIndex + fullMatch.length);
-          } else {
-            // If value not found, keep the pattern (don't remove it)
-            // This way @ModifiedDamage@ will remain if variable is not found
           }
         });
-      } else {
-        // If no variables, keep @...@ patterns (don't remove them)
-        // This way users can see what variables are missing
       }
       
       // Remove HTML tags after parsing
@@ -559,12 +561,16 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
       
       // Clean up whitespace
       parsed = parsed.trim();
-      // Remove multiple spaces
       parsed = parsed.replace(/\s+/g, ' ');
-      // Remove multiple newlines
       parsed = parsed.replace(/\n\s*\n/g, '\n');
       
       return parsed || null;
+    };
+
+    // Parse variables in ability description
+    const parseAbilityDescription = (desc?: string | null) => {
+      if (!unit || !unit.ability) return parseTextWithVariables(desc);
+      return parseTextWithVariables(desc, unit.ability.variables);
     };
 
     return (
@@ -604,12 +610,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 </View>
                 {unit.cost !== null && unit.cost !== undefined && (
                   <View style={styles.costBadgeContainer}>
-                    <Icon
-                      name="diamond"
-                      type={IconType.FontAwesome}
-                      color={colors.primary}
-                      size={16}
-                    />
+                    <GoldIcon size={18} color="#fbbf24" />
                     <Text style={styles.costBadgeText}>{unit.cost}</Text>
                   </View>
                 )}
@@ -625,7 +626,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="heart" type={IconType.Ionicons} color="#4ade80" size={16} />
-                  <Text style={styles.statItemLabel}>Máu</Text>
+                  <Text style={styles.statItemLabel}>{translations.health}</Text>
                 </View>
                 <Text style={styles.statItemValue}>
                   {unit.stats.hp ? `${unit.stats.hp} / ${Math.floor(unit.stats.hp * 1.8)} / ${Math.floor(unit.stats.hp * 3.24)}` : '---'}
@@ -634,7 +635,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="flash" type={IconType.Ionicons} color="#fbbf24" size={16} />
-                  <Text style={styles.statItemLabel}>Tốc Độ Đánh</Text>
+                  <Text style={styles.statItemLabel}>{translations.attackSpeed}</Text>
                 </View>
                 <Text style={styles.statItemValue}>{unit.stats.attackSpeed ?? '---'}</Text>
               </View>
@@ -643,7 +644,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="fitness" type={IconType.Ionicons} color="#fb923c" size={16} />
-                  <Text style={styles.statItemLabel}>Sức Mạnh Công Kích</Text>
+                  <Text style={styles.statItemLabel}>{translations.attackDamage}</Text>
                 </View>
                 <Text style={styles.statItemValue}>
                   {unit.stats.damage ? `${unit.stats.damage} / ${Math.floor(unit.stats.damage * 1.5)} / ${Math.floor(unit.stats.damage * 2.25)}` : '---'}
@@ -652,7 +653,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="shield" type={IconType.Ionicons} color="#fb7185" size={16} />
-                  <Text style={styles.statItemLabel}>Giáp</Text>
+                  <Text style={styles.statItemLabel}>{translations.armor}</Text>
                 </View>
                 <Text style={styles.statItemValue}>{unit.stats.armor ?? '---'}</Text>
               </View>
@@ -661,7 +662,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="sparkles" type={IconType.Ionicons} color="#c084fc" size={16} />
-                  <Text style={styles.statItemLabel}>DPS</Text>
+                  <Text style={styles.statItemLabel}>{translations.dps}</Text>
                 </View>
                 <Text style={styles.statItemValue}>
                   {unit.stats.damage && unit.stats.attackSpeed ? `${Math.floor(unit.stats.damage * unit.stats.attackSpeed)} / ${Math.floor(unit.stats.damage * 1.5 * unit.stats.attackSpeed * 1.5)} / ${Math.floor(unit.stats.damage * 2.25 * unit.stats.attackSpeed * 2.25)}` : '---'}
@@ -670,7 +671,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="color-wand" type={IconType.Ionicons} color="#ec4899" size={16} />
-                  <Text style={styles.statItemLabel}>Kháng Phép</Text>
+                  <Text style={styles.statItemLabel}>{translations.magicResist}</Text>
                 </View>
                 <Text style={styles.statItemValue}>{unit.stats.magicResist ?? '---'}</Text>
               </View>
@@ -679,7 +680,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.statItem}>
                 <View style={styles.statItemHeader}>
                   <Icon name="radio-button-on" type={IconType.Ionicons} color="#60a5fa" size={16} />
-                  <Text style={styles.statItemLabel}>Tầm Đánh</Text>
+                  <Text style={styles.statItemLabel}>{translations.range}</Text>
                 </View>
                 <Text style={styles.statItemValue}>{unit.stats.range ? '■'.repeat(unit.stats.range) : '---'}</Text>
               </View>
@@ -687,7 +688,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 <View style={styles.statItem}>
                   <View style={styles.statItemHeader}>
                     <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={16} />
-                    <Text style={styles.statItemLabel}>Mana</Text>
+                    <Text style={styles.statItemLabel}>{translations.mana}</Text>
                   </View>
                   <Text style={styles.statItemValue}>
                     {unit.stats.initialMana != null ? `${unit.stats.initialMana} / ${unit.stats.mana}` : `${unit.stats.mana}`}
@@ -702,7 +703,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         {unit.ability && (
           <View style={styles.abilitySection}>
             <Text h3 bold color={colors.text} style={styles.sectionTitle}>
-              Kỹ Năng
+              {translations.ability}
             </Text>
             
             <View style={styles.abilityCard}>
@@ -724,7 +725,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 </View>
                 <View style={styles.abilityInfo}>
                   <Text style={styles.abilityName}>
-                    {localizedAbilityName || unit.ability.name || 'Kỹ năng'}
+                    {localizedAbilityName || unit.ability.name || translations.ability}
                   </Text>
                   <View style={styles.abilityMeta}>
                     <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={14} />
@@ -738,13 +739,45 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               </View>
               
               {(localizedAbilityDesc || unit.ability.desc) && (
-                <Text style={styles.abilityDescription}>
-                  {parseAbilityDescription(localizedAbilityDesc || unit.ability.desc)}
-                </Text>
+                <AbilityDescription
+                  description={parseAbilityDescription(localizedAbilityDesc || unit.ability.desc) || ''}
+                  style={styles.abilityDescription}
+                  textStyle={styles.abilityDescription}
+                />
               )}
 
-              {/* Ability Variables */}
-              {unit.ability.variables && unit.ability.variables.length > 0 && (
+              {/* Ability Tooltip Elements from Localized Data */}
+              {localizedTooltipElements && localizedTooltipElements.length > 0 ? (
+                <View style={styles.abilityVariables}>
+                  {localizedTooltipElements.map((element: any, index: number) => {
+                    // Get text to parse from tooltipElement
+                    const elementText = element.text || element.value || element.values || '';
+                    const parsedText = parseTextWithVariables(
+                      typeof elementText === 'string' ? elementText : String(elementText),
+                      unit.ability?.variables
+                    );
+                    
+                    // Get display name
+                    const displayName = element.name || element.label || element.key || '';
+                    
+                    return (
+                      <View key={index} style={styles.variableItem}>
+                        {displayName && (
+                          <Text style={styles.variableName}>{displayName}:</Text>
+                        )}
+                        {parsedText ? (
+                          <AbilityDescription
+                            description={parsedText}
+                            style={styles.variableValue}
+                            textStyle={styles.variableValue}
+                          />
+                        ) : null}
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : unit.ability.variables && unit.ability.variables.length > 0 ? (
+                // Fallback to API variables if no localized tooltipElements
                 <View style={styles.abilityVariables}>
                   {unit.ability.variables.map((variable, index) => (
                     <View key={index} style={styles.variableItem}>
@@ -757,7 +790,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     </View>
                   ))}
                 </View>
-              )}
+              ) : null}
             </View>
           </View>
         )}
@@ -765,7 +798,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         {/* Suggested Items Section */}
         <View style={styles.augmentsSection}>
           <Text h3 bold color={colors.text} style={styles.sectionTitle}>
-            Đề xuất Trang bị
+            {translations.suggestedItems}
           </Text>
           
           <View style={styles.augmentCard}>
@@ -799,7 +832,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                   </View>
                 </View>
                 <Text style={styles.augmentDescription}>
-                  Kỹ năng có thể gây chí mạng.
+                  {translations.abilityCanCrit}
                 </Text>
               </View>
             </View>

@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useEffect, useState} from 'react';
 import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
@@ -7,6 +7,9 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl, getTraitIconUrl} from '../../../../utils/metatft';
 import createStyles from './GuideUnitItem.style';
+import useStore from '@services/zustand/store';
+import LocalStorage from '@services/local-storage';
+import {getLocaleFromLanguage} from '@services/api/data';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -18,7 +21,84 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const language = useStore((state) => state.language);
+  const [localizedName, setLocalizedName] = useState<string | null>(null);
+
   const {name, cost, traits, icon, squareIcon, apiName} = data;
+
+  // Get localized name from storage
+  useEffect(() => {
+    if (!data || !language) {
+      setLocalizedName(null);
+      return;
+    }
+
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const unitsKey = `data_units_${locale}`;
+      const unitsDataString = LocalStorage.getString(unitsKey);
+      
+      if (!unitsDataString) {
+        setLocalizedName(null);
+        return;
+      }
+
+      const unitsData = JSON.parse(unitsDataString);
+      let localizedUnit: any = null;
+
+      // Handle both array and object formats
+      if (Array.isArray(unitsData)) {
+        // If it's an array, find the unit
+        localizedUnit = unitsData.find((localUnit: any) => {
+          // Try to match by apiName first
+          if (data.apiName && localUnit.apiName === data.apiName) {
+            return true;
+          }
+          // Fallback to name matching (case insensitive)
+          if (data.name && localUnit.name) {
+            return data.name.toLowerCase() === localUnit.name.toLowerCase();
+          }
+          // Try characterName matching
+          if (data.characterName && localUnit.characterName) {
+            return data.characterName.toLowerCase() === localUnit.characterName.toLowerCase();
+          }
+          return false;
+        });
+      } else if (typeof unitsData === 'object' && unitsData !== null) {
+        // If it's an object, try to find by apiName as key first
+        if (data.apiName && unitsData[data.apiName]) {
+          localizedUnit = unitsData[data.apiName];
+        } else {
+          // Otherwise, search through object values
+          const unitsArray = Object.values(unitsData) as any[];
+          localizedUnit = unitsArray.find((localUnit: any) => {
+            // Try to match by apiName first
+            if (data.apiName && localUnit.apiName === data.apiName) {
+              return true;
+            }
+            // Fallback to name matching (case insensitive)
+            if (data.name && localUnit.name) {
+              return data.name.toLowerCase() === localUnit.name.toLowerCase();
+            }
+            // Try characterName matching
+            if (data.characterName && localUnit.characterName) {
+              return data.characterName.toLowerCase() === localUnit.characterName.toLowerCase();
+            }
+            return false;
+          });
+        }
+      }
+
+      if (localizedUnit && localizedUnit.name) {
+        setLocalizedName(localizedUnit.name);
+      } else {
+        setLocalizedName(null);
+      }
+    } catch (error) {
+      console.error('Error loading localized unit name:', error);
+      setLocalizedName(null);
+    }
+  }, [data, language]);
 
   // Get TFT unit avatar URL from metatft.com
   // Size: 64x64 for hexagon display (56px hexagon needs ~64px image)
@@ -57,7 +137,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
       {/* Unit Info */}
       <View style={styles.infoContainer}>
         <Text style={styles.unitName} numberOfLines={1}>
-          {name}
+          {localizedName || name}
         </Text>
         {cost !== null && cost !== undefined && (
           <View style={styles.costContainer}>

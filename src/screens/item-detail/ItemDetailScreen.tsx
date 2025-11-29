@@ -1,16 +1,18 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useEffect, useState} from 'react';
 import {View, Image, ScrollView, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {SvgUri} from 'react-native-svg';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './ItemDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {useItemById} from '@services/api/hooks/listQueryHooks';
-import type {IItem} from '@services/models/item';
+import {useTftItemById} from '@services/api/hooks/listQueryHooks';
+import type {ITftItem} from '@services/models/tft-item';
 import {API_BASE_URL} from '@shared-constants';
+import useStore from '@services/zustand/store';
+import LocalStorage from '@services/local-storage';
+import {getLocaleFromLanguage} from '@services/api/data';
 
 interface ItemDetailScreenProps {
   route?: {
@@ -26,6 +28,10 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const language = useStore((state) => state.language);
+  const [localizedDesc, setLocalizedDesc] = useState<string | null>(null);
+  const [localizedName, setLocalizedName] = useState<string | null>(null);
+
   const itemId =
     (routeProp?.params?.itemId ||
       (route?.params as any)?.itemId) as string;
@@ -36,7 +42,97 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     isError,
     error,
     refetch,
-  } = useItemById(itemId || '');
+  } = useTftItemById(itemId || '');
+
+  // Get localized name and description from storage
+  useEffect(() => {
+    if (!item || !language) {
+      setLocalizedDesc(null);
+      setLocalizedName(null);
+      return;
+    }
+
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const itemsKey = `data_items_${locale}`;
+      const itemsDataString = LocalStorage.getString(itemsKey);
+      
+      if (!itemsDataString) {
+        setLocalizedDesc(null);
+        setLocalizedName(null);
+        return;
+      }
+
+      const itemsData = JSON.parse(itemsDataString);
+      let localizedItem: any = null;
+
+      // Handle both array and object formats
+      if (Array.isArray(itemsData)) {
+        // If it's an array, find the item
+        localizedItem = itemsData.find((localItem: any) => {
+          // Try to match by apiName first
+          if (item.apiName && localItem.apiName === item.apiName) {
+            return true;
+          }
+          // Fallback to name matching (case insensitive)
+          if (item.name && localItem.name) {
+            return item.name.toLowerCase() === localItem.name.toLowerCase();
+          }
+          // Try enName matching
+          if (item.enName && localItem.enName) {
+            return item.enName.toLowerCase() === localItem.enName.toLowerCase();
+          }
+          return false;
+        });
+      } else if (typeof itemsData === 'object' && itemsData !== null) {
+        // If it's an object, try to find by apiName as key first
+        if (item.apiName && itemsData[item.apiName]) {
+          localizedItem = itemsData[item.apiName];
+        } else {
+          // Otherwise, search through object values
+          const itemsArray = Object.values(itemsData) as any[];
+          localizedItem = itemsArray.find((localItem: any) => {
+            // Try to match by apiName first
+            if (item.apiName && localItem.apiName === item.apiName) {
+              return true;
+            }
+            // Fallback to name matching (case insensitive)
+            if (item.name && localItem.name) {
+              return item.name.toLowerCase() === localItem.name.toLowerCase();
+            }
+            // Try enName matching
+            if (item.enName && localItem.enName) {
+              return item.enName.toLowerCase() === localItem.enName.toLowerCase();
+            }
+            return false;
+          });
+        }
+      }
+
+      if (localizedItem) {
+        // Set localized name
+        if (localizedItem.name) {
+          setLocalizedName(localizedItem.name);
+        } else {
+          setLocalizedName(null);
+        }
+        
+        // Set localized description
+        if (localizedItem.desc || localizedItem.description) {
+          setLocalizedDesc(localizedItem.desc || localizedItem.description);
+        } else {
+          setLocalizedDesc(null);
+        }
+      } else {
+        setLocalizedDesc(null);
+        setLocalizedName(null);
+      }
+    } catch (error) {
+      console.error('Error loading localized data:', error);
+      setLocalizedDesc(null);
+      setLocalizedName(null);
+    }
+  }, [item, language]);
 
   const renderBackButton = () => (
     <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
@@ -98,25 +194,9 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
           return item.icon;
         }
         // If icon is a path, try to construct URL
-        if (item.icon.startsWith('/') || item.icon.startsWith('ASSETS')) {
-          // Try local server first
-          if (item.icon.startsWith('/')) {
-            return `${API_BASE_URL}${item.icon}`;
-          }
+        if (item.icon.startsWith('/')) {
+          return `${API_BASE_URL}${item.icon}`;
         }
-      }
-      
-      if (item.image?.path) {
-        if (item.image.path.startsWith('http')) {
-          return item.image.path;
-        }
-        if (item.image.path.startsWith('/')) {
-          return `${API_BASE_URL}${item.image.path}`;
-        }
-      }
-      
-      if (item.imageUrl) {
-        return item.imageUrl;
       }
       
       // Fallback to Data Dragon
@@ -127,148 +207,121 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     const imageUri = getItemImageUrl();
 
     // Get components to display - prefer composition from API
-    const displayComponents = item.composition || item.components || item.componentDetails || [];
+    const displayComponents = item.composition || [];
 
     // Get component image URL
-    const getComponentImageUrl = (component: string | IItem) => {
-      if (typeof component === 'string') {
-        return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`;
-      }
-      const componentItem = component as IItem;
-      if (componentItem.image?.path) {
-        if (componentItem.image.path.startsWith('http')) {
-          return componentItem.image.path;
-        }
-        if (componentItem.image.path.startsWith('/')) {
-          return `${API_BASE_URL}${componentItem.image.path}`;
-        }
-      }
-      if (componentItem.imageUrl) {
-        return componentItem.imageUrl;
-      }
-      const itemKey = componentItem.apiName || componentItem.name?.toLowerCase() || '';
-      return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${itemKey}.png`;
+    const getComponentImageUrl = (component: string) => {
+      // Components in ITftItem are strings (apiName)
+      return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`;
     };
 
-    // Get all effects only
-    const effects = item.effects || {};
-    
-    // Map of stat keys to icon URLs from backend
-    const getStatIconUrl = (key: string): string | null => {
-      const keyUpper = key.toUpperCase();
-      const backendBaseUrl = API_BASE_URL;
-      
-      // Normalize key to icon name
-      let iconName = keyUpper;
-      
-      // Map common stat keys to icon names
-      if (keyUpper === 'AP' || keyUpper === 'ABILITYPOWER') {
-        iconName = 'AP';
-      } else if (keyUpper === 'AD' || keyUpper === 'ATTACKDAMAGE') {
-        iconName = 'AD';
-      } else if (keyUpper === 'AS' || keyUpper === 'ATTACKSPEED') {
-        iconName = 'AS';
-      } else if (keyUpper === 'MR' || keyUpper === 'MAGICRESIST' || keyUpper === 'MAGICRESISTANCE') {
-        iconName = 'MR';
-      } else if (keyUpper === 'HP' || keyUpper === 'HEALTH') {
-        iconName = 'HP';
-      } else if (keyUpper === 'MS' || keyUpper === 'MOVEMENTSPEED') {
-        iconName = 'MS';
-      } else if (keyUpper === 'CD' || keyUpper === 'COOLDOWN') {
-        iconName = 'CD';
-      } else if (keyUpper === 'CC' || keyUpper === 'CROWDCONTROL') {
-        iconName = 'CC';
-      } else if (keyUpper === 'ARMOR') {
-        iconName = 'Armor';
-      } else if (keyUpper === 'BONUSDAMAGE') {
-        iconName = 'BonusDamage';
-      } else if (keyUpper.length === 2 && /^[A-Z]{2}$/.test(keyUpper)) {
-        // For 2-character uppercase keys, use directly
-        iconName = keyUpper;
-      } else {
-        // Capitalize first letter for other keys
-        iconName = key.charAt(0).toUpperCase() + key.slice(1);
-      }
-      
-      // Return icon URL from backend
-      return `${backendBaseUrl}/icons/${iconName}.svg`;
-    };
-    
-    // Format stat value
-    const formatStatValue = (key: string, value: any): string => {
-      if (typeof value === 'number') {
-        // If it's a percentage (between 0 and 1), show as percentage
-        if (value < 1 && value > 0 && (key.toLowerCase().includes('damage') || key.toLowerCase().includes('bonus'))) {
-          return `+${Math.round(value * 100)}%`;
-        }
-        return `+${value}`;
-      }
-      return `+${value}`;
-    };
-    
-    // Get list of effect keys that are already parsed into description via variableMatches
-    const parsedEffectKeys = new Set<string>();
-    if (item.variableMatches && item.variableMatches.length > 0) {
-      item.variableMatches.forEach((match) => {
-        if (match.match) {
-          parsedEffectKeys.add(match.match);
-        }
-      });
-    }
-    
-    // Filter out keys that look like IDs (e.g., "{1543aa48}") and keys already parsed into description
-    const validEffects = Object.entries(effects).filter(([key]) => {
-      // Exclude keys that look like IDs
-      if (key.startsWith('{') || key.startsWith('@')) {
-        return false;
-      }
-      // Exclude keys that are already parsed into description
-      if (parsedEffectKeys.has(key)) {
-        return false;
-      }
-      return true;
-    });
-    
-    // Clean description - remove HTML tags and parse variableMatches
-    const cleanDescription = (desc?: string, variableMatches?: IItem['variableMatches']) => {
+    // Parse variables in description (replace @...@ with values from effects)
+    const parseDescription = (desc?: string | null) => {
       if (!desc) return null;
       
-      let cleaned = desc;
+      let parsed = desc;
       
-      // Replace variableMatches first (before removing @ references)
-      if (variableMatches && variableMatches.length > 0) {
-        // Replace using full_match first (most accurate)
-        variableMatches.forEach((match) => {
-          const fullMatch = match.full_match;
-          const value = match.value;
+      // Remove HTML tags first
+      parsed = parsed.replace(/<[^>]*>/g, '');
+      // Replace <br> with newline
+      parsed = parsed.replace(/<br\s*\/?>/gi, '\n');
+      
+      // Parse @ variables from effects
+      if (item.effects && typeof item.effects === 'object') {
+        // Find all @...@ patterns
+        const variablePattern = /@([^@]+)@/g;
+        const matches = [...parsed.matchAll(variablePattern)];
+        
+        matches.forEach((match) => {
+          const fullMatch = match[0]; // e.g., "@TFTUnitProperty:AP@"
+          const variableKey = match[1]; // e.g., "TFTUnitProperty:AP"
           
-          if (fullMatch && value !== undefined) {
-            // Escape special regex characters in full_match
-            const escapedMatch = fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(escapedMatch, 'g');
-            cleaned = cleaned.replace(regex, String(value));
-          } else if (match.match && value !== undefined) {
-            // Fallback: use match field to create @match@ pattern
-            const pattern = `@${match.match}@`;
-            const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(escapedPattern, 'g');
-            cleaned = cleaned.replace(regex, String(value));
+          // Try different patterns to extract the key
+          let value: any = null;
+          
+          // Pattern 1: @TFTUnitProperty:KEY@ -> look for KEY in effects
+          if (variableKey.startsWith('TFTUnitProperty:')) {
+            const key = variableKey.replace('TFTUnitProperty:', '');
+            value = item.effects[key];
+          }
+          // Pattern 2: @KEY@ -> look for KEY directly in effects
+          else {
+            value = item.effects[variableKey];
+          }
+          
+          // Pattern 3: Try with different case variations
+          if (value === undefined || value === null) {
+            const keys = Object.keys(item.effects);
+            const foundKey = keys.find(k => 
+              k.toLowerCase() === variableKey.toLowerCase() ||
+              k.toLowerCase() === variableKey.replace('TFTUnitProperty:', '').toLowerCase()
+            );
+            if (foundKey) {
+              value = item.effects[foundKey];
+            }
+          }
+          
+          // Handle stage values (arrays)
+          if (Array.isArray(value)) {
+            // If it's an array, show as range or all values
+            if (value.length > 0) {
+              const uniqueValues = [...new Set(value)];
+              if (uniqueValues.length === 1) {
+                value = uniqueValues[0];
+              } else {
+                // Show as range: "10/20/30" or "10-30"
+                const min = Math.min(...value);
+                const max = Math.max(...value);
+                if (min === max) {
+                  value = min;
+                } else {
+                  value = `${min}/${max}`;
+                }
+              }
+            } else {
+              value = null;
+            }
+          }
+          
+          // Replace the variable with the value
+          if (value !== undefined && value !== null) {
+            // Format the value
+            let formattedValue = String(value);
+            
+            // If it's a number, format it nicely
+            if (typeof value === 'number') {
+              // If it's a percentage (between 0 and 1), show as percentage
+              if (value < 1 && value > 0) {
+                formattedValue = `${Math.round(value * 100)}%`;
+              } else if (value >= 1) {
+                formattedValue = String(Math.round(value));
+              }
+            }
+            
+            // Replace all occurrences of this pattern
+            parsed = parsed.replace(new RegExp(fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), formattedValue);
+          } else {
+            // If value not found, remove the variable
+            parsed = parsed.replace(new RegExp(fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '');
           }
         });
+      } else {
+        // If no effects, remove all @...@ patterns
+        parsed = parsed.replace(/@[^@]*@/g, '');
       }
       
-      // Remove HTML tags
-      cleaned = cleaned.replace(/<[^>]*>/g, '');
-      // Replace <br> with newline
-      cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n');
-      // Remove remaining @TFTUnitProperty references that weren't matched
-      cleaned = cleaned.replace(/@[^@]*@/g, '');
       // Clean up whitespace
-      cleaned = cleaned.trim();
-      return cleaned || null;
+      parsed = parsed.trim();
+      // Remove multiple spaces
+      parsed = parsed.replace(/\s+/g, ' ');
+      // Remove multiple newlines
+      parsed = parsed.replace(/\n\s*\n/g, '\n');
+      
+      return parsed || null;
     };
     
-    const description = cleanDescription(item.desc || item.description, item.variableMatches);
+    // Use localized description if available, otherwise fallback to item.desc
+    const description = parseDescription(localizedDesc || item.desc);
 
     return (
       <ScrollView
@@ -279,7 +332,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         {/* Item Name */}
         <View style={styles.nameSection}>
           <Text h1 bold color={colors.text} style={styles.itemName}>
-            {item.name}
+            {localizedName || item.name}
           </Text>
         </View>
 
@@ -322,35 +375,6 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
               </View>
             )}
 
-            {/* Stats Section */}
-            {validEffects.length > 0 && (
-              <View style={styles.statsSection}>
-                {validEffects.map(([key, value]) => {
-                  const iconUrl = getStatIconUrl(key);
-                  return (
-                    <View key={key} style={styles.statItem}>
-                      {iconUrl ? (
-                        <SvgUri
-                          uri={iconUrl}
-                          width={20}
-                          height={20}
-                        />
-                      ) : (
-                        <Icon 
-                          name="star" 
-                          type={IconType.Ionicons} 
-                          color={colors.primary} 
-                          size={20} 
-                        />
-                      )}
-                      <Text style={styles.statValue}>
-                        {formatStatValue(key, value)}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
           </View>
         </View>
 

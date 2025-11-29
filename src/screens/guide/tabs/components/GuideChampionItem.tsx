@@ -7,6 +7,7 @@ import type {ITrait} from '@services/models/trait';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
 import createStyles from './GuideChampionItem.style';
+import {API_BASE_URL} from '@shared-constants';
 
 interface GuideChampionItemProps {
   data: IChampion;
@@ -27,7 +28,7 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
         return image.path;
       }
       if (image.path.startsWith('/')) {
-        return `http://localhost:3000${image.path}`;
+        return `${API_BASE_URL}${image.path}`;
       }
     }
     

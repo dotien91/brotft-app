@@ -8,7 +8,7 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useChampionById} from '@services/api/hooks/listQueryHooks';
-import {SCREENS} from '@shared-constants';
+import {SCREENS, API_BASE_URL} from '@shared-constants';
 import type {ITrait} from '@services/models/trait';
 import Hexagon from '@screens/detail/components/Hexagon';
 
@@ -145,7 +145,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           return champion.image.path;
         }
         if (champion.image.path.startsWith('/')) {
-          return `http://localhost:3000${champion.image.path}`;
+          return `${API_BASE_URL}${champion.image.path}`;
         }
       }
       

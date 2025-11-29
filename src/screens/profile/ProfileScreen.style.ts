@@ -1,10 +1,30 @@
 import { ExtendedTheme } from "@react-navigation/native";
-import { ViewStyle, StyleSheet } from "react-native";
+import { ViewStyle, TextStyle, StyleSheet } from "react-native";
 
 interface Style {
   container: ViewStyle;
-  userContainer: ViewStyle;
-  userButton: ViewStyle;
+  safeArea: ViewStyle;
+  scrollView: ViewStyle;
+  scrollContent: ViewStyle;
+  header: ViewStyle;
+  headerTitle: TextStyle;
+  section: ViewStyle;
+  sectionHeader: ViewStyle;
+  sectionTitle: TextStyle;
+  optionItem: ViewStyle;
+  optionContent: ViewStyle;
+  optionLeft: ViewStyle;
+  optionText: TextStyle;
+  toggle: ViewStyle;
+  toggleActive: ViewStyle;
+  toggleThumb: ViewStyle;
+  toggleThumbActive: ViewStyle;
+  modalOverlay: ViewStyle;
+  dropdownContainer: ViewStyle;
+  dropdownItem: ViewStyle;
+  dropdownItemActive: ViewStyle;
+  dropdownItemContent: ViewStyle;
+  dropdownItemText: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -12,23 +32,116 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
-      alignItems: "center",
-      justifyContent: "center",
+      backgroundColor: colors.background,
     },
-    userContainer: {
-      marginTop: 16,
-      alignItems: "center",
-      justifyContent: "center",
+    safeArea: {
+      flex: 1,
     },
-    userButton: {
-      height: 35,
-      width: 150,
-      marginTop: 32,
-      borderRadius: 16,
-      alignItems: "center",
-      justifyContent: "center",
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: 20,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 16,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: {
+      fontSize: 28,
+      letterSpacing: -0.5,
+    },
+    section: {
+      marginTop: 8,
+      paddingHorizontal: 20,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      gap: 12,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      letterSpacing: -0.3,
+    },
+    optionItem: {
+      marginBottom: 12,
+      borderRadius: 12,
+      backgroundColor: colors.card,
+      overflow: 'hidden',
+    },
+    optionContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+    },
+    optionLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    optionText: {
+      fontSize: 16,
+      fontWeight: '500',
+    },
+    toggle: {
+      width: 50,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.border,
+      padding: 2,
+      justifyContent: 'center',
+    },
+    toggleActive: {
       backgroundColor: colors.primary,
+    },
+    toggleThumb: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: colors.white,
+      alignSelf: 'flex-start',
+    },
+    toggleThumbActive: {
+      alignSelf: 'flex-end',
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    },
+    dropdownContainer: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      minWidth: 200,
+      maxWidth: 300,
+      overflow: 'hidden',
+    },
+    dropdownItem: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    dropdownItemActive: {
+      backgroundColor: colors.highlight,
+    },
+    dropdownItemContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+    },
+    dropdownItemText: {
+      fontSize: 16,
+      fontWeight: '500',
     },
   });
 };

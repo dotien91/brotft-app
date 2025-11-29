@@ -1,17 +1,32 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import {LogBox, StatusBar, useColorScheme} from 'react-native';
+import {LogBox, StatusBar} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {isAndroid} from '@freakycoder/react-native-helpers';
 import Navigation from './src/navigation';
 import {queryClient} from '@services/api/react-query';
+import useStore from './src/services/zustand/store';
+import {translations} from './src/shared/localization';
+import {checkAndFetchDataByLocale} from './src/services/api/data';
 
 LogBox.ignoreAllLogs();
 
 const App = () => {
-  const scheme = useColorScheme();
-  const isDarkMode = scheme === 'dark';
+  const isDarkMode = useStore((state) => state.isDarkMode);
+  const language = useStore((state) => state.language);
+
+  React.useEffect(() => {
+    // Load language from store
+    if (language) {
+      translations.setLanguage(language);
+    }
+  }, []);
+
+  // Check and fetch data by locale on app startup
+  React.useEffect(() => {
+    checkAndFetchDataByLocale(language);
+  }, [language]);
 
   React.useEffect(() => {
     StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');
@@ -23,7 +38,7 @@ const App = () => {
     setTimeout(() => {
       SplashScreen.hide();
     }, 750);
-  }, [scheme, isDarkMode]);
+  }, [isDarkMode]);
 
   return (
     <QueryClientProvider client={queryClient}>

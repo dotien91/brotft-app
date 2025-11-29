@@ -10,6 +10,8 @@ import TraitsTab from './tabs/TraitsTab';
 import ItemsTab from './tabs/ItemsTab';
 import UpgradesTab from './tabs/UpgradesTab';
 import AugmentsTab from './tabs/AugmentsTab';
+import {translations} from '../../shared/localization';
+import useStore from '@services/zustand/store';
 
 const renderScene = SceneMap({
   units: UnitsTab,
@@ -24,15 +26,16 @@ const GuideScreen: React.FC = () => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const layout = useWindowDimensions();
+  const language = useStore((state) => state.language);
 
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    {key: 'units', title: 'Units'},
-    {key: 'traits', title: 'Tộc/Hệ'},
-    {key: 'items', title: 'Item'},
-    {key: 'upgrades', title: 'Nâng cấp'},
-    {key: 'augments', title: 'Thức tỉnh'},
-  ]);
+  const routes = useMemo(() => [
+    {key: 'units', title: translations.units},
+    {key: 'traits', title: translations.traits},
+    {key: 'items', title: translations.items},
+    {key: 'upgrades', title: translations.upgrades},
+    {key: 'augments', title: translations.augments},
+  ], [language]);
 
   const renderTabBar = (props: any) => (
     <TabBar
@@ -52,7 +55,7 @@ const GuideScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text h2 bold color={colors.text} style={styles.headerTitle}>
-          Guide
+          {translations.guide}
         </Text>
       </View>
 

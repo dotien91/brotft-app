@@ -1,4 +1,4 @@
-package com.rntypescriptzustandboilerplate
+package com.tftbuddy
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -41,3 +41,4 @@ class MainApplication : Application(), ReactApplication {
     }
   }
 }
+

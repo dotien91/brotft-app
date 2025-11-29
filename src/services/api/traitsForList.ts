@@ -40,22 +40,10 @@ export const getTraitsForList = async (params: any): Promise<any> => {
     }
 
     const url = `/origins?${queryParams.toString()}`;
-    console.log('[getTraitsForList] API call:', url);
-    console.log('[getTraitsForList] Full URL:', `http://localhost:3000/api/v1${url}`);
-    console.log('[getTraitsForList] Params:', JSON.stringify(params, null, 2));
 
     const response = await axiosInstance.get<ITraitsResponse>(url);
     
-    console.log('[getTraitsForList] Response status:', response.status);
-    console.log('[getTraitsForList] Response headers:', response.headers);
-    console.log('[getTraitsForList] Response data:', JSON.stringify(response.data, null, 2));
-    console.log('[getTraitsForList] Response data.data:', response.data?.data);
-    console.log('[getTraitsForList] Response data.data type:', typeof response.data?.data);
-    console.log('[getTraitsForList] Response data.data isArray:', Array.isArray(response.data?.data));
-    console.log('[getTraitsForList] Response data.data length:', response.data?.data?.length);
-
     // Handle different response formats
-    console.log('response.data', response.data);
     let data = [];
     if (response.data) {
       // If response.data is an array directly
@@ -72,9 +60,6 @@ export const getTraitsForList = async (params: any): Promise<any> => {
       }
     }
 
-    console.log('[getTraitsForList] Extracted data:', data);
-    console.log('[getTraitsForList] Extracted data length:', data.length);
-
     // Return format expected by useListData
     return {
       data: data,
@@ -84,7 +69,6 @@ export const getTraitsForList = async (params: any): Promise<any> => {
       },
     };
   } catch (error: any) {
-    console.error('[getTraitsForList] Error:', error);
     return {
       data: [],
       isError: true,

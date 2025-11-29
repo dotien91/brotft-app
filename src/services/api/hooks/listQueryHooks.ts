@@ -827,8 +827,6 @@ export const useTraitsWithPagination = (
           }
         : undefined,
     };
-    console.log('[useTraitsWithPagination] Creating queryParams with filters:', filters);
-    console.log('[useTraitsWithPagination] queryParams:', JSON.stringify(params, null, 2));
     return params;
   }, [page, limit, filters]);
 

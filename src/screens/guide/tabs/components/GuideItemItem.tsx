@@ -4,6 +4,7 @@ import {useTheme} from '@react-navigation/native';
 import type {ITftItem} from '@services/models/tft-item';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideItemItem.style';
+import {API_BASE_URL} from '@shared-constants';
 
 interface GuideItemItemProps {
   data: ITftItem;
@@ -25,8 +26,21 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
         return icon;
       }
       if (icon.startsWith('/')) {
-        return `http://localhost:3000${icon}`;
+        return `${API_BASE_URL}${icon}`;
       }
+    }
+    
+    if (image?.path) {
+      if (image.path.startsWith('http')) {
+        return image.path;
+      }
+      if (image.path.startsWith('/')) {
+        return `${API_BASE_URL}${image.path}`;
+      }
+    }
+    
+    if (imageUrl) {
+      return imageUrl;
     }
     
     // Fallback to Data Dragon

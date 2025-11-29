@@ -10,6 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl, getUnitSplashUrl, getTraitIconUrl} from '../../utils/metatft';
+import {API_BASE_URL} from '@shared-constants';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -32,12 +33,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const unitApiName =
     (routeProp?.params?.unitApiName ||
       (route?.params as any)?.unitApiName) as string;
-
-  // Debug logging
-  React.useEffect(() => {
-    console.log('[UnitDetailScreen] unitId:', unitId);
-    console.log('[UnitDetailScreen] unitApiName:', unitApiName);
-  }, [unitId, unitApiName]);
 
   // Use unitApiName if available, otherwise use unitId
   const {
@@ -65,18 +60,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const isError = unitApiName ? isErrorByApiName : isErrorById;
   const error = unitApiName ? errorByApiName : errorById;
   const refetch = unitApiName ? refetchByApiName : refetchById;
-
-  // Debug logging for unit data
-  React.useEffect(() => {
-    console.log('[UnitDetailScreen] Unit data:', {
-      hasUnit: !!unit,
-      unitId: unit?.id,
-      unitName: unit?.name,
-      isLoading,
-      isError,
-      error: error?.message,
-    });
-  }, [unit, isLoading, isError, error]);
 
   const renderBackButton = () => (
     <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
@@ -180,7 +163,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     };
 
     const avatarUri = getTftUnitAvatarUrl();
-    console.log('avatarUri', avatarUri);
     // Get splash art for background from metatft.com
     // Size: 768x456 for better quality on larger screens
     const getSplashArtUrl = () => {
@@ -333,7 +315,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 <View style={styles.abilityIconContainer}>
                   {unit.ability.icon ? (
                     <Image
-                      source={{uri: unit.ability.icon.startsWith('http') ? unit.ability.icon : `http://localhost:3000${unit.ability.icon}`}}
+                      source={{uri: unit.ability.icon.startsWith('http') ? unit.ability.icon : `${API_BASE_URL}${unit.ability.icon}`}}
                       style={styles.abilityIcon}
                       resizeMode="cover"
                     />

@@ -1,37 +1,209 @@
-import React, {useMemo} from 'react';
-import {View} from 'react-native';
+import React, {useMemo, useEffect, useState} from 'react';
+import {View, ScrollView, Modal, TouchableOpacity} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
+import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import createStyles from './ProfileScreen.style';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import useStore, {StoreState} from '@services/zustand/store';
 import RNBounceable from '@freakycoder/react-native-bounceable';
+import {translations} from '../../shared/localization';
+import {queryClient} from '@services/api/react-query';
+import {checkAndFetchDataByLocale} from '@services/api/data';
 
 interface ProfileScreenProps {}
+
+const languages = [
+  {code: 'en', label: 'English', flag: '🇬🇧'},
+  {code: 'vi', label: 'Vietnamese', flag: '🇻🇳'},
+  {code: 'zh-CN', label: 'Chinese', flag: '🇨🇳'},
+];
 
 const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const userData = useStore((state: StoreState) => state.userData);
-  const setUserData = useStore((state: StoreState) => state.setUserData);
+  const isDarkMode = useStore((state: StoreState) => state.isDarkMode);
+  const setDarkMode = useStore((state: StoreState) => state.setDarkMode);
+  const language = useStore((state: StoreState) => state.language);
+  const setLanguage = useStore((state: StoreState) => state.setLanguage);
+
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+
+  // Update translations when language changes
+  useEffect(() => {
+    if (language && translations.getLanguage() !== language) {
+      translations.setLanguage(language);
+    }
+  }, [language]);
+
+  const handleThemeToggle = () => {
+    setDarkMode(!isDarkMode);
+  };
+
+  const handleLanguageChange = async (lang: string) => {
+    setLanguage(lang);
+    translations.setLanguage(lang);
+    setIsLanguageDropdownOpen(false);
+
+    // Check and fetch data by locale in background
+    try {
+      await checkAndFetchDataByLocale(lang);
+      
+      // Invalidate all queries to refetch with new locale
+      await queryClient.invalidateQueries();
+    } catch (error) {
+      // Don't block UI if API calls fail
+    }
+  };
+
+  const getCurrentLanguageLabel = () => {
+    const currentLang = languages.find(lang => lang.code === language);
+    if (currentLang) {
+      if (currentLang.code === 'en') return `${currentLang.flag} ${translations.english}`;
+      if (currentLang.code === 'vi') return `${currentLang.flag} ${translations.vietnamese}`;
+      if (currentLang.code === 'zh-CN') return `${currentLang.flag} ${translations.chinese}`;
+    }
+    return `${languages[0].flag} ${translations.english}`;
+  };
+
+  const getLanguageLabel = (code: string) => {
+    const lang = languages.find(l => l.code === code);
+    if (!lang) return '';
+    if (code === 'en') return `${lang.flag} ${translations.english}`;
+    if (code === 'vi') return `${lang.flag} ${translations.vietnamese}`;
+    if (code === 'zh-CN') return `${lang.flag} ${translations.chinese}`;
+    return `${lang.flag} ${lang.label}`;
+  };
 
   return (
     <View style={styles.container}>
-      <Text h1 color={colors.text}>
-        Profile
-      </Text>
-      <View style={styles.userContainer}>
-        <Text>{userData?.name}</Text>
-        <Text>{userData?.email}</Text>
-      </View>
-      <RNBounceable
-        style={styles.userButton}
-        onPress={() => {
-          setUserData({name: 'John Doe', email: 'johndoe@gmail.com'});
-        }}>
-        <Text color="#fff">Set User</Text>
-      </RNBounceable>
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          
+          {/* Header */}
+          <View style={styles.header}>
+            <Text h2 bold color={colors.text} style={styles.headerTitle}>
+              {translations.settings}
+            </Text>
+          </View>
+
+          {/* Appearance Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon
+                name="color-palette"
+                type={IconType.Ionicons}
+                color={colors.primary}
+                size={24}
+              />
+              <Text h3 color={colors.text} style={styles.sectionTitle}>
+                {translations.appearance}
+              </Text>
+            </View>
+            
+            <TouchableOpacity
+              style={styles.optionItem}
+              onPress={handleThemeToggle}>
+              <View style={styles.optionContent}>
+                <View style={styles.optionLeft}>
+                  <Icon
+                    name={isDarkMode ? 'moon' : 'sunny'}
+                    type={IconType.Ionicons}
+                    color={colors.text}
+                    size={20}
+                  />
+                  <Text color={colors.text} style={styles.optionText}>
+                    {isDarkMode ? translations.darkMode : translations.lightMode}
+                  </Text>
+                </View>
+                <View style={[styles.toggle, isDarkMode && styles.toggleActive]}>
+                  <View style={[styles.toggleThumb, isDarkMode && styles.toggleThumbActive]} />
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Language Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon
+                name="language"
+                type={IconType.Ionicons}
+                color={colors.primary}
+                size={24}
+              />
+              <Text h3 color={colors.text} style={styles.sectionTitle}>
+                {translations.language}
+              </Text>
+            </View>
+
+            {/* Language Dropdown */}
+            <RNBounceable
+              style={styles.optionItem}
+              onPress={() => setIsLanguageDropdownOpen(true)}>
+              <View style={styles.optionContent}>
+                <Text color={colors.text} style={styles.optionText}>
+                  {getCurrentLanguageLabel()}
+                </Text>
+                <Icon
+                  name="chevron-down"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={20}
+                />
+              </View>
+            </RNBounceable>
+
+            {/* Language Dropdown Modal */}
+            <Modal
+              visible={isLanguageDropdownOpen}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setIsLanguageDropdownOpen(false)}>
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPress={() => setIsLanguageDropdownOpen(false)}>
+                <View
+                  style={styles.dropdownContainer}
+                  onStartShouldSetResponder={() => true}
+                  onTouchEnd={(e) => e.stopPropagation()}>
+                  {languages.map((lang) => (
+                    <RNBounceable
+                      key={lang.code}
+                      style={[
+                        styles.dropdownItem,
+                        language === lang.code && styles.dropdownItemActive,
+                      ]}
+                      onPress={() => handleLanguageChange(lang.code)}>
+                      <View style={styles.dropdownItemContent}>
+                        <Text
+                          color={language === lang.code ? colors.primary : colors.text}
+                          style={styles.dropdownItemText}>
+                          {getLanguageLabel(lang.code)}
+                        </Text>
+                        {language === lang.code && (
+                          <Icon
+                            name="checkmark-circle"
+                            type={IconType.Ionicons}
+                            color={colors.primary}
+                            size={24}
+                          />
+                        )}
+                      </View>
+                    </RNBounceable>
+                  ))}
+                </View>
+              </TouchableOpacity>
+            </Modal>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 };

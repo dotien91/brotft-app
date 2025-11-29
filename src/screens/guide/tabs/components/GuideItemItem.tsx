@@ -30,19 +30,6 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
       }
     }
     
-    if (image?.path) {
-      if (image.path.startsWith('http')) {
-        return image.path;
-      }
-      if (image.path.startsWith('/')) {
-        return `${API_BASE_URL}${image.path}`;
-      }
-    }
-    
-    if (imageUrl) {
-      return imageUrl;
-    }
-    
     // Fallback to Data Dragon
     const itemKey = data.apiName || name?.toLowerCase() || '';
     return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${itemKey}.png`;

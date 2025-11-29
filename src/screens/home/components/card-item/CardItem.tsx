@@ -54,7 +54,6 @@ const CardItem: React.FC<ICardItemProps> = ({ style, data, onPress }) => {
       <Text style={styles.valueTextStyle}>{fork}</Text>
     </View>
   );
-
   return (
     <RNBounceable style={[styles.container, style]} onPress={onPress}>
       {renderHeader()}

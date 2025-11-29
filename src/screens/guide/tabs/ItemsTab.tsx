@@ -73,7 +73,7 @@ const ItemsTab: React.FC = () => {
   if (allItems.length === 0 && !isLoading) {
     return renderEmpty();
   }
-
+console.log('allItems', allItems);
   return (
     <FlatList
       data={allItems}

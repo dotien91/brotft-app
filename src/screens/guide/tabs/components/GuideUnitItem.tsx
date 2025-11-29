@@ -10,7 +10,7 @@ import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
-import GoldIcon from '@shared-components/gold-icon/GoldIcon';
+import UnitCost from '@shared-components/unit-cost/UnitCost';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -141,10 +141,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
           {localizedName || name}
         </Text>
         {cost !== null && cost !== undefined && (
-          <View style={styles.costContainer}>
-            <GoldIcon size={16} color="#fbbf24" />
-            <Text style={styles.costText}>{cost}</Text>
-          </View>
+          <UnitCost cost={cost} size={16} active={false} />
         )}
       </View>
 

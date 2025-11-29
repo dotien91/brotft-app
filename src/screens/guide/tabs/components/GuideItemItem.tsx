@@ -8,6 +8,7 @@ import {API_BASE_URL} from '@shared-constants';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
+import {deleteTftItem} from '@services/api/tft-items';
 
 interface GuideItemItemProps {
   data: ITftItem;
@@ -125,6 +126,15 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
           source={{uri: imageUri}}
           style={styles.icon}
           resizeMode="cover"
+          onError={async () => {
+            console.log('Failed to load item image:', imageUri);
+            try {
+              // await deleteTftItem(String(data.id));
+              console.log(`[GuideItemItem] Deleted item without avatar: ${data.name} (id: ${data.id})`);
+            } catch (error) {
+              console.error(`[GuideItemItem] Error deleting item ${data.id}:`, error);
+            }
+          }}
         />
       </View>
 

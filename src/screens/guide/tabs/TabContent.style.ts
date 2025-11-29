@@ -9,11 +9,8 @@ interface Style {
   clearButton: ViewStyle;
   filtersContainer: ViewStyle;
   filtersContent: ViewStyle;
-  filterChip: ViewStyle;
-  filterChipActive: ViewStyle;
   filterChipClear: ViewStyle;
-  filterChipText: TextStyle;
-  filterChipTextActive: TextStyle;
+  filterChipClearText: TextStyle;
   listContent: ViewStyle;
   scrollContent: ViewStyle;
   centerContainer: ViewStyle;
@@ -57,40 +54,30 @@ export default (theme: ExtendedTheme) => {
       marginLeft: 8,
     },
     filtersContainer: {
-      maxHeight: 50,
       marginBottom: 8,
+      marginHorizontal: 16,
+      paddingVertical: 4,
     },
     filtersContent: {
       paddingHorizontal: 16,
       gap: 8,
       alignItems: 'center',
     },
-    filterChip: {
+    filterChipClear: {
       flexDirection: 'row',
       alignItems: 'center',
+      height: 26,
       paddingHorizontal: 12,
-      paddingVertical: 6,
       borderRadius: 16,
-      backgroundColor: colors.card,
+      backgroundColor: colors.notification,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.notification,
       gap: 4,
     },
-    filterChipActive: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    filterChipClear: {
-      backgroundColor: colors.notification,
-      borderColor: colors.notification,
-    },
-    filterChipText: {
+    filterChipClearText: {
       fontSize: 14,
       color: colors.text,
       fontWeight: '500',
-    },
-    filterChipTextActive: {
-      color: '#FFFFFF',
     },
     listContent: {
       paddingBottom: 20,

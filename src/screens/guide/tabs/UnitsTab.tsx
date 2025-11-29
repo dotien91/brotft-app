@@ -16,6 +16,7 @@ import GuideUnitItem from './components/GuideUnitItem';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnitsFilters} from '@services/models/tft-unit';
 import {SCREENS} from '@shared-constants';
+import UnitCost from '@shared-components/unit-cost/UnitCost';
 import createStyles from './TabContent.style';
 
 const UnitsTab: React.FC = () => {
@@ -173,17 +174,8 @@ const UnitsTab: React.FC = () => {
           <TouchableOpacity
             key={cost}
             onPress={() => setSelectedCost(selectedCost === cost ? undefined : cost)}
-            style={[
-              styles.filterChip,
-              selectedCost === cost && styles.filterChipActive,
-            ]}>
-            <Text
-              style={[
-                styles.filterChipText,
-                selectedCost === cost && styles.filterChipTextActive,
-              ]}>
-              {cost}⭐
-            </Text>
+            activeOpacity={0.7}>
+            <UnitCost cost={cost} size={16} active={selectedCost === cost} />
           </TouchableOpacity>
         ))}
         
@@ -191,14 +183,13 @@ const UnitsTab: React.FC = () => {
         {hasActiveFilters && (
           <TouchableOpacity
             onPress={clearFilters}
-            style={[styles.filterChip, styles.filterChipClear]}>
+            style={styles.filterChipClear}>
             <Icon
               name="close"
               type={IconType.Ionicons}
               color={colors.text}
               size={16}
             />
-            <Text style={styles.filterChipText}>Clear</Text>
           </TouchableOpacity>
         )}
       </ScrollView>

@@ -40,7 +40,8 @@ export const getTftUnits = async (
   if (params?.sort) {
     params.sort.forEach((sortItem, index) => {
       queryParams.append(`sort[${index}][orderBy]`, sortItem.orderBy);
-      queryParams.append(`sort[${index}][order]`, sortItem.order);
+      // Ensure order is uppercase (ASC/DESC) as per API documentation
+      queryParams.append(`sort[${index}][order]`, sortItem.order.toUpperCase());
     });
   }
 

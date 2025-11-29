@@ -41,6 +41,7 @@ import type {
 } from '@services/models/item';
 import type {
   ITftUnitsQueryParams,
+  ITftUnitsFilters,
   ITftUnit,
 } from '@services/models/tft-unit';
 import type {
@@ -335,11 +336,32 @@ export const useTftUnits = (
 };
 
 // Hook with pagination handling built-in for TFT units
-export const useTftUnitsWithPagination = (limit: number = 10) => {
+export const useTftUnitsWithPagination = (
+  limit: number = 10,
+  filters?: ITftUnitsFilters,
+) => {
   const [page, setPage] = useState(1);
   const [allTftUnits, setAllTftUnits] = useState<ITftUnit[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+
+  // Create params object - ensure filters object identity changes when filters change
+  const queryParams = useMemo(() => {
+    const params: ITftUnitsQueryParams = {
+      page,
+      limit,
+      filters: filters
+        ? {
+            name: filters.name || undefined,
+            apiName: filters.apiName || undefined,
+            trait: filters.trait || undefined,
+            cost: filters.cost !== undefined ? filters.cost : undefined,
+            role: filters.role || undefined,
+          }
+        : undefined,
+    };
+    return params;
+  }, [page, limit, filters]);
 
   const {
     data: tftUnitsData,
@@ -348,7 +370,20 @@ export const useTftUnitsWithPagination = (limit: number = 10) => {
     error,
     refetch,
     isRefetching,
-  } = useTftUnits({page, limit});
+  } = useTftUnits(queryParams, {
+    // Ensure query refetches when filters change
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to refetch on filter change
+  });
+
+  // Reset when filters change - must run before data effect
+  useEffect(() => {
+    setPage(1);
+    setAllTftUnits([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+  }, [filters]);
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -775,6 +810,7 @@ export const traitKeys = {
             : null,
         }
       : undefined;
+      console.log('[traitKeys.list] serializedParams:', serializedParams);
     return [...traitKeys.lists(), serializedParams] as const;
   },
   details: () => [...traitKeys.all, 'detail'] as const,

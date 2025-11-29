@@ -54,7 +54,7 @@ export interface ITftUnitsFilters {
 
 export interface ITftUnitsSort {
   orderBy: string;
-  order: 'asc' | 'desc';
+  order: 'ASC' | 'DESC';
 }
 
 export interface ITftUnitsQueryParams {

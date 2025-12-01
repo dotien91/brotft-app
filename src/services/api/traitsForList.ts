@@ -26,16 +26,16 @@ export const getTraitsForList = async (params: any): Promise<any> => {
     if (params.filters) {
       const {filters} = params;
       if (filters.type !== undefined && filters.type !== null) {
-        queryParams.append('filters[type]', filters.type);
+        queryParams.append('type', filters.type);
       }
       if (filters.name !== undefined && filters.name !== null && filters.name !== '') {
-        queryParams.append('filters[name]', filters.name);
+        queryParams.append('name', filters.name);
       }
       if (filters.key !== undefined && filters.key !== null && filters.key !== '') {
-        queryParams.append('filters[key]', filters.key);
+        queryParams.append('key', filters.key);
       }
       if (filters.set !== undefined && filters.set !== null && filters.set !== '') {
-        queryParams.append('filters[set]', filters.set);
+        queryParams.append('set', filters.set);
       }
     }
 

@@ -20,19 +20,19 @@ export const getChampions = async (
   if (params?.filters) {
     const {filters} = params;
     if (filters.name) {
-      queryParams.append('filters[name]', filters.name);
+      queryParams.append('name', filters.name);
     }
     if (filters.key) {
-      queryParams.append('filters[key]', filters.key);
+      queryParams.append('key', filters.key);
     }
     if (filters.cost) {
-      queryParams.append('filters[cost]', filters.cost.toString());
+      queryParams.append('cost', filters.cost.toString());
     }
     if (filters.set) {
-      queryParams.append('filters[set]', filters.set);
+      queryParams.append('set', filters.set);
     }
     if (filters.trait) {
-      queryParams.append('filters[trait]', filters.trait);
+      queryParams.append('trait', filters.trait);
     }
   }
 

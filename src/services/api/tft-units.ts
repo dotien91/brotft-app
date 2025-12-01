@@ -22,27 +22,26 @@ export const getTftUnits = async (
   if (params?.filters) {
     const {filters} = params;
     if (filters.name) {
-      queryParams.append('filters[name]', filters.name);
+      queryParams.append('name', filters.name);
     }
     if (filters.apiName) {
-      queryParams.append('filters[apiName]', filters.apiName);
+      queryParams.append('apiName', filters.apiName);
     }
     if (filters.trait) {
-      queryParams.append('filters[trait]', filters.trait);
+      queryParams.append('trait', filters.trait);
     }
     if (filters.cost !== undefined) {
-      queryParams.append('filters[cost]', filters.cost.toString());
+      queryParams.append('cost', filters.cost.toString());
     }
     if (filters.role) {
-      queryParams.append('filters[role]', filters.role);
+      queryParams.append('role', filters.role);
     }
   }
-  if (params?.sort) {
-    params.sort.forEach((sortItem, index) => {
-      queryParams.append(`sort[${index}][orderBy]`, sortItem.orderBy);
-      // Ensure order is uppercase (ASC/DESC) as per API documentation
-      queryParams.append(`sort[${index}][order]`, sortItem.order.toUpperCase());
-    });
+  if (params?.sort && params.sort.length > 0) {
+    // Only use the first sort item (flat format supports single sort)
+    const sortItem = params.sort[0];
+    queryParams.append('orderBy', sortItem.orderBy);
+    queryParams.append('order', sortItem.order.toLowerCase());
   }
 
   const response = await axiosInstance.get<ITftUnitsResponse>(

@@ -45,6 +45,10 @@ export interface IItemsFilters {
   name?: string;
   apiName?: string;
   set?: string;
+  tag?: string;
+  unique?: boolean;
+  disabled?: boolean;
+  status?: 'active' | 'disabled';
 }
 
 export interface IItemsQueryParams {

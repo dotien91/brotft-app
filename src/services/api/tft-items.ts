@@ -22,63 +22,38 @@ export const getTftItems = async (
   if (params?.filters) {
     const {filters} = params;
     if (filters.name) {
-      queryParams.append('filters[name]', filters.name);
+      queryParams.append('name', filters.name);
     }
     if (filters.apiName) {
-      queryParams.append('filters[apiName]', filters.apiName);
+      queryParams.append('apiName', filters.apiName);
     }
     if (filters.trait) {
-      queryParams.append('filters[trait]', filters.trait);
+      queryParams.append('trait', filters.trait);
     }
     if (filters.unique !== undefined) {
-      queryParams.append('filters[unique]', filters.unique.toString());
+      queryParams.append('unique', filters.unique.toString());
     }
   }
-  if (params?.sort) {
-    params.sort.forEach((sortItem, index) => {
-      queryParams.append(`sort[${index}][orderBy]`, sortItem.orderBy);
-      queryParams.append(`sort[${index}][order]`, sortItem.order);
-    });
+  if (params?.sort && params.sort.length > 0) {
+    // Only use the first sort item (flat format supports single sort)
+    const sortItem = params.sort[0];
+    queryParams.append('orderBy', sortItem.orderBy);
+    queryParams.append('order', sortItem.order.toLowerCase());
   }
 
-  const url = `/tft-items?${queryParams.toString()}`;
-  console.log('[getTftItems] Calling API:', url);
-  const response = await axiosInstance.get<ITftItemsResponse>(url);
-  console.log('[getTftItems] Response:', {
-    dataCount: response.data?.data?.length,
-    hasNextPage: response.data?.hasNextPage,
-  });
+  const response = await axiosInstance.get<ITftItemsResponse>(
+    `/tft-items?${queryParams.toString()}`,
+  );
   return response.data;
 };
 
 // Get TFT item by ID
 export const getTftItemById = async (id: string): Promise<ITftItem | null> => {
   try {
-    console.log('[getTftItemById] Calling API with id:', id);
     const url = `/tft-items/${encodeURIComponent(id)}`;
-    const fullUrl = `http://localhost:3000/api/v1${url}`;
-    console.log('[getTftItemById] Full URL:', fullUrl);
-    
     const response = await axiosInstance.get<ITftItem | null>(url);
-    
-    console.log('[getTftItemById] Response status:', response.status);
-    console.log('[getTftItemById] Response data:', {
-      hasData: !!response.data,
-      data: response.data ? {
-        id: response.data.id,
-        name: response.data.name,
-        apiName: response.data.apiName,
-      } : null,
-    });
-    
     return response.data;
   } catch (error: any) {
-    console.error('[getTftItemById] Error:', {
-      message: error?.message,
-      response: error?.response?.data,
-      status: error?.response?.status,
-      url: error?.config?.url,
-    });
     throw error;
   }
 };
@@ -88,31 +63,10 @@ export const getTftItemByApiName = async (
   apiName: string,
 ): Promise<ITftItem | null> => {
   try {
-    console.log('[getTftItemByApiName] Calling API with apiName:', apiName);
     const url = `/tft-items/api-name/${encodeURIComponent(apiName)}`;
-    const fullUrl = `http://localhost:3000/api/v1${url}`;
-    console.log('[getTftItemByApiName] Full URL:', fullUrl);
-    
     const response = await axiosInstance.get<ITftItem | null>(url);
-    
-    console.log('[getTftItemByApiName] Response status:', response.status);
-    console.log('[getTftItemByApiName] Response data:', {
-      hasData: !!response.data,
-      data: response.data ? {
-        id: response.data.id,
-        name: response.data.name,
-        apiName: response.data.apiName,
-      } : null,
-    });
-    
     return response.data;
   } catch (error: any) {
-    console.error('[getTftItemByApiName] Error:', {
-      message: error?.message,
-      response: error?.response?.data,
-      status: error?.response?.status,
-      url: error?.config?.url,
-    });
     throw error;
   }
 };

@@ -22,57 +22,32 @@ export const getTftTraits = async (
   if (params?.filters) {
     const {filters} = params;
     if (filters.name) {
-      queryParams.append('filters[name]', filters.name);
+      queryParams.append('name', filters.name);
     }
     if (filters.apiName) {
-      queryParams.append('filters[apiName]', filters.apiName);
+      queryParams.append('apiName', filters.apiName);
     }
   }
-  if (params?.sort) {
-    params.sort.forEach((sortItem, index) => {
-      queryParams.append(`sort[${index}][orderBy]`, sortItem.orderBy);
-      queryParams.append(`sort[${index}][order]`, sortItem.order);
-    });
+  if (params?.sort && params.sort.length > 0) {
+    // Only use the first sort item (flat format supports single sort)
+    const sortItem = params.sort[0];
+    queryParams.append('orderBy', sortItem.orderBy);
+    queryParams.append('order', sortItem.order.toLowerCase());
   }
 
-  const url = `/tft-traits?${queryParams.toString()}`;
-  console.log('[getTftTraits] Calling API:', url);
-  const response = await axiosInstance.get<ITftTraitsResponse>(url);
-  console.log('[getTftTraits] Response:', {
-    dataCount: response.data?.data?.length,
-    hasNextPage: response.data?.hasNextPage,
-  });
+  const response = await axiosInstance.get<ITftTraitsResponse>(
+    `/tft-traits?${queryParams.toString()}`,
+  );
   return response.data;
 };
 
 // Get TFT trait by ID
 export const getTftTraitById = async (id: string): Promise<ITftTrait | null> => {
   try {
-    console.log('[getTftTraitById] Calling API with id:', id);
     const url = `/tft-traits/${encodeURIComponent(id)}`;
-    const fullUrl = `http://localhost:3000/api/v1${url}`;
-    console.log('[getTftTraitById] Full URL:', fullUrl);
-    
     const response = await axiosInstance.get<ITftTrait | null>(url);
-    
-    console.log('[getTftTraitById] Response status:', response.status);
-    console.log('[getTftTraitById] Response data:', {
-      hasData: !!response.data,
-      data: response.data ? {
-        id: response.data.id,
-        name: response.data.name,
-        apiName: response.data.apiName,
-      } : null,
-    });
-    
     return response.data;
   } catch (error: any) {
-    console.error('[getTftTraitById] Error:', {
-      message: error?.message,
-      response: error?.response?.data,
-      status: error?.response?.status,
-      url: error?.config?.url,
-    });
     throw error;
   }
 };
@@ -82,31 +57,10 @@ export const getTftTraitByApiName = async (
   apiName: string,
 ): Promise<ITftTrait | null> => {
   try {
-    console.log('[getTftTraitByApiName] Calling API with apiName:', apiName);
     const url = `/tft-traits/api-name/${encodeURIComponent(apiName)}`;
-    const fullUrl = `http://localhost:3000/api/v1${url}`;
-    console.log('[getTftTraitByApiName] Full URL:', fullUrl);
-    
     const response = await axiosInstance.get<ITftTrait | null>(url);
-    
-    console.log('[getTftTraitByApiName] Response status:', response.status);
-    console.log('[getTftTraitByApiName] Response data:', {
-      hasData: !!response.data,
-      data: response.data ? {
-        id: response.data.id,
-        name: response.data.name,
-        apiName: response.data.apiName,
-      } : null,
-    });
-    
     return response.data;
   } catch (error: any) {
-    console.error('[getTftTraitByApiName] Error:', {
-      message: error?.message,
-      response: error?.response?.data,
-      status: error?.response?.status,
-      url: error?.config?.url,
-    });
     throw error;
   }
 };

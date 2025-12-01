@@ -38,6 +38,8 @@ interface Style {
   championsContainer: ViewStyle;
   championBadge: ViewStyle;
   championContent: ViewStyle;
+  championAvatarContainer: ViewStyle;
+  championInfo: ViewStyle;
   championCostBadge: ViewStyle;
   championCostText: TextStyle;
   championText: TextStyle;
@@ -309,6 +311,14 @@ export default (theme: ExtendedTheme) => {
       flexDirection: 'row',
       alignItems: 'center',
       flexWrap: 'wrap',
+    },
+    championAvatarContainer: {
+      marginRight: 10,
+    },
+    championInfo: {
+      flex: 1,
+      flexDirection: 'column',
+      alignItems: 'flex-start',
     },
     championCostBadge: {
       flexDirection: 'row',

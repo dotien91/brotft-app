@@ -7,9 +7,11 @@ import createStyles from './TraitDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {useTftTraitById} from '@services/api/hooks/listQueryHooks';
+import {useTftTraitById, useTftUnits} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
-import {getTraitIconUrl} from '../../utils/metatft';
+import {getTraitIconUrl, getUnitAvatarUrl} from '../../utils/metatft';
+import Hexagon from '../detail/components/Hexagon';
+import type {ITftUnit} from '@services/models/tft-unit';
 
 interface TraitDetailScreenProps {
   route?: {
@@ -38,6 +40,25 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
     error,
     refetch,
   } = useTftTraitById(traitId || '');
+
+  // Fetch all units with this trait
+  const {
+    data: unitsData,
+    isLoading: isLoadingUnits,
+    isError: isErrorUnits,
+  } = useTftUnits(
+    {
+      filters: {
+        trait: trait?.name || undefined,
+      },
+      limit: 100, // Get all units with this trait
+    },
+    {
+      enabled: !!trait?.name,
+    },
+  );
+
+  const units = unitsData?.data || [];
 
   const renderBackButton = () => (
     <RNBounceable
@@ -151,13 +172,25 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
   };
 
   const renderUnits = () => {
-    const units = trait?.units || [];
     const unitsCount = units.length;
 
-    if (unitsCount === 0) return null;
+    const handleUnitPress = (unit: ITftUnit) => {
+      if (unit.apiName) {
+        NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.apiName});
+      } else if (unit.id) {
+        NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unit.id)});
+      }
+    };
 
-    const handleUnitPress = (unitApiName: string) => {
-      NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName});
+    // Get unit avatar URL
+    const getUnitAvatar = (unit: ITftUnit) => {
+      if (unit.icon && unit.icon.startsWith('http')) {
+        return unit.icon;
+      }
+      if (unit.squareIcon && unit.squareIcon.startsWith('http')) {
+        return unit.squareIcon;
+      }
+      return getUnitAvatarUrl(unit.apiName || unit.name, 48);
     };
 
     return (
@@ -165,39 +198,68 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
         <Text h4 bold color={colors.text} style={styles.sectionTitle}>
           Units ({unitsCount})
         </Text>
-        <View style={styles.championsContainer}>
-          {units.map((unit, index) => (
-            <RNBounceable
-              key={unit.unit || index}
-              style={styles.championBadge}
-              onPress={() => handleUnitPress(unit.unit)}>
-              <View style={styles.championContent}>
-                {unit.unit_cost && (
-                  <View style={styles.championCostBadge}>
-                    <Icon
-                      name="diamond"
-                      type={IconType.FontAwesome}
-                      color={colors.primary}
-                      size={12}
-                    />
-                    <Text style={styles.championCostText}>
-                      {unit.unit_cost}
-                    </Text>
+        {isLoadingUnits ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text color={colors.placeholder} style={styles.loadingText}>
+              Loading units...
+            </Text>
+          </View>
+        ) : isErrorUnits ? (
+          <View style={styles.errorContainer}>
+            <Text color={colors.danger} style={styles.errorDescription}>
+              Error loading units
+            </Text>
+          </View>
+        ) : unitsCount === 0 ? (
+          <View style={styles.errorContainer}>
+            <Text color={colors.placeholder} style={styles.errorDescription}>
+              No units found with this trait
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.championsContainer}>
+            {units.map((unit, index) => {
+              const avatarUri = getUnitAvatar(unit);
+              return (
+                <RNBounceable
+                  key={unit.id || unit.apiName || index}
+                  style={styles.championBadge}
+                  onPress={() => handleUnitPress(unit)}>
+                  <View style={styles.championContent}>
+                    <View style={styles.championAvatarContainer}>
+                      <Hexagon
+                        size={40}
+                        backgroundColor={colors.card}
+                        borderColor={colors.border}
+                        borderWidth={2}
+                        imageUri={avatarUri}
+                      />
+                    </View>
+                    <View style={styles.championInfo}>
+                      {unit.cost !== null && unit.cost !== undefined && (
+                        <View style={styles.championCostBadge}>
+                          <Icon
+                            name="diamond"
+                            type={IconType.FontAwesome}
+                            color={colors.primary}
+                            size={10}
+                          />
+                          <Text style={styles.championCostText}>
+                            {unit.cost}
+                          </Text>
+                        </View>
+                      )}
+                      <Text style={styles.championText} numberOfLines={1}>
+                        {unit.name || unit.apiName}
+                      </Text>
+                    </View>
                   </View>
-                )}
-                <Icon
-                  name="person"
-                  type={IconType.Ionicons}
-                  color={colors.primary}
-                  size={16}
-                />
-                <Text style={styles.championText} numberOfLines={1}>
-                  {unit.unit}
-                </Text>
-              </View>
-            </RNBounceable>
-          ))}
-        </View>
+                </RNBounceable>
+              );
+            })}
+          </View>
+        )}
       </View>
     );
   };
@@ -300,12 +362,12 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
                 <Text style={styles.infoValue}>{trait.effects.length}</Text>
               </View>
             )}
-            {trait.units && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Units Count:</Text>
-                <Text style={styles.infoValue}>{trait.units.length}</Text>
-              </View>
-            )}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Units Count:</Text>
+              <Text style={styles.infoValue}>
+                {isLoadingUnits ? 'Loading...' : units.length}
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>

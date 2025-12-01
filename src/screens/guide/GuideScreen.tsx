@@ -8,7 +8,6 @@ import createStyles from './GuideScreen.style';
 import UnitsTab from './tabs/UnitsTab';
 import TraitsTab from './tabs/TraitsTab';
 import ItemsTab from './tabs/ItemsTab';
-import UpgradesTab from './tabs/UpgradesTab';
 import AugmentsTab from './tabs/AugmentsTab';
 import {translations} from '../../shared/localization';
 import useStore from '@services/zustand/store';
@@ -17,8 +16,7 @@ const renderScene = SceneMap({
   units: UnitsTab,
   traits: TraitsTab,
   items: ItemsTab,
-  upgrades: UpgradesTab,
-  augments: AugmentsTab,
+  upgrades: AugmentsTab,
 });
 
 const GuideScreen: React.FC = () => {
@@ -34,7 +32,6 @@ const GuideScreen: React.FC = () => {
     {key: 'traits', title: translations.traits},
     {key: 'items', title: translations.items},
     {key: 'upgrades', title: translations.upgrades},
-    {key: 'augments', title: translations.augments},
   ], [language]);
 
   const renderTabBar = (props: any) => (

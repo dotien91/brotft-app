@@ -14,7 +14,7 @@ import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideAugmentItem from './components/GuideAugmentItem';
 import {useTftAugmentsWithPagination} from '@services/api/hooks/listQueryHooks';
-import type {ITftAugmentsFilters} from '@services/models/tft-augment';
+import type {ITftAugmentsFilters, ITftAugmentsSort} from '@services/models/tft-augment';
 import {SCREENS} from '@shared-constants';
 import createStyles from './TabContent.style';
 
@@ -65,6 +65,17 @@ const AugmentsTab: React.FC = () => {
     return filterObj;
   }, [debouncedSearchQuery, selectedStage, selectedTrait, selectedUnique]);
 
+  // Build sort object
+  const sort = useMemo<ITftAugmentsSort[] | undefined>(() => {
+    if (!sortBy) return undefined;
+    return [
+      {
+        orderBy: sortBy,
+        order: sortOrder,
+      },
+    ];
+  }, [sortBy, sortOrder]);
+
   // Use pagination hook with filters and sort
   const {
     data: augments,
@@ -76,33 +87,10 @@ const AugmentsTab: React.FC = () => {
     loadMore,
     refresh,
     isRefetching,
-  } = useTftAugmentsWithPagination(20, filters); // Limit 20 per page
+  } = useTftAugmentsWithPagination(20, filters, sort); // Limit 20 per page
 
-  // Apply sort to augments data
-  const sortedAugments = useMemo(() => {
-    if (!augments || augments.length === 0) return [];
-    
-    const sorted = [...augments].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-      
-      if (sortBy === 'name') {
-        aValue = a.name?.toLowerCase() || '';
-        bValue = b.name?.toLowerCase() || '';
-      } else if (sortBy === 'createdAt') {
-        aValue = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        bValue = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      }
-      
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      } else {
-        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-      }
-    });
-    
-    return sorted;
-  }, [augments, sortBy, sortOrder]);
+  // Use augments directly from API (already sorted)
+  const augmentsList = augments || [];
 
   const handleItemPress = (augmentId?: string | number) => {
     // TODO: Navigate to augment detail screen when available
@@ -148,9 +136,6 @@ const AugmentsTab: React.FC = () => {
 
   // Common stages
   const stages = ['2-1', '2-2', '3-1', '3-2', '4-1', '4-2'];
-
-  // Ensure augments is always an array
-  const augmentsList = sortedAugments || [];
 
   if (isLoading && augmentsList.length === 0) {
     return renderLoading();

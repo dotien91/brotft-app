@@ -50,7 +50,7 @@ export default (theme: ExtendedTheme) => {
       fontSize: 16,
       fontWeight: '600',
       color: colors.text,
-      marginBottom: 4,
+      flexShrink: 1,
     },
     itemDescription: {
       fontSize: 12,

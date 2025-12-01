@@ -4,7 +4,8 @@ import {useTheme} from '@react-navigation/native';
 import type {ITftAugment} from '@services/models/tft-augment';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideItemItem.style';
-import {API_BASE_URL} from '@shared-constants';
+import {getAugmentIconUrlFromPath} from '../../../../utils/metatft';
+import {parseAugmentDescription} from '../../../../shared/utils/parseAugmentDescription';
 
 interface GuideAugmentItemProps {
   data: ITftAugment;
@@ -16,17 +17,27 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const {name, icon, stage, trait, unique} = data;
+  const {name, icon, stage, trait, unique, desc, tags, effects, variableMatches} = data;
+
+  // Parse description with variables
+  const parsedDescription = useMemo(() => {
+    if (!desc) return null;
+    return parseAugmentDescription(desc, effects, variableMatches);
+  }, [desc, effects, variableMatches]);
 
   // Get augment image URL
   const getAugmentImageUrl = () => {
-    // Try icon field first (from API)
+    // Try parsing icon path from API first (e.g., ASSETS/Maps/TFT/Icons/Augments/...)
     if (icon) {
+      // If it's already a full URL, use it
       if (icon.startsWith('http')) {
         return icon;
       }
-      if (icon.startsWith('/')) {
-        return `${API_BASE_URL}${icon}`;
+      
+      // Try to parse icon path and get MetaTFT URL
+      const metatftUrl = getAugmentIconUrlFromPath(icon);
+      if (metatftUrl) {
+        return metatftUrl;
       }
     }
     
@@ -55,27 +66,52 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
 
       {/* Augment Info */}
       <View style={styles.infoContainer}>
-        <Text style={styles.itemName} numberOfLines={1}>
-          {name || '---'}
-        </Text>
-        {(stage || trait || unique) && (
-          <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 4, flexWrap: 'wrap'}}>
-            {stage && (
-              <Text style={{fontSize: 11, color: colors.placeholder, marginRight: 6}}>
-                {stage}
-              </Text>
-            )}
-            {trait && (
-              <Text style={{fontSize: 11, color: colors.primary, marginRight: 6}}>
-                {trait}
-              </Text>
-            )}
-            {unique && (
-              <Text style={{fontSize: 11, color: colors.primary}}>
-                Unique
-              </Text>
-            )}
-          </View>
+        {/* Title and Tags */}
+        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap'}}>
+          <Text style={styles.itemName} numberOfLines={1}>
+            {name || '---'}
+          </Text>
+          {(stage || trait || unique || (tags && tags.length > 0)) && (
+            <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 8, flexWrap: 'wrap', gap: 6}}>
+              {stage && (
+                <View style={[styles.componentBadge, {backgroundColor: colors.card, borderColor: colors.border}]}>
+                  <Text style={[styles.componentText, {color: colors.placeholder, fontSize: 11}]}>
+                    {stage}
+                  </Text>
+                </View>
+              )}
+              {trait && (
+                <View style={[styles.componentBadge, {backgroundColor: colors.primary + '20', borderColor: colors.primary + '40'}]}>
+                  <Text style={[styles.componentText, {color: colors.primary, fontSize: 11}]}>
+                    {trait}
+                  </Text>
+                </View>
+              )}
+              {unique && (
+                <View style={[styles.componentBadge, {backgroundColor: colors.primary + '20', borderColor: colors.primary + '40'}]}>
+                  <Text style={[styles.componentText, {color: colors.primary, fontSize: 11}]}>
+                    Unique
+                  </Text>
+                </View>
+              )}
+              {tags && tags.length > 0 && tags.map((tag, index) => (
+                <View 
+                  key={index}
+                  style={[styles.componentBadge, {backgroundColor: colors.card, borderColor: colors.border}]}>
+                  <Text style={[styles.componentText, {color: colors.text, fontSize: 11}]}>
+                    {tag}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+        
+        {/* Description */}
+        {parsedDescription && (
+          <Text style={styles.itemDescription}>
+            {parsedDescription}
+          </Text>
         )}
       </View>
     </TouchableOpacity>

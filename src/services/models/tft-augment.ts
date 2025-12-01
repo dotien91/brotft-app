@@ -1,3 +1,13 @@
+export interface ITftAugmentVariableMatch {
+  match?: string;
+  type?: string;
+  multiplier?: string | number | null;
+  full_match?: string;
+  hash?: string;
+  value?: string | number;
+  [key: string]: any;
+}
+
 export interface ITftAugment {
   id: string | number;
   apiName: string; // Unique
@@ -9,6 +19,7 @@ export interface ITftAugment {
   stage?: string | null; // e.g., "2-1", "3-2"
   unique?: boolean;
   effects?: Record<string, any>;
+  variableMatches?: ITftAugmentVariableMatch[];
   tags?: string[];
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -53,6 +64,7 @@ export interface ICreateTftAugmentDto {
   stage?: string;
   unique?: boolean;
   effects?: Record<string, any>;
+  variableMatches?: ITftAugmentVariableMatch[];
   tags?: string[];
 }
 
@@ -66,6 +78,7 @@ export interface IUpdateTftAugmentDto {
   stage?: string;
   unique?: boolean;
   effects?: Record<string, any>;
+  variableMatches?: ITftAugmentVariableMatch[];
   tags?: string[];
 }
 

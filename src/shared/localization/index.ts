@@ -109,7 +109,7 @@ export const translations = new LocalizedStrings({
     traits: "Tộc/Hệ",
     items: "Trang bị",
     upgrades: "Nâng cấp",
-    augments: "Thức tỉnh",
+    augments: "Nâng cấp",
     loadingUnit: "Đang tải tướng...",
     errorLoadingUnit: "Lỗi tải tướng",
     somethingWentWrong: "Đã xảy ra lỗi",

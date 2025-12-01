@@ -60,6 +60,7 @@ import type {
 import type {
   ITftAugmentsQueryParams,
   ITftAugmentsFilters,
+  ITftAugmentsSort,
   ITftAugment,
 } from '@services/models/tft-augment';
 
@@ -837,6 +838,7 @@ export const useTftAugments = (
 export const useTftAugmentsWithPagination = (
   limit: number = 20,
   filters?: ITftAugmentsFilters,
+  sort?: ITftAugmentsSort[],
 ) => {
   const [page, setPage] = useState(1);
   const [allTftAugments, setAllTftAugments] = useState<ITftAugment[]>([]);
@@ -857,9 +859,10 @@ export const useTftAugmentsWithPagination = (
             ...(filters.unique !== undefined && {unique: filters.unique}),
           }
         : undefined,
+      sort,
     };
     return params;
-  }, [page, limit, filters]);
+  }, [page, limit, filters, sort]);
 
   const {
     data: tftAugmentsData,
@@ -875,13 +878,13 @@ export const useTftAugmentsWithPagination = (
     staleTime: 0, // Always consider data stale to refetch on filter change
   });
 
-  // Reset when filters change - must run before data effect
+  // Reset when filters or sort change - must run before data effect
   useEffect(() => {
     setPage(1);
     setAllTftAugments([]);
     setHasMore(true);
     setIsLoadingMore(false);
-  }, [filters]);
+  }, [filters, sort]);
 
   // Handle data accumulation and hasMore state
   useEffect(() => {

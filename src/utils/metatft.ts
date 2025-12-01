@@ -152,12 +152,12 @@ export const formatTraitNameForMetaTft = (traitName?: string | null): string => 
 /**
  * Get trait icon URL from MetaTFT CDN
  * @param traitName - Trait name (e.g., "Huntress" or "TFT16_Huntress")
- * @param size - Image size (optional, not used for traits - kept for compatibility)
+ * @param _size - Image size (optional, not used for traits - kept for compatibility)
  * @returns Trait icon URL (direct URL without CDN optimization)
  */
 export const getTraitIconUrl = (
   traitName?: string | null,
-  size?: number,
+  _size?: number,
 ): string => {
   const formattedTrait = formatTraitNameForMetaTft(traitName);
   if (!formattedTrait) return '';
@@ -166,5 +166,33 @@ export const getTraitIconUrl = (
   const cleanTrait = formattedTrait.replace(/^tft\d+_/, '');
   
   return `https://cdn.metatft.com/file/metatft/traits/${cleanTrait}.png`;
+};
+
+/**
+ * Get augment icon URL from MetaTFT CDN based on icon path from API
+ * Example: "ASSETS/Maps/TFT/Icons/Augments/Hexcore/ChaosMagic_II.TFT_Set16.tex"
+ * -> "https://cdn.metatft.com/file/metatft/augments/chaosmagic_ii.png"
+ * @param iconPath - Icon path from API
+ * @returns Augment icon URL
+ */
+export const getAugmentIconUrlFromPath = (
+  iconPath?: string | null,
+): string | null => {
+  if (!iconPath) return null;
+  
+  // Parse icon path to get filename
+  const filename = parseIconPath(iconPath);
+  if (!filename) return null;
+  
+  // Format filename: ChaosMagic_II -> chaosmagic_ii
+  const formattedKey = filename.toLowerCase();
+  
+  const url = `https://cdn.metatft.com/file/metatft/augments/${formattedKey}.png`;
+  
+  if (__DEV__) {
+    console.log('[getAugmentIconUrlFromPath] iconPath:', iconPath, 'filename:', filename, 'formattedKey:', formattedKey, 'URL:', url);
+  }
+  
+  return url;
 };
 

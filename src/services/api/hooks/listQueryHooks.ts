@@ -25,6 +25,11 @@ import {
   getTftItemById,
   getTftItemByApiName,
 } from '../tft-items';
+import {
+  getTftAugments,
+  getTftAugmentById,
+  getTftAugmentByApiName,
+} from '../tft-augments';
 import type {
   IChampionsQueryParams,
   IChampion,
@@ -52,6 +57,11 @@ import type {
   ITftItemsQueryParams,
   ITftItem,
 } from '@services/models/tft-item';
+import type {
+  ITftAugmentsQueryParams,
+  ITftAugmentsFilters,
+  ITftAugment,
+} from '@services/models/tft-augment';
 
 // Query keys
 export const championKeys = {
@@ -783,6 +793,186 @@ export const useTftItemByApiName = (
   return useQuery({
     queryKey: tftItemKeys.byApiName(apiName),
     queryFn: () => getTftItemByApiName(apiName),
+    enabled: !!apiName,
+    ...queryOptions,
+  });
+};
+
+// ============= TFT AUGMENTS HOOKS =============
+
+// Query keys for TFT augments
+export const tftAugmentKeys = {
+  all: ['tft-augments'] as const,
+  lists: () => [...tftAugmentKeys.all, 'list'] as const,
+  list: (params?: ITftAugmentsQueryParams) =>
+    [...tftAugmentKeys.lists(), params] as const,
+  details: () => [...tftAugmentKeys.all, 'detail'] as const,
+  detail: (id: string) => [...tftAugmentKeys.details(), id] as const,
+  byApiName: (apiName: string) => [...tftAugmentKeys.all, 'apiName', apiName] as const,
+};
+
+// Get all TFT augments with pagination and filters
+export const useTftAugments = (
+  params?: ITftAugmentsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftAugments>>,
+      Error,
+      Awaited<ReturnType<typeof getTftAugments>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createOptionalListQueryHook<
+    ITftAugmentsQueryParams,
+    Awaited<ReturnType<typeof getTftAugments>>,
+    Awaited<ReturnType<typeof getTftAugments>>
+  >({
+    queryKey: tftAugmentKeys.list,
+    queryFn: getTftAugments,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for TFT augments
+export const useTftAugmentsWithPagination = (
+  limit: number = 20,
+  filters?: ITftAugmentsFilters,
+) => {
+  const [page, setPage] = useState(1);
+  const [allTftAugments, setAllTftAugments] = useState<ITftAugment[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Create params object - ensure filters object identity changes when filters change
+  const queryParams = useMemo(() => {
+    const params: ITftAugmentsQueryParams = {
+      page,
+      limit,
+      filters: filters
+        ? {
+            ...(filters.name && {name: filters.name}),
+            ...(filters.apiName && {apiName: filters.apiName}),
+            ...(filters.trait && {trait: filters.trait}),
+            ...(filters.stage && {stage: filters.stage}),
+            ...(filters.unique !== undefined && {unique: filters.unique}),
+          }
+        : undefined,
+    };
+    return params;
+  }, [page, limit, filters]);
+
+  const {
+    data: tftAugmentsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useTftAugments(queryParams, {
+    // Ensure query refetches when filters change
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to refetch on filter change
+  });
+
+  // Reset when filters change - must run before data effect
+  useEffect(() => {
+    setPage(1);
+    setAllTftAugments([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+  }, [filters]);
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    // Only process data if we have tftAugmentsData (even if empty array)
+    if (tftAugmentsData !== undefined) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllTftAugments(tftAugmentsData.data || []);
+      } else {
+        // Append new data when loading more
+        setAllTftAugments(prev => [...prev, ...(tftAugmentsData.data || [])]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (tftAugmentsData.hasNextPage !== undefined) {
+        setHasMore(tftAugmentsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [tftAugmentsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      tftAugmentsData?.hasNextPage !== undefined
+        ? tftAugmentsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && tftAugmentsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllTftAugments([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allTftAugments,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get TFT augment by ID
+export const useTftAugmentById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftAugmentById>>,
+      Error,
+      Awaited<ReturnType<typeof getTftAugmentById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftAugmentKeys.detail(id),
+    queryFn: () => getTftAugmentById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// Get TFT augment by API name
+export const useTftAugmentByApiName = (
+  apiName: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTftAugmentByApiName>>,
+      Error,
+      Awaited<ReturnType<typeof getTftAugmentByApiName>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: tftAugmentKeys.byApiName(apiName),
+    queryFn: () => getTftAugmentByApiName(apiName),
     enabled: !!apiName,
     ...queryOptions,
   });

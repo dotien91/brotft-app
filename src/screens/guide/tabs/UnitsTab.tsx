@@ -13,6 +13,7 @@ import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideUnitItem from './components/GuideUnitItem';
+import FilterModal from './components/FilterModal';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnitsFilters} from '@services/models/tft-unit';
 import {SCREENS} from '@shared-constants';
@@ -26,9 +27,18 @@ const UnitsTab: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [selectedCost, setSelectedCost] = useState<number | undefined>(undefined);
-  const [selectedTrait, setSelectedTrait] = useState<string | undefined>(undefined);
-  const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);
+  
+  // Applied filters (used for API calls)
+  const [appliedCost, setAppliedCost] = useState<number | undefined>(undefined);
+  const [appliedTrait, setAppliedTrait] = useState<string | undefined>(undefined);
+  const [appliedRole, setAppliedRole] = useState<string | undefined>(undefined);
+  
+  // Temp filters (for modal, before applying)
+  const [tempCost, setTempCost] = useState<number | undefined>(undefined);
+  const [tempTrait, setTempTrait] = useState<string | undefined>(undefined);
+  const [tempRole, setTempRole] = useState<string | undefined>(undefined);
+  
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   // Debounce search query to avoid too many API calls
   useEffect(() => {
@@ -39,21 +49,50 @@ const UnitsTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Build filters object
+  // Initialize temp filters when opening modal
+  useEffect(() => {
+    if (isFilterModalVisible) {
+      setTempCost(appliedCost);
+      setTempTrait(appliedTrait);
+      setTempRole(appliedRole);
+    }
+  }, [isFilterModalVisible, appliedCost, appliedTrait, appliedRole]);
+
+  const handleApplyFilters = () => {
+    setAppliedCost(tempCost);
+    setAppliedTrait(tempTrait);
+    setAppliedRole(tempRole);
+    setIsFilterModalVisible(false);
+  };
+
+  const handleClearAllFilters = () => {
+    setTempCost(undefined);
+    setTempTrait(undefined);
+    setTempRole(undefined);
+  };
+
+  const handleClearAppliedFilters = () => {
+    setSearchQuery('');
+    setAppliedCost(undefined);
+    setAppliedTrait(undefined);
+    setAppliedRole(undefined);
+  };
+
+  // Build filters object from applied filters
   const filters = useMemo<ITftUnitsFilters | undefined>(() => {
     const filterObj: ITftUnitsFilters = {};
     
     if (debouncedSearchQuery.trim()) {
       filterObj.name = debouncedSearchQuery.trim();
     }
-    if (selectedCost !== undefined) {
-      filterObj.cost = selectedCost;
+    if (appliedCost !== undefined) {
+      filterObj.cost = appliedCost;
     }
-    if (selectedTrait) {
-      filterObj.trait = selectedTrait;
+    if (appliedTrait) {
+      filterObj.trait = appliedTrait;
     }
-    if (selectedRole) {
-      filterObj.role = selectedRole;
+    if (appliedRole) {
+      filterObj.role = appliedRole;
     }
 
     // Return undefined if no filters to avoid unnecessary API calls
@@ -62,7 +101,7 @@ const UnitsTab: React.FC = () => {
     }
 
     return filterObj;
-  }, [debouncedSearchQuery, selectedCost, selectedTrait, selectedRole]);
+  }, [debouncedSearchQuery, appliedCost, appliedTrait, appliedRole]);
 
   // Use pagination hook with filters
   const {
@@ -109,14 +148,22 @@ const UnitsTab: React.FC = () => {
     </View>
   );
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedCost(undefined);
-    setSelectedTrait(undefined);
-    setSelectedRole(undefined);
-  };
+  const hasActiveFilters = appliedCost !== undefined || appliedTrait || appliedRole || searchQuery.trim();
+  const hasTempFilters = !!(tempCost !== undefined || tempTrait || tempRole);
 
-  const hasActiveFilters = selectedCost !== undefined || selectedTrait || selectedRole || searchQuery.trim();
+  // Filter sections for modal
+  const filterSections = useMemo(() => [
+    {
+      title: 'Cost',
+      type: 'single' as const,
+      compact: true, // Enable compact layout for short content
+      options: [1, 2, 3, 4, 5].map(cost => ({label: `Cost ${cost}`, value: cost})),
+      selected: tempCost,
+      onSelect: (value: string | number | boolean) => {
+        setTempCost(tempCost === value ? undefined : (value as number));
+      },
+    },
+  ], [tempCost]);
 
   // Ensure units is always an array
   const unitsList = units || [];
@@ -161,38 +208,95 @@ const UnitsTab: React.FC = () => {
             />
           </TouchableOpacity>
         )}
+        <TouchableOpacity
+          onPress={() => setIsFilterModalVisible(true)}
+          style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
+          <Icon
+            name="filter"
+            type={IconType.Ionicons}
+            color={hasActiveFilters ? colors.primary : colors.placeholder}
+            size={20}
+          />
+          {hasActiveFilters && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>
+                {[appliedCost, appliedTrait, appliedRole].filter(Boolean).length}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filtersContainer}
-        contentContainerStyle={styles.filtersContent}>
-        {/* Cost Filter */}
-        {[1, 2, 3, 4, 5].map(cost => (
-          <TouchableOpacity
-            key={cost}
-            onPress={() => setSelectedCost(selectedCost === cost ? undefined : cost)}
-            activeOpacity={0.7}>
-            <UnitCost cost={cost} size={16} active={selectedCost === cost} />
-          </TouchableOpacity>
-        ))}
-        
-        {/* Clear Filters Button */}
-        {hasActiveFilters && (
-          <TouchableOpacity
-            onPress={clearFilters}
-            style={styles.filterChipClear}>
-            <Icon
-              name="close"
-              type={IconType.Ionicons}
-              color={colors.text}
-              size={16}
-            />
-          </TouchableOpacity>
-        )}
-      </ScrollView>
+      {/* Active Filters Display */}
+      {hasActiveFilters && (
+        <View style={styles.activeFiltersContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.activeFiltersContent}>
+            {appliedCost !== undefined && (
+              <View style={styles.activeFilterChip}>
+                <UnitCost cost={appliedCost} size={14} active={true} />
+                <TouchableOpacity
+                  onPress={() => setAppliedCost(undefined)}
+                  style={styles.activeFilterClose}>
+                  <Icon
+                    name="close-circle"
+                    type={IconType.Ionicons}
+                    color={colors.placeholder}
+                    size={16}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+            {appliedTrait && (
+              <View style={styles.activeFilterChip}>
+                <Text style={styles.activeFilterText}>Trait: {appliedTrait}</Text>
+                <TouchableOpacity
+                  onPress={() => setAppliedTrait(undefined)}
+                  style={styles.activeFilterClose}>
+                  <Icon
+                    name="close-circle"
+                    type={IconType.Ionicons}
+                    color={colors.placeholder}
+                    size={16}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+            {appliedRole && (
+              <View style={styles.activeFilterChip}>
+                <Text style={styles.activeFilterText}>Role: {appliedRole}</Text>
+                <TouchableOpacity
+                  onPress={() => setAppliedRole(undefined)}
+                  style={styles.activeFilterClose}>
+                  <Icon
+                    name="close-circle"
+                    type={IconType.Ionicons}
+                    color={colors.placeholder}
+                    size={16}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+            <TouchableOpacity
+              onPress={handleClearAppliedFilters}
+              style={styles.clearAllButton}>
+              <Text style={styles.clearAllText}>Clear All</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={isFilterModalVisible}
+        onClose={() => setIsFilterModalVisible(false)}
+        onApply={handleApplyFilters}
+        sections={filterSections}
+        hasActiveFilters={hasTempFilters}
+        onClearAll={handleClearAllFilters}
+      />
 
       {/* Units List */}
       {unitsList.length === 0 && !isLoading ? (

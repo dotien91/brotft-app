@@ -17,6 +17,7 @@ export interface ITftAugment {
   icon?: string | null;
   trait?: string | null;
   stage?: string | null; // e.g., "2-1", "3-2"
+  tier?: number | null; // 1 = Silver, 2 = Gold, 3 = Prismatic
   unique?: boolean;
   effects?: Record<string, any>;
   variableMatches?: ITftAugmentVariableMatch[];
@@ -31,6 +32,7 @@ export interface ITftAugmentsFilters {
   apiName?: string;
   trait?: string;
   stage?: string;
+  tier?: number; // 1 = Silver, 2 = Gold, 3 = Prismatic
   unique?: boolean;
 }
 
@@ -62,6 +64,7 @@ export interface ICreateTftAugmentDto {
   icon?: string;
   trait?: string;
   stage?: string;
+  tier?: number; // 1 = Silver, 2 = Gold, 3 = Prismatic
   unique?: boolean;
   effects?: Record<string, any>;
   variableMatches?: ITftAugmentVariableMatch[];
@@ -76,6 +79,7 @@ export interface IUpdateTftAugmentDto {
   icon?: string;
   trait?: string;
   stage?: string;
+  tier?: number; // 1 = Silver, 2 = Gold, 3 = Prismatic
   unique?: boolean;
   effects?: Record<string, any>;
   variableMatches?: ITftAugmentVariableMatch[];

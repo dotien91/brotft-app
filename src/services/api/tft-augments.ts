@@ -33,6 +33,9 @@ export const getTftAugments = async (
     if (filters.stage) {
       queryParams.append('stage', filters.stage);
     }
+    if (filters.tier !== undefined) {
+      queryParams.append('tier', filters.tier.toString());
+    }
     if (filters.unique !== undefined) {
       queryParams.append('unique', filters.unique.toString());
     }

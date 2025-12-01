@@ -7,10 +7,20 @@ interface Style {
   searchInput: TextStyle;
   searchIcon: ViewStyle;
   clearButton: ViewStyle;
+  filterButton: ViewStyle;
+  filterBadge: ViewStyle;
+  filterBadgeText: TextStyle;
   filtersContainer: ViewStyle;
   filtersContent: ViewStyle;
   filterChipClear: ViewStyle;
   filterChipClearText: TextStyle;
+  activeFiltersContainer: ViewStyle;
+  activeFiltersContent: ViewStyle;
+  activeFilterChip: ViewStyle;
+  activeFilterText: TextStyle;
+  activeFilterClose: ViewStyle;
+  clearAllButton: ViewStyle;
+  clearAllText: TextStyle;
   listContent: ViewStyle;
   scrollContent: ViewStyle;
   centerContainer: ViewStyle;
@@ -52,6 +62,73 @@ export default (theme: ExtendedTheme) => {
     clearButton: {
       padding: 4,
       marginLeft: 8,
+    },
+    filterButton: {
+      padding: 4,
+      marginLeft: 8,
+      position: 'relative',
+      borderRadius: 8,
+      paddingHorizontal: 8,
+    },
+    filterBadge: {
+      position: 'absolute',
+      top: -4,
+      right: -4,
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+    },
+    filterBadgeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.white,
+    },
+    activeFiltersContainer: {
+      marginHorizontal: 16,
+      marginBottom: 8,
+      maxHeight: 50,
+    },
+    activeFiltersContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 4,
+    },
+    activeFilterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.primary + '20',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.primary + '40',
+      gap: 6,
+    },
+    activeFilterText: {
+      fontSize: 13,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    activeFilterClose: {
+      padding: 2,
+    },
+    clearAllButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    clearAllText: {
+      fontSize: 13,
+      color: colors.text,
+      fontWeight: '600',
     },
     filtersContainer: {
       marginBottom: 8,

@@ -196,3 +196,47 @@ export const getAugmentIconUrlFromPath = (
   return url;
 };
 
+/**
+ * Get item icon URL from MetaTFT CDN or Data Dragon based on icon path from API
+ * Example: "ASSETS/Maps/TFT/Icons/Items/Hexcore/TFT_Item_BFSword.TFT_Set13.tex"
+ * -> "https://cdn.metatft.com/file/metatft/items/tft_item_bfsword.png"
+ * Or fallback to Data Dragon: "https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_BFSword.png"
+ * @param iconPath - Icon path from API
+ * @param apiName - Item API name (e.g., "TFT_Item_BFSword") for fallback
+ * @returns Item icon URL
+ */
+export const getItemIconUrlFromPath = (
+  iconPath?: string | null,
+  apiName?: string | null,
+): string => {
+  if (iconPath) {
+    // If icon is a full URL
+    if (iconPath.startsWith('http')) {
+      return iconPath;
+    }
+    
+    // If icon is a path starting with /, it's a relative path from API
+    if (iconPath.startsWith('/')) {
+      // This would need API_BASE_URL, but we don't have it here
+      // So we'll try to parse it as a MetaTFT path
+    }
+    
+    // Try to parse icon path to get filename
+    const filename = parseIconPath(iconPath);
+    if (filename) {
+      // Format filename: TFT_Item_BFSword -> tft_item_bfsword
+      const formattedKey = filename.toLowerCase();
+      const metatftUrl = `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
+      return metatftUrl;
+    }
+  }
+  
+  // Fallback to Data Dragon using apiName
+  if (apiName) {
+    return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${apiName}.png`;
+  }
+  
+  // Last resort: return empty string
+  return '';
+};
+

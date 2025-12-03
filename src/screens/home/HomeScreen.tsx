@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {FlatList, Image, View} from 'react-native';
+import {FlatList, Image, View, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './HomeScreen.style';
@@ -8,248 +8,242 @@ import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {SCREENS} from '@shared-constants';
-
-const TFT_IMAGE_VERSION = '14.15.1';
-const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
-const ITEM_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-item/`;
-
-const championIcon = (fileName: string) => `${CHAMPION_BASE}${fileName}`;
-const itemIcon = (fileName: string) => `${ITEM_BASE}${fileName}`;
+import {useCompositionsWithPagination} from '@services/api/hooks/listQueryHooks';
+import type {IComposition} from '@services/models/composition';
+import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../utils/metatft';
+import ThreeStars from '@shared-components/three-stars/ThreeStars';
 
 interface TeamComp {
   id: string;
   name: string;
   rank: string;
+  tier?: string; // S, A, B, C, D
   champions: Array<{
     id: string;
     image: string;
     items?: Array<{icon: string}>;
+    need3Star?: boolean;
   }>;
   items: Array<{icon: string}>;
+  composition: IComposition; // Store original composition for navigation
 }
-
-const TEAM_COMPS: TeamComp[] = [
-  {
-    id: '1',
-    name: 'Học Viện Yuumi',
-    rank: 'OP',
-    champions: [
-      {id: 'lux', image: championIcon('TFT11_Lux.TFT_Set11.png')},
-      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
-      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
-      {id: 'yuumi', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
-      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
-      {id: 'nami', image: championIcon('TFT11_Nami.TFT_Set11.png')},
-      {id: 'lux2', image: championIcon('TFT11_Lux.TFT_Set11.png')},
-      {id: 'ahri', image: championIcon('TFT11_Ahri.TFT_Set11.png')},
-      {id: 'yuumi2', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
-    ],
-    items: [
-      {icon: itemIcon('TFT_Item_ArchangelsStaff.png')},
-      {icon: itemIcon('TFT_Item_JeweledGauntlet.png')},
-      {icon: itemIcon('TFT_Item_RabadonsDeathcap.png')},
-      {icon: itemIcon('TFT_Item_Morellonomicon.png')},
-    ],
-  },
-  {
-    id: '2',
-    name: 'Học Viện Katarina',
-    rank: 'S',
-    champions: [
-      {id: 'lux', image: championIcon('TFT11_Lux.TFT_Set11.png')},
-      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
-      {id: 'katarina', image: championIcon('TFT11_Katarina.TFT_Set11.png')},
-      {id: 'yuumi', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
-      {id: 'kaisa', image: championIcon('TFT11_Kaisa.TFT_Set11.png')},
-      {id: 'lux2', image: championIcon('TFT11_Lux.TFT_Set11.png')},
-      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
-      {id: 'syndra', image: championIcon('TFT11_Syndra.TFT_Set11.png')},
-    ],
-    items: [
-      {icon: itemIcon('TFT_Item_HextechGunblade.png')},
-      {icon: itemIcon('TFT_Item_GuardianAngel.png')},
-      {icon: itemIcon('TFT_Item_InfinityEdge.png')},
-      {icon: itemIcon('TFT_Item_BlueBuff.png')},
-    ],
-  },
-  {
-    id: '3',
-    name: 'Đại Cơ Giáp Yone',
-    rank: 'S',
-    champions: [
-      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
-      {id: 'riven', image: championIcon('TFT11_Riven.TFT_Set11.png')},
-      {id: 'riven2', image: championIcon('TFT11_Riven.TFT_Set11.png')},
-      {id: 'nami', image: championIcon('TFT11_Nami.TFT_Set11.png')},
-      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
-      {id: 'mordekaiser', image: championIcon('TFT11_Mordekaiser.TFT_Set11.png')},
-      {id: 'irelia', image: championIcon('TFT11_Irelia.TFT_Set11.png')},
-      {id: 'yone', image: championIcon('TFT11_Yone.TFT_Set11.png')},
-      {id: 'ahri', image: championIcon('TFT11_Ahri.TFT_Set11.png')},
-    ],
-    items: [
-      {icon: itemIcon('TFT_Item_GuinsoosRageblade.png')},
-      {icon: itemIcon('TFT_Item_HandOfJustice.png')},
-      {icon: itemIcon('TFT_Item_Deathblade.png')},
-      {icon: itemIcon('TFT_Item_BrambleVest.png')},
-    ],
-  },
-  {
-    id: '4',
-    name: 'Đại Cơ Giáp Akali',
-    rank: 'S',
-    champions: [
-      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
-      {id: 'riven', image: championIcon('TFT11_Riven.TFT_Set11.png')},
-      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
-      {id: 'nami', image: championIcon('TFT11_Nami.TFT_Set11.png')},
-      {id: 'kaisa', image: championIcon('TFT11_Kaisa.TFT_Set11.png')},
-      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
-      {id: 'irelia', image: championIcon('TFT11_Irelia.TFT_Set11.png')},
-      {id: 'akali', image: championIcon('TFT11_Akali.TFT_Set11.png')},
-      {id: 'yone', image: championIcon('TFT11_Yone.TFT_Set11.png')},
-    ],
-    items: [
-      {icon: itemIcon('TFT_Item_InfinityEdge.png')},
-      {icon: itemIcon('TFT_Item_JeweledGauntlet.png')},
-      {icon: itemIcon('TFT_Item_GuardianAngel.png')},
-      {icon: itemIcon('TFT_Item_BrambleVest.png')},
-    ],
-  },
-  {
-    id: '5',
-    name: 'Chiến Hạm Malphite',
-    rank: 'S',
-    champions: [
-      {id: 'nautilus', image: championIcon('TFT11_Nautilus.TFT_Set11.png')},
-      {id: 'graves', image: championIcon('TFT11_Graves.TFT_Set11.png')},
-      {id: 'katarina', image: championIcon('TFT11_Katarina.TFT_Set11.png')},
-      {id: 'malphite', image: championIcon('TFT11_Malphite.TFT_Set11.png')},
-      {id: 'urgot', image: championIcon('TFT11_Urgot.TFT_Set11.png')},
-      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
-      {id: 'janna', image: championIcon('TFT11_Janna.TFT_Set11.png')},
-      {id: 'yone', image: championIcon('TFT11_Yone.TFT_Set11.png')},
-    ],
-    items: [
-      {icon: itemIcon('TFT_Item_Redemption.png')},
-      {icon: itemIcon('TFT_Item_Morellonomicon.png')},
-      {icon: itemIcon('TFT_Item_Sunfire.png')},
-    ],
-  },
-  {
-    id: '6',
-    name: 'Hàng Nặng Malzahar',
-    rank: 'S',
-    champions: [
-      {id: 'garen', image: championIcon('TFT11_Garen.TFT_Set11.png')},
-      {id: 'ziggs', image: championIcon('TFT11_Ziggs.TFT_Set11.png')},
-      {id: 'katarina', image: championIcon('TFT11_Katarina.TFT_Set11.png')},
-      {id: 'malphite', image: championIcon('TFT11_Malphite.TFT_Set11.png')},
-      {id: 'kaisa', image: championIcon('TFT11_Kaisa.TFT_Set11.png')},
-      {id: 'neeko', image: championIcon('TFT11_Neeko.TFT_Set11.png')},
-      {id: 'malzahar', image: championIcon('TFT11_Malzahar.TFT_Set11.png')},
-      {id: 'yuumi', image: championIcon('TFT11_Yuumi.TFT_Set11.png')},
-    ],
-    items: [
-      {icon: itemIcon('TFT_Item_Redemption.png')},
-      {icon: itemIcon('TFT_Item_Morellonomicon.png')},
-      {icon: itemIcon('TFT_Item_ArchangelsStaff.png')},
-      {icon: itemIcon('TFT_Item_RabadonsDeathcap.png')},
-      {icon: itemIcon('TFT_Item_BlueBuff.png')},
-    ],
-  },
-];
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  // Fetch compositions from API
+  const {
+    data: compositions,
+    isLoading,
+    isError,
+    error,
+    refresh,
+    isRefetching,
+  } = useCompositionsWithPagination(10);
+
+  // Map IComposition to TeamComp format
+  const teamComps = useMemo<TeamComp[]>(() => {
+    if (!compositions) return [];
+
+    return compositions.map(comp => {
+      // Map units to champions
+      const champions = comp.units.map(unit => ({
+        id: unit.championId || unit.championKey,
+        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+        items: (unit.itemsDetails || []).map(itemDetail => ({
+          icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
+        })),
+        need3Star: unit.need3Star || false,
+      }));
+
+      // Extract all items from units (flatten and deduplicate by ID)
+      const allItems = comp.units
+        .flatMap(unit => unit.itemsDetails || [])
+        .filter((item, index, self) => {
+          // Deduplicate by item ID
+          return index === self.findIndex(i => i.id === item.id);
+        })
+        .map(itemDetail => ({
+          icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
+        }));
+
+      // Map difficulty to rank
+      const getRank = (difficulty: string): string => {
+        if (difficulty === 'Dễ') return 'OP';
+        if (difficulty === 'Trung bình') return 'S';
+        if (difficulty === 'Khó') return 'A';
+        return 'S'; // Default
+      };
+
+      // Get tier from API or fallback to rank
+      const tier = comp.tier || getRank(comp.difficulty);
+
+      return {
+        id: comp.id,
+        name: comp.name,
+        rank: getRank(comp.difficulty),
+        tier: tier,
+        champions,
+        items: allItems,
+        composition: comp,
+      };
+    });
+  }, [compositions]);
+
   const handleTeamPress = (team: TeamComp) => {
-    // Convert TeamComp to TeamComposition format for detail screen
-    const teamData = {
-      id: team.id,
-      name: team.name,
-      plan: 'Lvl 7/8 Roll',
-      difficulty: team.rank === 'OP' ? 'Dễ' : team.rank === 'S' ? 'Trung bình' : 'Khó',
-      metaDescription: `Đội hình ${team.name} - ${team.rank} tier`,
-      isLateGame: true,
-      boardSize: {rows: 4, cols: 7},
-      synergies: [],
-      units: team.champions.map((champ, index) => ({
-        id: champ.id,
-        name: champ.id,
-        cost: Math.floor(Math.random() * 5) + 1,
-        star: 2,
-        position: {
-          row: Math.floor(index / 7),
-          col: index % 7,
-        },
-        image: champ.image,
-        items: champ.items || [],
-      })),
-      bench: [],
-      carryItems: [],
-      notes: [`Đội hình ${team.name} mạnh ở giai đoạn cuối game`],
-    };
-    
-    NavigationService.push(SCREENS.DETAIL, {team: teamData});
+    // Navigate to detail screen with compId to fetch from API
+    const comp = team.composition;
+    NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
   };
 
-  const getRankColor = (rank: string) => {
-    switch (rank) {
+  const getRankColor = (rankOrTier: string) => {
+    switch (rankOrTier) {
       case 'OP':
         return '#ff4757';
       case 'S':
-        return '#5352ed';
+        return '#ff7e83';
       case 'A':
-        return '#3742fa';
+        return '#ffbf7f';
+      case 'B':
+        return '#ffdf80';
+      case 'C':
+        return '#feff7f';
+      case 'D':
+        return '#bffe7f';
       default:
         return colors.primary;
     }
   };
-  const renderTeamCard = ({item}: {item: TeamComp}) => (
-    <RNBounceable style={styles.teamCard} onPress={() => handleTeamPress(item)}>
-      <View style={styles.teamHeader}>
-        <View style={[styles.rankBadge, {backgroundColor: getRankColor(item.rank)}]}>
-          <Text style={styles.rankText}>{item.rank}</Text>
+
+  // Always return black text color
+  const getContrastTextColor = (): string => {
+    return '#000000';
+  };
+  const renderTeamCard = ({item}: {item: TeamComp}) => {
+    const displayTier = item.tier || item.rank;
+    const backgroundColor = getRankColor(displayTier);
+    const textColor = getContrastTextColor();
+    return (
+      <RNBounceable style={styles.teamCard} onPress={() => handleTeamPress(item)}>
+        <View style={styles.teamHeader}>
+          <View style={[styles.rankBadge, {backgroundColor}]}>
+            <Text style={[styles.rankText, {color: textColor}]}>{displayTier}</Text>
+          </View>
+          <Text style={styles.teamName}>{item.name}</Text>
         </View>
-        <Text style={styles.teamName}>{item.name}</Text>
-      </View>
 
       <View style={styles.championsRow}>
         {item.champions.map((champion, index) => (
-          <Hexagon
-            key={`${champion.id}-${index}`}
-            size={40}
-            backgroundColor={colors.card}
-            borderColor={colors.border}
-            borderWidth={2}
-            imageUri={champion.image}
-          />
+          <View key={`${champion.id}-${index}`} style={styles.championContainer}>
+            <View style={styles.championWrapper}>
+              {/* Border hexagon */}
+              <View style={styles.hexagonBorder}>
+                <Hexagon
+                  size={50}
+                  backgroundColor="transparent"
+                  borderColor={colors.primary}
+                  borderWidth={1}
+                />
+              </View>
+              {/* Main hexagon with image */}
+              <View style={styles.hexagonInner}>
+                <Hexagon
+                  size={46}
+                  backgroundColor={colors.card}
+                  borderColor={colors.border}
+                  borderWidth={2}
+                  imageUri={champion.image}
+                />
+              </View>
+              {champion.need3Star && (
+                <View style={styles.tier3Icon}>
+                  <ThreeStars size={36} color="#fbbf24" />
+                </View>
+              )}
+            </View>
+            {champion.items && champion.items.length > 0 && (
+              <View style={styles.championItemsRow}>
+                {champion.items.map((itemObj, itemIndex) => (
+                  <Image
+                    key={`champion-${index}-item-${itemIndex}`}
+                    source={{uri: itemObj.icon}}
+                    style={styles.championItemIcon}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
         ))}
       </View>
+      </RNBounceable>
+    );
+  };
 
-      <View style={styles.itemsRow}>
-        {item.items.map((itemObj, index) => (
-          <Image
-            key={`item-${index}`}
-            source={{uri: itemObj.icon}}
-            style={styles.itemIcon}
-          />
-        ))}
-      </View>
-    </RNBounceable>
+  const renderLoading = () => (
+    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center', flex: 1}]}>
+      <ActivityIndicator size="large" color={colors.primary} />
+      <Text color={colors.placeholder} style={{marginTop: 12}}>
+        Loading compositions...
+      </Text>
+    </View>
   );
+
+  const renderError = () => (
+    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center', flex: 1}]}>
+      <Text h4 color={colors.danger}>
+        Error loading compositions
+      </Text>
+      <Text color={colors.placeholder} style={{marginTop: 8, marginBottom: 16}}>
+        {error?.message || 'Something went wrong'}
+      </Text>
+      <RNBounceable
+        onPress={() => refresh()}
+        style={{
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          backgroundColor: colors.primary,
+          borderRadius: 8,
+        }}>
+        <Text color="#fff" style={{fontWeight: '600'}}>
+          Retry
+        </Text>
+      </RNBounceable>
+    </View>
+  );
+
+  if (isLoading && teamComps.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        {renderLoading()}
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        {renderError()}
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <FlatList
-        data={TEAM_COMPS}
+        data={teamComps}
         renderItem={renderTeamCard}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshing={isRefetching}
+        onRefresh={refresh}
+        ListEmptyComponent={
+          <View style={{padding: 20, alignItems: 'center'}}>
+            <Text color={colors.placeholder}>No compositions found</Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );

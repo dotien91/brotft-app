@@ -10,9 +10,14 @@ interface Style {
   rankText: TextStyle;
   teamName: TextStyle;
   championsRow: ViewStyle;
+  championContainer: ViewStyle;
+  championWrapper: ViewStyle;
+  hexagonBorder: ViewStyle;
+  hexagonInner: ViewStyle;
   championAvatar: ImageStyle;
-  itemsRow: ViewStyle;
-  itemIcon: ImageStyle;
+  tier3Icon: ImageStyle;
+  championItemsRow: ViewStyle;
+  championItemIcon: ImageStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -23,13 +28,12 @@ export default (theme: ExtendedTheme) => {
       backgroundColor: colors.background,
     },
     listContent: {
-      padding: 16,
-      paddingBottom: 32,
+      paddingHorizontal: 12,
     },
     teamCard: {
       backgroundColor: colors.card,
       borderRadius: 16,
-      padding: 16,
+      padding: 8,
       marginBottom: 16,
       borderWidth: 1,
       borderColor: colors.border,
@@ -50,7 +54,6 @@ export default (theme: ExtendedTheme) => {
     rankText: {
       fontSize: 14,
       fontWeight: '800',
-      color: colors.white,
       letterSpacing: 0.5,
     },
     teamName: {
@@ -61,9 +64,29 @@ export default (theme: ExtendedTheme) => {
     },
     championsRow: {
       flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
+      alignItems: 'flex-start',
       flexWrap: 'wrap',
+    },
+    championContainer: {
+      alignItems: 'center',
+      marginRight: 2,
+      marginBottom: 2,
+      // minHeight: 70, // Đảm bảo chiều cao tối thiểu để thẳng hàng
+    },
+    championWrapper: {
+      position: 'relative',
+      marginBottom: 2,
+      overflow: 'visible',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    hexagonBorder: {
+      position: 'absolute',
+      zIndex: 1,
+    },
+    hexagonInner: {
+      position: 'relative',
+      zIndex: 2,
     },
     championAvatar: {
       width: 40,
@@ -74,17 +97,26 @@ export default (theme: ExtendedTheme) => {
       borderWidth: 2,
       borderColor: '#3a3d4a',
     },
-    itemsRow: {
+    tier3Icon: {
+      position: 'absolute',
+      top: -12,
+      right: 4,
+      width: 36,
+      height: 36,
+      zIndex: 10,
+    },
+    championItemsRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       flexWrap: 'wrap',
+      gap: 2,
+      minHeight: 14, // Đảm bảo chiều cao tối thiểu cho items row
     },
-    itemIcon: {
-      width: 24,
-      height: 24,
-      borderRadius: 6,
-      marginRight: 4,
-      marginBottom: 4,
+    championItemIcon: {
+      width: 12,
+      height: 12,
+      borderRadius: 3,
     },
   });
 };

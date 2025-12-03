@@ -30,6 +30,11 @@ import {
   getTftAugmentById,
   getTftAugmentByApiName,
 } from '../tft-augments';
+import {
+  getCompositions,
+  getCompositionById,
+  getCompositionByCompId,
+} from '../compositions';
 import type {
   IChampionsQueryParams,
   IChampion,
@@ -63,6 +68,10 @@ import type {
   ITftAugmentsSort,
   ITftAugment,
 } from '@services/models/tft-augment';
+import type {
+  ICompositionsQueryParams,
+  IComposition,
+} from '@services/models/composition';
 
 // Query keys
 export const championKeys = {
@@ -1297,6 +1306,147 @@ export const useItemByApiName = (
     queryKey: itemKeys.byApiName(apiName),
     queryFn: () => getItemByApiName(apiName),
     enabled: !!apiName,
+    ...queryOptions,
+  });
+};
+
+// Query keys for compositions
+export const compositionKeys = {
+  all: ['compositions'] as const,
+  lists: () => [...compositionKeys.all, 'list'] as const,
+  list: (params?: ICompositionsQueryParams) =>
+    [...compositionKeys.lists(), params] as const,
+  details: () => [...compositionKeys.all, 'detail'] as const,
+  detail: (id: string) => [...compositionKeys.details(), id] as const,
+};
+
+// Get compositions with pagination
+export const useCompositions = (
+  params?: ICompositionsQueryParams,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getCompositions>>,
+      Error,
+      Awaited<ReturnType<typeof getCompositions>>
+    >,
+    'queryKey' | 'queryFn'
+  >,
+) => {
+  return createListQueryHook({
+    queryKey: compositionKeys.list,
+    queryFn: getCompositions,
+  })(params, queryOptions);
+};
+
+// Hook with pagination handling built-in for compositions
+export const useCompositionsWithPagination = (limit: number = 10) => {
+  const [page, setPage] = useState(1);
+  const [allCompositions, setAllCompositions] = useState<IComposition[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data: compositionsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useCompositions({page, limit}, {
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    if (compositionsData?.data) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllCompositions(compositionsData.data);
+      } else {
+        // Append new data when loading more
+        setAllCompositions(prev => [...prev, ...compositionsData.data]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (compositionsData.hasNextPage !== undefined) {
+        setHasMore(compositionsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [compositionsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      compositionsData?.hasNextPage !== undefined
+        ? compositionsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && compositionsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllCompositions([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  return {
+    data: allCompositions,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
+};
+
+// Get composition by ID
+export const useCompositionById = (
+  id: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getCompositionById>>,
+      Error,
+      Awaited<ReturnType<typeof getCompositionById>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: compositionKeys.detail(id),
+    queryFn: () => getCompositionById(id),
+    enabled: !!id,
+    ...queryOptions,
+  });
+};
+
+// Get composition by compId
+export const useCompositionByCompId = (
+  compId: string,
+  queryOptions?: Omit<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getCompositionByCompId>>,
+      Error,
+      Awaited<ReturnType<typeof getCompositionByCompId>>
+    >,
+    'queryKey' | 'queryFn' | 'enabled'
+  >,
+) => {
+  return useQuery({
+    queryKey: [...compositionKeys.all, 'compId', compId],
+    queryFn: () => getCompositionByCompId(compId),
+    enabled: !!compId,
     ...queryOptions,
   });
 };

@@ -21,6 +21,8 @@ interface Style {
   metaPillPrimary: ViewStyle;
   metaPillSecondary: ViewStyle;
   metaPillText: TextStyle;
+  tierBadge: ViewStyle;
+  tierBadgeText: TextStyle;
   toggleRow: ViewStyle;
   toggleLabel: TextStyle;
   mainLayout: ViewStyle;
@@ -47,6 +49,13 @@ interface Style {
   hexCell: ViewStyle;
   hexCellContainer: ViewStyle;
   hexCellOccupied: ViewStyle;
+  unitWrapper: ViewStyle;
+  hexagonBorderWrapper: ViewStyle;
+  hexagonBorder: ViewStyle;
+  hexagonInner: ViewStyle;
+  tier3Icon: ViewStyle;
+  unitItemsRow: ViewStyle;
+  unitItemIcon: ImageStyle;
   unitRing: ViewStyle;
   unitAvatar: ImageStyle;
   starBadge: ViewStyle;
@@ -189,6 +198,19 @@ export default (theme: ExtendedTheme) => {
       color: colors.white,
       letterSpacing: 0.4,
     },
+    tierBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 8,
+    },
+    tierBadgeText: {
+      fontSize: 14,
+      fontWeight: '800',
+      letterSpacing: 0.5,
+    },
     toggleRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -327,6 +349,39 @@ export default (theme: ExtendedTheme) => {
       marginVertical: 1,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    unitWrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    hexagonBorderWrapper: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'visible',
+    },
+    hexagonBorder: {
+      position: 'absolute',
+      zIndex: 1,
+    },
+    hexagonInner: {
+      position: 'relative',
+      zIndex: 2,
+    },
+    tier3Icon: {
+      position: 'absolute',
+      zIndex: 10,
+    },
+    unitItemsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexWrap: 'wrap',
+      gap: 2,
+      marginTop: 4,
+    },
+    unitItemIcon: {
+      borderRadius: 3,
     },
     hexCell: {
       width: 64,

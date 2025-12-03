@@ -106,19 +106,21 @@ export default (theme: ExtendedTheme) => {
       zIndex: 10,
     },
     championItemsRow: {
+      position: 'absolute',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       flexWrap: 'wrap',
       gap: 2,
-      marginTop: 4,
-      minHeight: 14, // Đảm bảo chiều cao tối thiểu cho items row
+      bottom: -28,
+      width: '100%',
+      zIndex: 5,
     },
     championItemIcon: {
-      width: 14,
-      height: 14,
+      width: 12,
+      height: 12,
       borderRadius: 3,
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
   });
 };

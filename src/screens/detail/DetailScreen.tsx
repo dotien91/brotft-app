@@ -9,8 +9,12 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarUrl} from '../../utils/metatft';
+import {getUnitAvatarUrl, getTraitIconUrl} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
+import {getTftItemByApiName} from '@services/api/tft-items';
+import LocalStorage from '@services/local-storage';
+import {getLocaleFromLanguage} from '@services/api/data';
+import useStore from '@services/zustand/store';
 
 const TFT_IMAGE_VERSION = '14.15.1';
 const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
@@ -28,9 +32,10 @@ const championIcon = (fileName: string) => `${CHAMPION_BASE}${fileName}`;
 const itemIcon = (fileName: string) => `${ITEM_BASE}${fileName}`;
 
 type TeamUnitItem = {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   icon: string;
+  apiName?: string; // For fetching item details
 };
 
 type TeamUnit = {
@@ -46,6 +51,7 @@ type TeamUnit = {
   };
   image: string;
   items?: TeamUnitItem[];
+  championKey?: string; // For fetching traits from LocalStorage
 };
 
 type TeamSynergy = {
@@ -84,185 +90,6 @@ type TeamComposition = {
   notes: string[];
 };
 
-export const DEFAULT_TEAM: TeamComposition = {
-  id: 'comp-daicogiap-yone',
-  name: 'Đại Cơ Giáp Yone',
-  plan: 'Lvl 7/8 Roll',
-  difficulty: 'Trung bình',
-  metaDescription:
-    'Roll nhẹ ở cấp 7 tìm đủ dàn chắn Đại Cơ Giáp, giữ vàng lên 8 hoàn thiện đội hình với Yone chủ lực.',
-  isLateGame: true,
-  boardSize: {
-    rows: 4,
-    cols: 7,
-  },
-  synergies: [
-    {id: 'armor', name: 'Đại Cơ Giáp', abbreviation: 'ĐC', count: 7, max: 7, color: '#facc15'},
-    {id: 'pilot', name: 'Phi Công Công Nghệ', abbreviation: 'PC', count: 3, max: 3, color: '#38bdf8'},
-    {id: 'guardian', name: 'Hộ Công', abbreviation: 'HC', count: 2, max: 2, color: '#f87171'},
-    {id: 'rebel', name: 'Đấu Trường', abbreviation: 'ĐT', count: 2, max: 2, color: '#fb7185'},
-    {id: 'fortress', name: 'Tổng Lực', abbreviation: 'TL', count: 2, max: 2, color: '#34d399'},
-  ],
-  units: [
-    {
-      id: 'garen',
-      name: 'Garen',
-      cost: 1,
-      star: 2,
-      position: {row: 0, col: 1},
-      image: championIcon('TFT11_Garen.TFT_Set11.png'),
-    },
-    {
-      id: 'riven',
-      name: 'Riven',
-      cost: 3,
-      star: 2,
-      position: {row: 0, col: 3},
-      image: championIcon('TFT11_Riven.TFT_Set11.png'),
-      items: [
-        {id: 'bramble', name: 'Áo Choàng Gai', icon: itemIcon('TFT_Item_BrambleVest.png')},
-        {id: 'dragonclaw', name: 'Vuốt Rồng', icon: itemIcon('TFT_Item_DragonsClaw.png')},
-      ],
-    },
-    {
-      id: 'mordekaiser',
-      name: 'Mordekaiser',
-      cost: 4,
-      star: 2,
-      position: {row: 0, col: 5},
-      image: championIcon('TFT11_Mordekaiser.TFT_Set11.png'),
-      items: [
-        {id: 'redemption', name: 'Chuộc Tội', icon: itemIcon('TFT_Item_Redemption.png')},
-      ],
-    },
-    {
-      id: 'illaoi',
-      name: 'Urgot',
-      cost: 4,
-      star: 2,
-      position: {row: 1, col: 0},
-      image: championIcon('TFT11_Urgot.TFT_Set11.png'),
-    },
-    {
-      id: 'shen',
-      name: 'Shen',
-      cost: 2,
-      star: 2,
-      position: {row: 1, col: 2},
-      image: championIcon('TFT11_Shen.TFT_Set11.png'),
-    },
-    {
-      id: 'wukong',
-      name: 'Wukong',
-      cost: 2,
-      star: 2,
-      position: {row: 1, col: 4},
-      image: championIcon('TFT11_Wukong.TFT_Set11.png'),
-    },
-    {
-      id: 'irelia',
-      name: 'Irelia',
-      cost: 3,
-      star: 2,
-      position: {row: 1, col: 6},
-      image: championIcon('TFT11_Irelia.TFT_Set11.png'),
-    },
-    {
-      id: 'yone',
-      name: 'Yone',
-      cost: 4,
-      carry: true,
-      star: 2,
-      position: {row: 2, col: 3},
-      image: championIcon('TFT11_Yone.TFT_Set11.png'),
-      items: [
-        {id: 'rageblade', name: 'Cuồng Đao Guinsoo', icon: itemIcon('TFT_Item_GuinsoosRageblade.png')},
-        {id: 'handofjustice', name: 'Bàn Tay Công Lý', icon: itemIcon('TFT_Item_HandOfJustice.png')},
-        {id: 'deathblade', name: 'Kiếm Tử Thần', icon: itemIcon('TFT_Item_Deathblade.png')},
-      ],
-    },
-    {
-      id: 'janna',
-      name: 'Janna',
-      cost: 4,
-      star: 2,
-      position: {row: 2, col: 1},
-      image: championIcon('TFT11_Janna.TFT_Set11.png'),
-    },
-    {
-      id: 'leesin',
-      name: 'Lee Sin',
-      cost: 4,
-      star: 1,
-      position: {row: 2, col: 5},
-      image: championIcon('TFT11_LeeSin.TFT_Set11.png'),
-    },
-    {
-      id: 'ahri',
-      name: 'Ahri',
-      cost: 5,
-      star: 1,
-      position: {row: 3, col: 3},
-      image: championIcon('TFT11_Ahri.TFT_Set11.png'),
-    },
-  ],
-  bench: [
-    {
-      id: 'aatrox',
-      name: 'Aatrox',
-      cost: 4,
-      star: 1,
-      position: {row: 0, col: 0},
-      image: championIcon('TFT11_Aatrox.TFT_Set11.png'),
-    },
-    {
-      id: 'nasus',
-      name: 'Nasus',
-      cost: 2,
-      star: 2,
-      position: {row: 0, col: 0},
-      image: championIcon('TFT11_Nasus.TFT_Set11.png'),
-    },
-    {
-      id: 'seraphine',
-      name: 'Seraphine',
-      cost: 3,
-      star: 1,
-      position: {row: 0, col: 0},
-      image: championIcon('TFT11_Seraphine.TFT_Set11.png'),
-    },
-  ],
-  carryItems: [
-    {
-      championId: 'yone',
-      championName: 'Yone',
-      role: 'Chủ lực sát thương',
-      image: championIcon('TFT11_Yone.TFT_Set11.png'),
-      items: [
-        {id: 'rageblade', name: 'Guinsoo', icon: itemIcon('TFT_Item_GuinsoosRageblade.png')},
-        {id: 'hand', name: 'Bàn Tay', icon: itemIcon('TFT_Item_HandOfJustice.png')},
-        {id: 'deathblade', name: 'Kiếm Tử Thần', icon: itemIcon('TFT_Item_Deathblade.png')},
-      ],
-    },
-    {
-      championId: 'riven',
-      championName: 'Riven',
-      role: 'Chống chịu chính',
-      image: championIcon('TFT11_Riven.TFT_Set11.png'),
-      items: [
-        {id: 'bramble', name: 'Áo Choàng Gai', icon: itemIcon('TFT_Item_BrambleVest.png')},
-        {id: 'dclaw', name: 'Vuốt Rồng', icon: itemIcon('TFT_Item_DragonsClaw.png')},
-        {id: 'warmog', name: 'Giáp Máu', icon: itemIcon('TFT_Item_WarmogsArmor.png')},
-      ],
-    },
-  ],
-  notes: [
-    'Ưu tiên roll tìm Yone 2★ và đủ 7 Đại Cơ Giáp trước khi lên cấp 8.',
-    'Sau cấp 8 thêm Lee Sin để hoàn thiện Phi Công Công Nghệ, cân nhắc Ahri nếu cần sát thương phép.',
-    'Trang bị chống chịu nên dồn cho Riven hoặc Mordekaiser để bảo kê tuyến sau.',
-    'Nếu lobby nhiều phép, chuyển Vuốt Rồng sang Mordekaiser và lấy Khăn Giải Thuật cho Yone.',
-  ],
-};
 
 interface DetailScreenProps {
   route?: {
@@ -279,6 +106,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const {width: windowWidth} = useWindowDimensions();
+  const language = useStore((state) => state.language);
 
   // Get compId from params
   const compIdFromParams =
@@ -312,7 +140,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           // Map items from apiName strings to icon URLs (like ItemsTab does)
           const itemIcons = (unit.items || []).map(apiName => {
             // Use Data Dragon URL format (same as GuideItemItem)
-            return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${apiName}.png`;
+            return {
+              icon: `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${apiName}.png`,
+              apiName: apiName,
+            };
           });
 
           return {
@@ -324,7 +155,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
             need3Star: unit.need3Star || false,
             position: unit.position,
             image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-            items: itemIcons.map(icon => ({icon})),
+            items: itemIcons,
+            championKey: unit.championKey, // For fetching traits
           };
         }),
         bench: [],
@@ -337,7 +169,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     const teamFromParams =
       (routeProp?.params?.team ||
         (route?.params as any)?.team) as TeamComposition | undefined;
-    return teamFromParams || DEFAULT_TEAM;
+    return teamFromParams;
   }, [compositionData, routeProp, route]);
 
   const [isLateGame, setIsLateGame] = useState(team.isLateGame);
@@ -491,6 +323,21 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                           borderWidth={2}
                           imageUri={unit.image}>
                           {renderUnit(unit)}
+                          {/* Items inside hexagon (absolute positioned) */}
+                          {unit.items && unit.items.length > 0 && (
+                            <View style={styles.unitItemsRow}>
+                              {unit.items.map(item => (
+                                <Image
+                                  key={item.id}
+                                  source={{uri: item.icon}}
+                                  style={[styles.unitItemIcon, {
+                                    width: Math.max(hexSize * 0.2, 12),
+                                    height: Math.max(hexSize * 0.2, 12),
+                                  }]}
+                                />
+                              ))}
+                            </View>
+                          )}
                         </Hexagon>
                       </View>
                       {/* 3 Stars icon */}
@@ -503,21 +350,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                           </View>
                       )}
                     </View>
-                    {/* Items below unit */}
-                    {unit.items && unit.items.length > 0 && (
-                      <View style={styles.unitItemsRow}>
-                        {unit.items.map(item => (
-                          <Image
-                            key={item.id}
-                            source={{uri: item.icon}}
-                            style={[styles.unitItemIcon, {
-                              width: Math.max(hexSize * 0.2, 12),
-                              height: Math.max(hexSize * 0.2, 12),
-                            }]}
-                          />
-                        ))}
-                      </View>
-                    )}
                   </View>
                 ) : (
                   <Hexagon
@@ -535,39 +367,147 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     </View>
   );
 
-  const renderCarryCard = () => (
-    <View style={styles.carryCard}>
-      <Text style={styles.sectionLabel}>Trang bị chủ lực</Text>
-      {team.carryItems.map(carry => (
-        <View key={carry.championId} style={styles.carryRow}>
-          <View style={styles.carryChampion}>
-            <Image source={{uri: carry.image}} style={styles.carryAvatar} />
-            <View>
-              <Text style={styles.carryName}>{carry.championName}</Text>
-              <Text style={styles.carryRole}>{carry.role}</Text>
-            </View>
-          </View>
-          <View style={styles.carryItemsRow}>
-            {carry.items.map(item => (
-              <Image key={item.id} source={{uri: item.icon}} style={styles.carryItemIcon} />
+  // Component to render item with its components
+  const ItemWithComponents: React.FC<{item: TeamUnitItem}> = ({item}) => {
+    const [itemDetails, setItemDetails] = useState<any>(null);
+
+    useEffect(() => {
+      if (item.apiName) {
+        getTftItemByApiName(item.apiName)
+          .then(data => {
+            setItemDetails(data);
+          })
+          .catch(() => {
+            // Ignore errors
+          });
+      }
+    }, [item.apiName]);
+
+    const components = itemDetails?.composition || [];
+
+    return (
+      <View style={styles.itemWithComponents}>
+        <Image source={{uri: item.icon}} style={styles.carryItemIcon} />
+        {components.length > 0 && (
+          <View style={styles.itemComponentsRow}>
+            {components.map((component: string, idx: number) => (
+              <Image
+                key={idx}
+                source={{
+                  uri: `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`,
+                }}
+                style={styles.componentIcon}
+              />
             ))}
           </View>
-        </View>
-      ))}
-    </View>
-  );
+        )}
+      </View>
+    );
+  };
 
-  const renderNotes = () => (
-    <View style={styles.highlightsCard}>
-      <Text style={styles.sectionLabel}>Ghi chú vận hành</Text>
-      {team.notes.map(note => (
-        <View key={note} style={styles.highlightItem}>
-          <View style={styles.highlightBullet} />
-          <Text style={styles.highlightText}>{note}</Text>
-        </View>
-      ))}
-    </View>
-  );
+  const renderCarryUnits = () => {
+    // Filter units that have items
+    const unitsWithItems = team.units.filter(unit => unit.items && unit.items.length > 0);
+    
+    if (unitsWithItems.length === 0) {
+      return null;
+    }
+
+    // Get traits for each unit from LocalStorage
+    const getUnitTraits = (unit: TeamUnit): string[] => {
+      if (!unit.championKey || !language) {
+        return [];
+      }
+
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const unitsKey = `data_units_${locale}`;
+        const unitsDataString = LocalStorage.getString(unitsKey);
+        
+        if (!unitsDataString) {
+          return [];
+        }
+
+        const unitsData = JSON.parse(unitsDataString);
+        let localizedUnit: any = null;
+
+        // Handle both array and object formats
+        if (Array.isArray(unitsData)) {
+          localizedUnit = unitsData.find((localUnit: any) => {
+            if (unit.championKey && localUnit.apiName === unit.championKey) {
+              return true;
+            }
+            if (unit.name && localUnit.name) {
+              return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+            }
+            return false;
+          });
+        } else if (typeof unitsData === 'object' && unitsData !== null) {
+          if (unit.championKey && unitsData[unit.championKey]) {
+            localizedUnit = unitsData[unit.championKey];
+          } else {
+            const unitsArray = Object.values(unitsData) as any[];
+            localizedUnit = unitsArray.find((localUnit: any) => {
+              if (unit.championKey && localUnit.apiName === unit.championKey) {
+                return true;
+              }
+              if (unit.name && localUnit.name) {
+                return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+              }
+              return false;
+            });
+          }
+        }
+
+        if (localizedUnit && localizedUnit.traits) {
+          return Array.isArray(localizedUnit.traits) ? localizedUnit.traits : [];
+        }
+        return [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    return (
+      <View style={styles.carryCard}>
+        <Text style={styles.sectionLabel}>Tướng chủ lực</Text>
+        {unitsWithItems.map((unit, unitIndex) => {
+          const unitTraits = getUnitTraits(unit);
+          const isLast = unitIndex === unitsWithItems.length - 1;
+          return (
+            <View key={unit.id} style={[styles.carryRow, isLast && styles.carryRowLast]}>
+              <View style={styles.carryChampion}>
+                <Image source={{uri: unit.image}} style={styles.carryAvatar} />
+                <View style={styles.carryInfo}>
+                  <Text style={styles.carryName}>{unit.name}</Text>
+                  {unit.star && (
+                    <Text style={styles.carryRole}>
+                      {'★★★'}
+                    </Text>
+                  )}
+                  {/* Show traits */}
+                  {unitTraits.length > 0 && (
+                    <View style={styles.traitsRow}>
+                      {unitTraits.slice(0, 3).map((trait, idx) => (
+                        <View key={idx} style={styles.traitBadge}>
+                          <Text style={styles.traitText}>{trait}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              </View>
+              <View style={styles.carryItemsRow}>
+                {unit.items.map((item, itemIdx) => (
+                  <ItemWithComponents key={itemIdx} item={item} />
+                ))}
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
 
   // Render loading state
   if (isLoading && compIdFromParams) {
@@ -609,13 +549,14 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.topHeader}>
         {renderBackButton()}
-        <View style={styles.headerContent}>
-          <Text h2 bold color={colors.text} style={styles.headerTitle}>
-            {team.name}
-          </Text>
-          <Text color={colors.text} style={styles.headerPlan}>
-            {team.plan}
-          </Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Tier and Name */}
+        <View style={styles.compositionHeader}>
           {team.tier && (
             <View style={[styles.tierBadge, {backgroundColor: getRankColor(team.tier)}]}>
               <Text style={[styles.tierBadgeText, {color: getContrastTextColor()}]}>
@@ -623,29 +564,13 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
               </Text>
             </View>
           )}
-          <View style={[styles.metaPill, styles.metaPillSecondary]}>
-            <Text style={styles.metaPillText}>{team.difficulty}</Text>
-          </View>
-          <Text style={styles.toggleLabel}>Cuối game</Text>
-          <Switch
-            value={isLateGame}
-            onValueChange={setIsLateGame}
-            trackColor={{
-              false: colors.borderColor,
-              true: '#facc15' + '80',
-            }}
-            thumbColor={isLateGame ? '#facc15' : colors.placeholder}
-          />
+          <Text h2 bold color={colors.text} style={styles.compositionName}>
+            {team.name}
+          </Text>
         </View>
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <View style={styles.synergyRow}>
+        {!!team?.synergies && <View style={styles.synergyRow}>
           {team.synergies.map(renderSynergy)}
-        </View>
+         </View>}
 
         <View style={styles.mainLayout}>
           <View style={styles.boardColumn}>
@@ -653,8 +578,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           </View>
         </View>
 
-        {renderCarryCard()}
-        {renderNotes()}
+        {renderCarryUnits()}
       </ScrollView>
     </SafeAreaView>
   );

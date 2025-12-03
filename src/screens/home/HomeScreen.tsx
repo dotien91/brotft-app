@@ -49,14 +49,20 @@ const HomeScreen: React.FC = () => {
 
     return compositions.map(comp => {
       // Map units to champions
-      const champions = comp.units.map(unit => ({
-        id: unit.championId || unit.championKey,
-        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-        items: (unit.itemsDetails || []).map(itemDetail => ({
-          icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
-        })),
-        need3Star: unit.need3Star || false,
-      }));
+      const champions = comp.units.map(unit => {
+        // Map items from apiName strings to icon URLs (like ItemsTab does)
+        const itemIcons = (unit.items || []).map(apiName => {
+          // Use Data Dragon URL format (same as GuideItemItem)
+          return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${apiName}.png`;
+        });
+
+        return {
+          id: unit.championId || unit.championKey,
+          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+          items: itemIcons.map(icon => ({icon})),
+          need3Star: unit.need3Star || false,
+        };
+      });
 
       // Extract all items from units (flatten and deduplicate by ID)
       const allItems = comp.units
@@ -122,6 +128,7 @@ const HomeScreen: React.FC = () => {
     return '#000000';
   };
   const renderTeamCard = ({item}: {item: TeamComp}) => {
+    console.log('item', item?.items);
     const displayTier = item.tier || item.rank;
     const backgroundColor = getRankColor(displayTier);
     const textColor = getContrastTextColor();

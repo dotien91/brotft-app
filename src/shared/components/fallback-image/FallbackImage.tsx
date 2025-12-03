@@ -23,17 +23,12 @@ const FallbackImage: React.FC<FallbackImageProps> = ({
 
   const currentSource = sources[currentIndex];
 
-  // Log current source being tried
-    console.log('[FallbackImage] Trying to load image:', currentSource);
-
   const handleError = () => {
-      console.log('[FallbackImage] Failed to load image:', sources[currentIndex], 'trying next URL...');
     if (currentIndex < sources.length - 1) {
       // Try next URL
       setCurrentIndex(currentIndex + 1);
     } else {
       // All URLs failed
-        console.log('[FallbackImage] All URLs failed, using default source or returning null');
       setHasError(true);
     }
   };

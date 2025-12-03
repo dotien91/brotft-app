@@ -127,10 +127,8 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
           style={styles.icon}
           resizeMode="cover"
           onError={async () => {
-            console.log('Failed to load item image:', imageUri);
             try {
               // await deleteTftItem(String(data.id));
-              console.log(`[GuideItemItem] Deleted item without avatar: ${data.name} (id: ${data.id})`);
             } catch (error) {
               console.error(`[GuideItemItem] Error deleting item ${data.id}:`, error);
             }

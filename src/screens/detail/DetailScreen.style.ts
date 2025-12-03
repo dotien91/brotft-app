@@ -333,6 +333,7 @@ export default (theme: ExtendedTheme) => {
     },
     boardWrapper: {
       paddingVertical: 8,
+      marginLeft: -20,
     },
     board: {
       paddingVertical: 4,
@@ -340,13 +341,15 @@ export default (theme: ExtendedTheme) => {
     boardRow: {
       flexDirection: 'row',
       justifyContent: 'center',
+      marginBottom: -10,
     },
     boardRowOffset: {
       marginLeft: '7%',
     },
     hexCellContainer: {
       marginHorizontal: 1,
-      marginVertical: 1,
+      marginTop: 1,
+      marginBottom: -2,
       alignItems: 'center',
       justifyContent: 'center',
     },

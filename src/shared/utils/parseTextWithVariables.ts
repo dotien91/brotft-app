@@ -38,16 +38,8 @@ export const parseTextWithVariables = (
   
   // Add calculations (parse complex calculation structure)
   if (calculations && typeof calculations === 'object') {
-    if (__DEV__) {
-      console.log('[parseTextWithVariables] Processing calculations:', calculations);
-    }
-    
     Object.keys(calculations).forEach((key) => {
       const calcValue = calculations[key];
-      
-      if (__DEV__) {
-        console.log(`[parseTextWithVariables] Processing calculation key: ${key}`, calcValue);
-      }
       
       // If calculation is an array, try to extract values
       if (Array.isArray(calcValue)) {
@@ -362,20 +354,6 @@ export const parseTextWithVariables = (
                 }
                 
                 calculatedResults.push(calculatedValue);
-                
-                if (__DEV__) {
-                  console.log(`[parseTextWithVariables] Calculated value for ${key} (part: ${partName}, baseValue:`, baseValue, `, mRatio:`, mRatio, `, displayAsPercent:`, calcItem.displayAsPercent, `, result:`, calculatedValue, `)`);
-                }
-              } else {
-                if (__DEV__) {
-                  console.log(`[parseTextWithVariables] Could not find baseValue for part: ${partName}`, {
-                    partName,
-                    variableMapKeys: Object.keys(variableMap),
-                    varsToUseNames: varsToUse?.map((v: any) => ({name: v.name, value: v.value})),
-                    calculationsKeys: Object.keys(calculations || {}),
-                    unitStats: unit?.stats,
-                  });
-                }
               }
             }
           }
@@ -383,9 +361,6 @@ export const parseTextWithVariables = (
         
         // Combine results if multiple
         if (calculatedResults.length > 0) {
-          if (__DEV__) {
-            console.log(`[parseTextWithVariables] Combined results for ${key}:`, calculatedResults);
-          }
           if (calculatedResults.every(v => Array.isArray(v))) {
             // Sum arrays element-wise
             const maxLength = Math.max(...calculatedResults.map((arr: any) => arr.length));
@@ -406,30 +381,16 @@ export const parseTextWithVariables = (
             }, 0);
             variableMap[key] = sum;
           }
-          
-          if (__DEV__) {
-            console.log(`[parseTextWithVariables] Final value for ${key} in variableMap:`, variableMap[key]);
-          }
         } else {
           // If no calculated results, try to use the calculation structure as fallback
           // This might contain pre-calculated values
           variableMap[key] = calcValue;
-          if (__DEV__) {
-            console.log(`[parseTextWithVariables] No calculated results for ${key}, using calcValue as fallback:`, calcValue);
-          }
         }
       } else {
         // If calculation is not an array, use it directly
         variableMap[key] = calcValue;
-        if (__DEV__) {
-          console.log(`[parseTextWithVariables] Non-array calculation for ${key}, using directly:`, calcValue);
-        }
       }
     });
-    
-    if (__DEV__) {
-      console.log('[parseTextWithVariables] Final variableMap after calculations:', variableMap);
-    }
   }
   
   if (Object.keys(variableMap).length > 0) {

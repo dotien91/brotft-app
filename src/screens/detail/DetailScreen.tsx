@@ -9,7 +9,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../utils/metatft';
+import {getUnitAvatarUrl} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 
 const TFT_IMAGE_VERSION = '14.15.1';
@@ -308,21 +308,25 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         isLateGame: compositionData.isLateGame,
         boardSize: compositionData.boardSize,
         synergies: compositionData.synergies || [],
-        units: compositionData.units.map(unit => ({
-          id: unit.championId || unit.championKey,
-          name: unit.name,
-          cost: unit.cost,
-          star: unit.star,
-          carry: unit.carry || false,
-          need3Star: unit.need3Star || false,
-          position: unit.position,
-          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-          items: (unit.itemsDetails || []).map(itemDetail => ({
-            icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
-            id: itemDetail.id,
-            name: itemDetail.name,
-          })),
-        })),
+        units: compositionData.units.map(unit => {
+          // Map items from apiName strings to icon URLs (like ItemsTab does)
+          const itemIcons = (unit.items || []).map(apiName => {
+            // Use Data Dragon URL format (same as GuideItemItem)
+            return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${apiName}.png`;
+          });
+
+          return {
+            id: unit.championId || unit.championKey,
+            name: unit.name,
+            cost: unit.cost,
+            star: unit.star,
+            carry: unit.carry || false,
+            need3Star: unit.need3Star || false,
+            position: unit.position,
+            image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+            items: itemIcons.map(icon => ({icon})),
+          };
+        }),
         bench: [],
         carryItems: [],
         notes: compositionData.notes || [],
@@ -384,19 +388,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     const rows = team.boardSize.rows || 4;
     const cols = team.boardSize.cols || 7;
     
-    if (__DEV__) {
-      console.log('[DetailScreen] Board rendering:', {
-        boardSize: {rows, cols},
-        totalCells: rows * cols,
-        unitsCount: team.units.length,
-        unitPositions: team.units.map(u => ({
-          name: u.name,
-          position: u.position, // API position (1-based)
-          arrayIndex: {row: u.position.row - 1, col: u.position.col - 1}, // Array index (0-based)
-        })),
-      });
-    }
-    
     return Array.from({length: rows}).map((_, rowIndex) =>
       Array.from({length: cols}).map((_, colIndex) => {
         // Convert array index (0-based) to API position (1-based) for comparison
@@ -447,13 +438,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     
     return (
       <>
-        {unit.star ? (
-          <View style={[styles.starBadge, {top: -hexSize * 0.1}]}>
-            <Text style={[styles.starText, {fontSize: hexSize * 0.16}]}>
-              {'★'.repeat(unit.star)}
-            </Text>
-          </View>
-        ) : null}
         {unit.carry ? (
           <View style={[
             styles.carryBadge,
@@ -480,7 +464,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
             key={`row-${rowIndex}`}
             style={[
               styles.boardRow,
-              rowIndex % 2 !== 0 && {marginLeft: hexSize * 0.5},
+              rowIndex % 2 !== 0 && {marginLeft: hexSize},
             ]}>
             {row.map((unit, colIndex) => (
               <View
@@ -512,11 +496,11 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                       {/* 3 Stars icon */}
                       {unit.need3Star && (
                         <View style={[styles.tier3Icon, {
-                          top: -hexSize * 0.15,
-                          right: -hexSize * 0.1,
+                          top: -8,
+                          right: 5,
                         }]}>
-                          <ThreeStars size={Math.max(hexSize * 0.4, 24)} color="#fbbf24" />
-                        </View>
+                          <ThreeStars size={Math.max(hexSize * 0.6, 36)} color="#fbbf24" />
+                          </View>
                       )}
                     </View>
                     {/* Items below unit */}

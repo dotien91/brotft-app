@@ -111,12 +111,14 @@ export default (theme: ExtendedTheme) => {
       justifyContent: 'center',
       flexWrap: 'wrap',
       gap: 2,
+      marginTop: 4,
       minHeight: 14, // Đảm bảo chiều cao tối thiểu cho items row
     },
     championItemIcon: {
-      width: 12,
-      height: 12,
+      width: 14,
+      height: 14,
       borderRadius: 3,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
   });
 };

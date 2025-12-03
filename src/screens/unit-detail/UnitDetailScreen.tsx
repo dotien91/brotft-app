@@ -458,7 +458,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                             style={styles.abilityIcon}
                             resizeMode="cover"
                             onError={() => {
-                              console.log('[UnitDetailScreen] Failed to load ability icon from metatft.com:', abilityIconUrl);
+                              // Failed to load ability icon
                             }}
                           />
                         );

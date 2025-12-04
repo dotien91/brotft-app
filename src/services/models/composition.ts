@@ -15,6 +15,7 @@ export interface ICompositionUnit {
   star: number;
   carry: boolean;
   need3Star: boolean;
+  needUnlock?: boolean;
   position: {
     row: number;
     col: number;

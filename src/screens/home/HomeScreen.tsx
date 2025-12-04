@@ -23,6 +23,7 @@ interface TeamComp {
     image: string;
     items?: Array<{icon: string}>;
     need3Star?: boolean;
+    needUnlock?: boolean;
   }>;
   items: Array<{icon: string}>;
   composition: IComposition; // Store original composition for navigation
@@ -56,6 +57,7 @@ const HomeScreen: React.FC = () => {
           icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
         })),
         need3Star: unit.need3Star || false,
+        needUnlock: unit.needUnlock || false,
       }));
 
       // Extract all items from units (flatten and deduplicate by ID)
@@ -160,6 +162,15 @@ const HomeScreen: React.FC = () => {
               {champion.need3Star && (
                 <View style={styles.tier3Icon}>
                   <ThreeStars size={36} color="#fbbf24" />
+                </View>
+              )}
+              {champion.needUnlock && (
+                <View style={styles.unlockBadge}>
+                  <Image
+                    source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                    style={styles.unlockIcon}
+                    resizeMode="contain"
+                  />
                 </View>
               )}
             </View>

@@ -16,6 +16,10 @@ interface Style {
   unitAvatarContainer: ViewStyle;
   unitInfo: ViewStyle;
   unitName: TextStyle;
+  unitNameRow: ViewStyle;
+  unlockRow: ViewStyle;
+  unlockIcon: ImageStyle;
+  unlockText: TextStyle;
   traitsRow: ViewStyle;
   traitBadge: ViewStyle;
   traitIcon: ImageStyle;
@@ -43,6 +47,8 @@ interface Style {
   variableItem: ViewStyle;
   variableName: TextStyle;
   variableValue: TextStyle;
+  unlockSection: ViewStyle;
+  unlockCard: ViewStyle;
   augmentsSection: ViewStyle;
   augmentCard: ViewStyle;
   augmentHeader: ViewStyle;
@@ -131,13 +137,36 @@ export default (theme: ExtendedTheme) => {
     unitInfo: {
       flex: 1,
     },
+    unitNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
     unitName: {
       fontSize: 24,
-      marginBottom: 6,
+      marginBottom: 4,
       letterSpacing: -0.5,
       textShadowColor: 'rgba(0, 0, 0, 0.8)',
       textShadowOffset: {width: 0, height: 2},
       textShadowRadius: 4,
+    },
+    unlockRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 6,
+    },
+    unlockIcon: {
+      width: 16,
+      height: 16,
+    },
+    unlockText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.text,
+      textShadowColor: 'rgba(0, 0, 0, 0.8)',
+      textShadowOffset: {width: 0, height: 1},
+      textShadowRadius: 2,
     },
     traitsRow: {
       flexDirection: 'row',
@@ -300,6 +329,19 @@ export default (theme: ExtendedTheme) => {
       fontSize: 11,
       fontWeight: '700',
       color: colors.text,
+    },
+    unlockSection: {
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+    },
+    unlockCard: {
+      backgroundColor: '#252836',
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: '#2a2d3a',
+      marginTop: 4,
     },
     augmentsSection: {
       paddingHorizontal: 16,

@@ -41,6 +41,7 @@ export const translations = new LocalizedStrings({
     ability: "Yetenek",
     suggestedItems: "Önerilen Eşyalar",
     abilityCanCrit: "Yetenek kritik vurabilir.",
+    unlock: "Aç",
   },
   en: {
     noLocationService: "Location Service Not Available",
@@ -83,6 +84,7 @@ export const translations = new LocalizedStrings({
     ability: "Ability",
     suggestedItems: "Suggested Items",
     abilityCanCrit: "Ability can crit.",
+    unlock: "Unlock",
   },
   vi: {
     noLocationService: "Dịch vụ vị trí không khả dụng",
@@ -125,6 +127,7 @@ export const translations = new LocalizedStrings({
     ability: "Kỹ Năng",
     suggestedItems: "Đề xuất Trang bị",
     abilityCanCrit: "Kỹ năng có thể gây chí mạng.",
+    unlock: "Mở khóa",
   },
   "zh-CN": {
     noLocationService: "位置服务不可用",
@@ -167,6 +170,7 @@ export const translations = new LocalizedStrings({
     ability: "技能",
     suggestedItems: "推荐装备",
     abilityCanCrit: "技能可以暴击。",
+    unlock: "解锁",
   },
 });
 

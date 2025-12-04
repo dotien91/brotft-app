@@ -64,6 +64,8 @@ interface Style {
   costText: TextStyle;
   carryBadge: ViewStyle;
   carryText: TextStyle;
+  unlockBadge: ViewStyle;
+  unlockIcon: ImageStyle;
   itemRow: ViewStyle;
   itemIcon: ImageStyle;
   benchRow: ViewStyle;
@@ -463,6 +465,23 @@ export default (theme: ExtendedTheme) => {
       fontSize: 11,
       fontWeight: '800',
       color: colors.white,
+    },
+    unlockBadge: {
+      position: 'absolute',
+      bottom: -8,
+      right: -8,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    unlockIcon: {
+      width: 14,
+      height: 14,
     },
     itemRow: {
       position: 'absolute',

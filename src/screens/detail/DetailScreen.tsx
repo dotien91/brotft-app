@@ -40,6 +40,7 @@ type TeamUnit = {
   star?: number;
   carry?: boolean;
   need3Star?: boolean;
+  needUnlock?: boolean;
   position: {
     row: number;
     col: number;
@@ -315,6 +316,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           star: unit.star,
           carry: unit.carry || false,
           need3Star: unit.need3Star || false,
+          needUnlock: unit.needUnlock || false,
           position: unit.position,
           image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
           items: (unit.itemsDetails || []).map(itemDetail => ({
@@ -466,6 +468,15 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
             }
           ]}>
             <Text style={[styles.carryText, {fontSize: hexSize * 0.18}]}>C</Text>
+          </View>
+        ) : null}
+        {unit.needUnlock ? (
+          <View style={styles.unlockBadge}>
+            <Image
+              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+              style={styles.unlockIcon}
+              resizeMode="contain"
+            />
           </View>
         ) : null}
       </>

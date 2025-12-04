@@ -16,6 +16,8 @@ interface Style {
   hexagonInner: ViewStyle;
   championAvatar: ImageStyle;
   tier3Icon: ImageStyle;
+  unlockBadge: ViewStyle;
+  unlockIcon: ImageStyle;
   championItemsRow: ViewStyle;
   championItemIcon: ImageStyle;
 }
@@ -104,6 +106,24 @@ export default (theme: ExtendedTheme) => {
       width: 36,
       height: 36,
       zIndex: 10,
+    },
+    unlockBadge: {
+      position: 'absolute',
+      bottom: -6,
+      right: -4,
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      zIndex: 9,
+    },
+    unlockIcon: {
+      width: 12,
+      height: 12,
     },
     championItemsRow: {
       flexDirection: 'row',

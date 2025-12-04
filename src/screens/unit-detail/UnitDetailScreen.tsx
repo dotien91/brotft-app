@@ -39,6 +39,8 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const [localizedAbilityName, setLocalizedAbilityName] = useState<string | null>(null);
   const [localizedAbilityDesc, setLocalizedAbilityDesc] = useState<string | null>(null);
   const [localizedTooltipElements, setLocalizedTooltipElements] = useState<any[] | null>(null);
+  // Có thể là string hoặc object (chứa levelRequired, conditions,...)
+  const [localizedUnlockText, setLocalizedUnlockText] = useState<any | null>(null);
 
   // Update translations when language changes
   useEffect(() => {
@@ -61,9 +63,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     isError: isErrorById,
     error: errorById,
     refetch: refetchById,
-  } = useTftUnitById(unitId || '', {
-    enabled: !!unitId && !unitApiName,
-  });
+  } = useTftUnitById(unitId || '');
 
   const {
     data: unitByApiName,
@@ -71,9 +71,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     isError: isErrorByApiName,
     error: errorByApiName,
     refetch: refetchByApiName,
-  } = useTftUnitByApiName(unitApiName || '', {
-    enabled: !!unitApiName,
-  });
+  } = useTftUnitByApiName(unitApiName || '');
 
   const unit = unitApiName ? unitByApiName : unitById;
   const isLoading = unitApiName ? isLoadingByApiName : isLoadingById;
@@ -81,10 +79,13 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const error = unitApiName ? errorByApiName : errorById;
   const refetch = unitApiName ? refetchByApiName : refetchById;
 
-  // Get localized name from storage
+  // Flag từ API: chỉ show unlock khi needUnlock = true
+  const needUnlock = !!(unit && (unit as any).needUnlock);
+  // Get localized name, ability & unlock info from storage (per language)
   useEffect(() => {
     if (!unit || !language) {
       setLocalizedName(null);
+      setLocalizedUnlockText(null);
       return;
     }
 
@@ -95,6 +96,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
       
       if (!unitsDataString) {
         setLocalizedName(null);
+        setLocalizedUnlockText(null);
         return;
       }
 
@@ -151,6 +153,21 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         } else {
           setLocalizedName(null);
         }
+
+        // Set localized unlock info (from local data)
+        if (
+          localizedUnit.unlockInfo ||
+          localizedUnit.unlock ||
+          localizedUnit.unlock_text
+        ) {
+          setLocalizedUnlockText(
+            localizedUnit.unlockInfo ||
+              localizedUnit.unlock ||
+              localizedUnit.unlock_text,
+          );
+        } else {
+          setLocalizedUnlockText(null);
+        }
         
         // Set localized ability name and description
         if (localizedUnit.ability) {
@@ -179,6 +196,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         }
       } else {
         setLocalizedName(null);
+        setLocalizedUnlockText(null);
         setLocalizedAbilityName(null);
         setLocalizedAbilityDesc(null);
         setLocalizedTooltipElements(null);
@@ -186,11 +204,105 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     } catch (error) {
       console.error('Error loading localized unit data:', error);
       setLocalizedName(null);
+      setLocalizedUnlockText(null);
       setLocalizedAbilityName(null);
       setLocalizedAbilityDesc(null);
       setLocalizedTooltipElements(null);
     }
   }, [unit, language]);
+
+  // Unlock info ưu tiên lấy từ data local theo ngôn ngữ,
+  // fallback nhẹ sang field từ API nếu local không có.
+  // Đảm bảo luôn convert sang string trước khi render.
+  const unlockText: string | null = useMemo(() => {
+    const rawFromLocal = localizedUnlockText;
+
+    const getRawFromApi = () => {
+      if (!unit) {
+        return null;
+      }
+      const anyUnit: any = unit;
+      return (
+        anyUnit.unlockInfo ??
+        anyUnit.unlock_text ??
+        anyUnit.unlockKey ??
+        anyUnit.unlock ??
+        null
+      );
+    };
+
+    const raw = rawFromLocal ?? getRawFromApi();
+    if (raw == null) {
+      return null;
+    }
+
+    if (typeof raw === 'string') {
+      return raw;
+    }
+
+    if (typeof raw === 'number' || typeof raw === 'boolean') {
+      return String(raw);
+    }
+
+    if (typeof raw === 'object') {
+      try {
+        const {levelRequired, manual_conditions, conditions} = raw as any;
+        const parts: string[] = [];
+
+        if (levelRequired != null) {
+          parts.push(`Level ${levelRequired}`);
+        }
+
+        if (manual_conditions) {
+          parts.push(String(manual_conditions));
+        }
+
+        if (Array.isArray(conditions) && conditions.length > 0) {
+          const conditionTexts = conditions
+            .map((c: any) => {
+              if (!c) {
+                return null;
+              }
+              // Ưu tiên mô tả dễ đọc
+              if (c.description) {
+                return String(c.description);
+              }
+              if (c.milestoneName) {
+                return String(c.milestoneName);
+              }
+              if (c.DescriptionTra) {
+                return String(c.DescriptionTra);
+              }
+              // Fallback: stringify gọn
+              try {
+                return JSON.stringify(c);
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean) as string[];
+
+          if (conditionTexts.length > 0) {
+            parts.push(conditionTexts.join(' • '));
+          }
+        }
+
+        if (parts.length > 0) {
+          return parts.join(' • ');
+        }
+      } catch (e) {
+        // ignore and fallback to JSON stringify
+      }
+
+      try {
+        return JSON.stringify(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
+  }, [localizedUnlockText, unit]);
 
   const renderBackButton = () => (
     <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
@@ -338,9 +450,18 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 />
               </View>
               <View style={styles.unitInfo}>
-                <Text h1 bold color={colors.text} style={styles.unitName}>
-                  {localizedName || unit.name}
-                </Text>
+                <View style={styles.unitNameRow}>
+                  <Text h1 bold color={colors.text} style={styles.unitName}>
+                    {localizedName || unit.name}
+                  </Text>
+                  {needUnlock && (
+                    <Image
+                      source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                      style={styles.unlockIcon}
+                      resizeMode="contain"
+                    />
+                  )}
+                </View>
                 <View style={styles.traitsRow}>
                   {renderTraits()}
                 </View>
@@ -514,6 +635,25 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                   }}
                 />
               )}
+            </View>
+          </View>
+        )}
+
+        {/* Unlock Section riêng - chỉ hiển thị khi API đánh dấu needUnlock */}
+        {needUnlock && unlockText && (
+          <View style={styles.unlockSection}>
+            <Text h3 bold color={colors.text} style={styles.sectionTitle}>
+              {translations.unlock}
+            </Text>
+            <View style={styles.unlockCard}>
+              <View style={styles.unlockRow}>
+                <Image
+                  source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                  style={styles.unlockIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.unlockText}>{unlockText}</Text>
+              </View>
             </View>
           </View>
         )}

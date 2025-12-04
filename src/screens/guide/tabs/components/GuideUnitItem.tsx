@@ -137,9 +137,18 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
 
       {/* Unit Info */}
       <View style={styles.infoContainer}>
-        <Text style={styles.unitName} numberOfLines={1}>
-          {localizedName || name}
-        </Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.unitName} numberOfLines={1}>
+            {localizedName || name}
+          </Text>
+          {data.needUnlock && (
+            <Image
+              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+              style={styles.unlockIcon}
+              resizeMode="contain"
+            />
+          )}
+        </View>
         {cost !== null && cost !== undefined && (
           <UnitCost cost={cost} size={16} active={false} />
         )}

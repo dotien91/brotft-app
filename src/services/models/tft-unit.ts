@@ -39,6 +39,7 @@ export interface ITftUnit {
   ability?: IAbility | null;
   stats?: IUnitStats | null;
   traits?: string[];
+  needUnlock?: boolean; // Flag từ API: tướng này có điều kiện unlock đặc biệt
   createdAt?: Date | string;
   updatedAt?: Date | string;
   deletedAt?: Date | string | null;

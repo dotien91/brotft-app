@@ -5,7 +5,9 @@ interface Style {
   container: ViewStyle;
   avatarContainer: ViewStyle;
   infoContainer: ViewStyle;
+  nameRow: ViewStyle;
   unitName: TextStyle;
+  unlockIcon: ImageStyle;
   costContainer: ViewStyle;
   costText: TextStyle;
   traitsContainer: ViewStyle;
@@ -34,11 +36,20 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       marginRight: 12,
     },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
     unitName: {
       fontSize: 16,
       fontWeight: '600',
       color: colors.text,
       marginBottom: 4,
+    },
+    unlockIcon: {
+      width: 14,
+      height: 14,
     },
     costContainer: {
       flexDirection: 'row',

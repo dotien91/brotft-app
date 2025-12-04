@@ -124,6 +124,7 @@ const HomeScreen: React.FC = () => {
     return '#000000';
   };
   const renderTeamCard = ({item}: {item: TeamComp}) => {
+    console.log('item', item?.items);
     const displayTier = item.tier || item.rank;
     const backgroundColor = getRankColor(displayTier);
     const textColor = getContrastTextColor();
@@ -156,8 +157,20 @@ const HomeScreen: React.FC = () => {
                   backgroundColor={colors.card}
                   borderColor={colors.border}
                   borderWidth={2}
-                  imageUri={champion.image}
-                />
+                  imageUri={champion.image}>
+                  {/* Items inside hexagon (absolute positioned) */}
+                  {champion.items && champion.items.length > 0 && (
+                    <View style={styles.championItemsRow}>
+                      {champion.items.map((itemObj, itemIndex) => (
+                        <Image
+                          key={`champion-${index}-item-${itemIndex}`}
+                          source={{uri: itemObj.icon}}
+                          style={styles.championItemIcon}
+                        />
+                      ))}
+                    </View>
+                  )}
+                </Hexagon>
               </View>
               {champion.need3Star && (
                 <View style={styles.tier3Icon}>
@@ -174,17 +187,6 @@ const HomeScreen: React.FC = () => {
                 </View>
               )}
             </View>
-            {champion.items && champion.items.length > 0 && (
-              <View style={styles.championItemsRow}>
-                {champion.items.map((itemObj, itemIndex) => (
-                  <Image
-                    key={`champion-${index}-item-${itemIndex}`}
-                    source={{uri: itemObj.icon}}
-                    style={styles.championItemIcon}
-                  />
-                ))}
-              </View>
-            )}
           </View>
         ))}
       </View>

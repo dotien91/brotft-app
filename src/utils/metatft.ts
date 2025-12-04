@@ -107,8 +107,6 @@ export const parseIconPath = (iconPath?: string | null): string | null => {
   // Remove .TFT_Set16 or similar patterns
   const cleanedName = nameWithoutExt.replace(/\.TFT_Set\d+$/i, '');
   
-  console.log('[parseIconPath] iconPath:', iconPath, 'filename:', filename, 'cleanedName:', cleanedName);
-  
   return cleanedName || null;
 };
 
@@ -132,8 +130,6 @@ export const getUnitAbilityIconUrlFromPath = (
   const formattedKey = filename.toLowerCase();
   
   const url = `https://cdn.metatft.com/file/metatft/champions/${formattedKey}.png`;
-  
-  console.log('[getUnitAbilityIconUrlFromPath] iconPath:', iconPath, 'filename:', filename, 'formattedKey:', formattedKey, 'URL:', url);
   
   return url;
 };
@@ -188,10 +184,6 @@ export const getAugmentIconUrlFromPath = (
   const formattedKey = filename.toLowerCase();
   
   const url = `https://cdn.metatft.com/file/metatft/augments/${formattedKey}.png`;
-  
-  if (__DEV__) {
-    console.log('[getAugmentIconUrlFromPath] iconPath:', iconPath, 'filename:', filename, 'formattedKey:', formattedKey, 'URL:', url);
-  }
   
   return url;
 };

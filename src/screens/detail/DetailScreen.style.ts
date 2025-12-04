@@ -6,9 +6,8 @@ interface Style {
   scrollView: ViewStyle;
   scrollContent: ViewStyle;
   topHeader: ViewStyle;
-  headerContent: ViewStyle;
-  headerTitle: TextStyle;
-  headerPlan: TextStyle;
+  compositionHeader: ViewStyle;
+  compositionName: TextStyle;
   backButton: ViewStyle;
   sourceLabel: TextStyle;
   sourceLabelVertical: TextStyle;
@@ -105,27 +104,23 @@ export default (theme: ExtendedTheme) => {
     topHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 20,
+      paddingHorizontal: 12,
       paddingTop: 12,
       paddingBottom: 16,
       backgroundColor: '#1a1d29',
     },
-    headerContent: {
-      flex: 1,
+    compositionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginLeft: 12,
       gap: 12,
-      flexWrap: 'wrap',
+      marginBottom: 16,
+      paddingHorizontal: 12,
     },
-    headerTitle: {
+    compositionName: {
       fontSize: 24,
       fontWeight: '800',
       letterSpacing: -0.5,
-    },
-    headerPlan: {
-      fontSize: 15,
-      fontWeight: '600',
+      flex: 1,
     },
     backButton: {
       width: 44,
@@ -335,6 +330,7 @@ export default (theme: ExtendedTheme) => {
     },
     boardWrapper: {
       paddingVertical: 8,
+      marginLeft: -20,
     },
     board: {
       paddingVertical: 4,
@@ -342,13 +338,15 @@ export default (theme: ExtendedTheme) => {
     boardRow: {
       flexDirection: 'row',
       justifyContent: 'center',
+      marginBottom: -10,
     },
     boardRowOffset: {
       marginLeft: '7%',
     },
     hexCellContainer: {
       marginHorizontal: 1,
-      marginVertical: 1,
+      marginTop: 1,
+      marginBottom: -2,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -375,15 +373,19 @@ export default (theme: ExtendedTheme) => {
       zIndex: 10,
     },
     unitItemsRow: {
+      position: 'absolute',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       flexWrap: 'wrap',
       gap: 2,
-      marginTop: 4,
+      bottom: -22,
+      width: '100%',
+      zIndex: 5,
     },
     unitItemIcon: {
       borderRadius: 3,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     hexCell: {
       width: 64,
@@ -532,15 +534,16 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
     },
     carryCard: {
-      borderRadius: 24,
-      padding: 20,
+      borderRadius: 16,
+      padding: 16,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.borderColor + '55',
+      borderColor: colors.border,
       marginBottom: 20,
+      marginHorizontal: 16,
     },
     sectionLabel: {
-      fontSize: 15,
+      fontSize: 18,
       fontWeight: '800',
       marginBottom: 16,
       color: colors.text,
@@ -550,35 +553,89 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       justifyContent: 'space-between',
       marginBottom: 16,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border + '40',
+    },
+    carryRowLast: {
+      marginBottom: 0,
+      paddingBottom: 0,
+      borderBottomWidth: 0,
     },
     carryChampion: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      flex: 1,
     },
     carryAvatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.border,
+      marginRight: 12,
+    },
+    carryInfo: {
+      flex: 1,
     },
     carryName: {
-      fontSize: 15,
+      fontSize: 16,
       fontWeight: '700',
       color: colors.text,
+      marginBottom: 4,
     },
     carryRole: {
-      fontSize: 12,
-      color: colors.placeholder,
+      fontSize: 14,
+      color: colors.gold,
+      fontWeight: '600',
+      marginBottom: 6,
+    },
+    traitsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+      marginTop: 4,
+    },
+    traitBadge: {
+      backgroundColor: colors.primary + '15',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.primary + '30',
+    },
+    traitText: {
+      fontSize: 11,
+      color: colors.primary,
+      fontWeight: '600',
     },
     carryItemsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: 6,
+    },
+    itemWithComponents: {
+      alignItems: 'center',
+      gap: 4,
     },
     carryItemIcon: {
-      width: 32,
-      height: 32,
+      width: 40,
+      height: 40,
       borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    itemComponentsRow: {
+      flexDirection: 'row',
+      gap: 3,
+      justifyContent: 'center',
+    },
+    componentIcon: {
+      width: 18,
+      height: 18,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.border + '60',
     },
     highlightsCard: {
       borderRadius: 24,

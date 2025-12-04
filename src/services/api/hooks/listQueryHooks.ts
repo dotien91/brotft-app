@@ -1012,7 +1012,6 @@ export const traitKeys = {
             : null,
         }
       : undefined;
-      console.log('[traitKeys.list] serializedParams:', serializedParams);
     return [...traitKeys.lists(), serializedParams] as const;
   },
   details: () => [...traitKeys.all, 'detail'] as const,

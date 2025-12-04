@@ -302,44 +302,44 @@ const UnitsTab: React.FC = () => {
       {unitsList.length === 0 && !isLoading ? (
         renderEmpty()
       ) : (
-        <FlatList
+    <FlatList
           data={unitsList}
-          renderItem={({item}) => (
-            <GuideUnitItem
-              data={item}
-              onPress={() => handleItemPress(item.id)}
-            />
-          )}
-          keyExtractor={item => String(item.id)}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refresh}
-              tintColor={colors.primary}
-              colors={[colors.primary]}
-            />
-          }
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text color={colors.placeholder} style={styles.footerText}>
-                  Loading more...
-                </Text>
-              </View>
-            ) : !hasMore && unitsList.length > 0 ? (
-              <View style={styles.footerLoader}>
-                <Text color={colors.placeholder} style={styles.footerText}>
-                  No more units to load
-                </Text>
-              </View>
-            ) : null
-          }
+      renderItem={({item}) => (
+        <GuideUnitItem
+          data={item}
+          onPress={() => handleItemPress(item.id)}
         />
+      )}
+      keyExtractor={item => String(item.id)}
+      contentContainerStyle={styles.listContent}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={refresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.3}
+      ListFooterComponent={
+            isLoadingMore ? (
+          <View style={styles.footerLoader}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text color={colors.placeholder} style={styles.footerText}>
+              Loading more...
+            </Text>
+          </View>
+            ) : !hasMore && unitsList.length > 0 ? (
+          <View style={styles.footerLoader}>
+            <Text color={colors.placeholder} style={styles.footerText}>
+              No more units to load
+            </Text>
+          </View>
+        ) : null
+      }
+    />
       )}
     </View>
   );

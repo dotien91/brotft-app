@@ -574,14 +574,14 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                       const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
                       if (abilityIconUrl) {
                         return (
-                          <Image
+                    <Image
                             source={{uri: abilityIconUrl}}
-                            style={styles.abilityIcon}
-                            resizeMode="cover"
+                      style={styles.abilityIcon}
+                      resizeMode="cover"
                             onError={() => {
-                              console.log('[UnitDetailScreen] Failed to load ability icon from metatft.com:', abilityIconUrl);
+                              // Failed to load ability icon
                             }}
-                          />
+                    />
                         );
                       }
                     }
@@ -589,11 +589,11 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     // Fallback to unit avatar
                     if (avatarUri) {
                       return (
-                        <Image
-                          source={{uri: avatarUri}}
-                          style={styles.abilityIcon}
-                          resizeMode="cover"
-                        />
+                    <Image
+                      source={{uri: avatarUri}}
+                      style={styles.abilityIcon}
+                      resizeMode="cover"
+                    />
                       );
                     }
                     

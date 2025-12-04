@@ -194,9 +194,9 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
           return item.icon;
         }
         // If icon is a path, try to construct URL
-        if (item.icon.startsWith('/')) {
-          return `${API_BASE_URL}${item.icon}`;
-        }
+          if (item.icon.startsWith('/')) {
+            return `${API_BASE_URL}${item.icon}`;
+          }
       }
       
       // Fallback to Data Dragon
@@ -212,7 +212,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     // Get component image URL
     const getComponentImageUrl = (component: string) => {
       // Components in ITftItem are strings (apiName)
-      return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`;
+        return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`;
     };
 
     // Parse variables in description (replace @...@ with values from effects)
@@ -225,7 +225,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
       parsed = parsed.replace(/<[^>]*>/g, '');
       // Replace <br> with newline
       parsed = parsed.replace(/<br\s*\/?>/gi, '\n');
-      
+
       // Parse @ variables from effects
       if (item.effects && typeof item.effects === 'object') {
         // Find all @...@ patterns
@@ -260,7 +260,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
               value = item.effects[foundKey];
             }
           }
-          
+    
           // Handle stage values (arrays)
           if (Array.isArray(value)) {
             // If it's an array, show as range or all values
@@ -276,7 +276,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
                   value = min;
                 } else {
                   value = `${min}/${max}`;
-                }
+        }
               }
             } else {
               value = null;

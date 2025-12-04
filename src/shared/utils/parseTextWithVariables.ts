@@ -355,9 +355,6 @@ export const parseTextWithVariables = (
                 }
                 
                 calculatedResults.push(calculatedValue);
-                
-              } else {
-               
               }
             }
           }

@@ -43,7 +43,6 @@ const HomeScreen: React.FC = () => {
     refresh,
     isRefetching,
   } = useCompositionsWithPagination(10);
-
   // Map IComposition to TeamComp format
   const teamComps = useMemo<TeamComp[]>(() => {
     if (!compositions) return [];

@@ -123,6 +123,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   } = useCompositionByCompId(compIdFromParams || '', {
     enabled: !!compIdFromParams,
   });
+console.log('compositionData', compositionData);
+
 
   // Map IComposition to TeamComposition format
   const team = useMemo<TeamComposition>(() => {
@@ -166,12 +168,14 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     return teamFromParams;
   }, [compositionData, routeProp, route]);
 
-  const [isLateGame, setIsLateGame] = useState(team.isLateGame);
+  const [isLateGame, setIsLateGame] = useState(team?.isLateGame ?? false);
 
   // Update isLateGame when team changes
   useEffect(() => {
-    setIsLateGame(team.isLateGame);
-  }, [team.isLateGame]);
+    if (team) {
+      setIsLateGame(team.isLateGame);
+    }
+  }, [team?.isLateGame]);
 
   // Get tier color
   const getRankColor = (tier?: string) => {
@@ -211,6 +215,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   // Note: API uses 1-based indexing (row: 1, col: 1 is first cell)
   // Array uses 0-based indexing, so we need to convert
   const boardRows = useMemo(() => {
+    if (!team) return [];
     const rows = team.boardSize.rows || 4;
     const cols = team.boardSize.cols || 7;
     
@@ -409,6 +414,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   };
 
   const renderCarryUnits = () => {
+    if (!team) return null;
     // Filter units that have items
     const unitsWithItems = team.units.filter(unit => unit.items && unit.items.length > 0);
     

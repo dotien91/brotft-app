@@ -140,6 +140,7 @@ console.log('compositionData', compositionData);
         boardSize: compositionData.boardSize,
         synergies: compositionData.synergies || [],
         units: compositionData.units.map(unit => ({
+          ...unit,
           id: unit.championId || unit.championKey,
           name: unit.name,
           cost: unit.cost,
@@ -149,11 +150,6 @@ console.log('compositionData', compositionData);
           needUnlock: unit.needUnlock || false,
           position: unit.position,
           image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-          items: (unit.itemsDetails || []).map(itemDetail => ({
-            icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
-            id: itemDetail.id,
-            name: itemDetail.name,
-          })),
         })),
         bench: [],
         carryItems: [],
@@ -417,7 +413,7 @@ console.log('compositionData', compositionData);
     if (!team) return null;
     // Filter units that have items
     const unitsWithItems = team.units.filter(unit => unit.items && unit.items.length > 0);
-    
+    console.log('unitsWithItems', team.units);
     if (unitsWithItems.length === 0) {
       return null;
     }

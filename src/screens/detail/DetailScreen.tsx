@@ -9,12 +9,13 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarUrl, getTraitIconUrl} from '../../utils/metatft';
+import {getUnitAvatarUrl, getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import {getTftItemByApiName} from '@services/api/tft-items';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
+import {SCREENS} from '@shared-constants';
 
 const TFT_IMAGE_VERSION = '14.15.1';
 const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
@@ -123,12 +124,87 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   } = useCompositionByCompId(compIdFromParams || '', {
     enabled: !!compIdFromParams,
   });
-console.log('compositionData', compositionData);
 
+  // Helper function to get localized item data
+  const getLocalizedItem = (itemApiName: string, itemsData: any): TeamUnitItem => {
+    if (!itemApiName) {
+      return {
+        id: '',
+        name: '',
+        icon: '',
+        apiName: '',
+      };
+    }
+    
+    if (!itemsData) {
+      // Fallback: return item with apiName only
+      return {
+        id: itemApiName,
+        name: itemApiName,
+        icon: getItemIconUrlFromPath(null, itemApiName),
+        apiName: itemApiName,
+      };
+    }
+
+    let localizedItem: any = null;
+
+    // Handle both array and object formats
+    if (Array.isArray(itemsData)) {
+      localizedItem = itemsData.find((localItem: any) => {
+        if (localItem.apiName === itemApiName) {
+          return true;
+        }
+        return false;
+      });
+    } else if (typeof itemsData === 'object' && itemsData !== null) {
+      // Try to find by apiName as key first
+      if (itemsData[itemApiName]) {
+        localizedItem = itemsData[itemApiName];
+      } else {
+        // Otherwise, search through object values
+        const itemsArray = Object.values(itemsData) as any[];
+        localizedItem = itemsArray.find((localItem: any) => {
+          return localItem.apiName === itemApiName;
+        });
+      }
+    }
+
+    if (localizedItem) {
+      return {
+        id: localizedItem.id || itemApiName,
+        name: localizedItem.name || itemApiName,
+        icon: getItemIconUrlFromPath(localizedItem.icon, localizedItem.apiName || itemApiName),
+        apiName: localizedItem.apiName || itemApiName,
+      };
+    }
+
+    // Fallback: return item with apiName only
+    return {
+      id: itemApiName,
+      name: itemApiName,
+      icon: getItemIconUrlFromPath(null, itemApiName),
+      apiName: itemApiName,
+    };
+  };
 
   // Map IComposition to TeamComposition format
   const team = useMemo<TeamComposition>(() => {
     if (compositionData) {
+      // Get localized items data
+      let itemsData: any = null;
+      if (language) {
+        try {
+          const locale = getLocaleFromLanguage(language);
+          const itemsKey = `data_items_${locale}`;
+          const itemsDataString = LocalStorage.getString(itemsKey);
+          if (itemsDataString) {
+            itemsData = JSON.parse(itemsDataString);
+          }
+        } catch (error) {
+          console.error('Error loading items data:', error);
+        }
+      }
+
       return {
         id: compositionData.id,
         name: compositionData.name,
@@ -139,18 +215,52 @@ console.log('compositionData', compositionData);
         isLateGame: compositionData.isLateGame,
         boardSize: compositionData.boardSize,
         synergies: compositionData.synergies || [],
-        units: compositionData.units.map(unit => ({
-          ...unit,
-          id: unit.championId || unit.championKey,
-          name: unit.name,
-          cost: unit.cost,
-          star: unit.star,
-          carry: unit.carry || false,
-          need3Star: unit.need3Star || false,
-          needUnlock: unit.needUnlock || false,
-          position: unit.position,
-          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-        })),
+        units: compositionData.units.map(unit => {
+          // Map items from itemsDetails or items array
+          let mappedItems: TeamUnitItem[] = [];
+          
+          if (unit.itemsDetails && unit.itemsDetails.length > 0) {
+            // Use itemsDetails if available
+            mappedItems = unit.itemsDetails.map(itemDetail => {
+              // Try to get localized data
+              if (itemsData) {
+                const localizedItem = getLocalizedItem(itemDetail.tag || itemDetail.id, itemsData);
+                // If localized item has a proper name (not just apiName), use it
+                if (localizedItem.name && localizedItem.name !== localizedItem.apiName) {
+                  return localizedItem;
+                }
+              }
+              
+              // Fallback to itemDetail
+              return {
+                id: itemDetail.id,
+                name: itemDetail.name,
+                icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.tag || itemDetail.id),
+                apiName: itemDetail.tag || itemDetail.id,
+              };
+            });
+          } else if (unit.items && unit.items.length > 0) {
+            // Use items array (string[]) and map with local data
+            mappedItems = unit.items.map(itemApiName => {
+              return getLocalizedItem(itemApiName, itemsData);
+            });
+          }
+
+          return {
+            ...unit,
+            id: unit.championId || unit.championKey,
+            name: unit.name,
+            cost: unit.cost,
+            star: unit.star,
+            carry: unit.carry || false,
+            need3Star: unit.need3Star || false,
+            needUnlock: unit.needUnlock || false,
+            position: unit.position,
+            image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+            items: mappedItems,
+            championKey: unit.championKey,
+          };
+        }),
         bench: [],
         carryItems: [],
         notes: compositionData.notes || [],
@@ -162,7 +272,7 @@ console.log('compositionData', compositionData);
       (routeProp?.params?.team ||
         (route?.params as any)?.team) as TeamComposition | undefined;
     return teamFromParams;
-  }, [compositionData, routeProp, route]);
+  }, [compositionData, routeProp, route, language]);
 
   const [isLateGame, setIsLateGame] = useState(team?.isLateGame ?? false);
 
@@ -371,40 +481,66 @@ console.log('compositionData', compositionData);
     </View>
   );
 
-  // Component to render item with its components
-  const ItemWithComponents: React.FC<{item: TeamUnitItem}> = ({item}) => {
-    const [itemDetails, setItemDetails] = useState<any>(null);
+  // Component to render items grid (each main item with its components below)
+  const ItemsGrid: React.FC<{items: TeamUnitItem[]}> = ({items}) => {
+    const [itemsDetails, setItemsDetails] = useState<any[]>([]);
 
     useEffect(() => {
-      if (item.apiName) {
-        getTftItemByApiName(item.apiName)
-          .then(data => {
-            setItemDetails(data);
-          })
-          .catch(() => {
-            // Ignore errors
-          });
-      }
-    }, [item.apiName]);
+      const fetchItemsDetails = async () => {
+        const details = await Promise.all(
+          items.map(item =>
+            item.apiName
+              ? getTftItemByApiName(item.apiName)
+                  .then(data => ({item, data}))
+                  .catch(() => ({item, data: null}))
+              : Promise.resolve({item, data: null})
+          )
+        );
+        setItemsDetails(details);
+      };
+      fetchItemsDetails();
+    }, [items]);
 
-    const components = itemDetails?.composition || [];
+    const handleItemPress = (item: TeamUnitItem, itemDetail: any) => {
+      // Try to get itemId from itemDetail.data first, then from item.id
+      const itemId = itemDetail?.data?.id || item.id;
+      if (itemId) {
+        NavigationService.push(SCREENS.ITEM_DETAIL, {itemId: String(itemId)});
+      }
+    };
 
     return (
-      <View style={styles.itemWithComponents}>
-        <Image source={{uri: item.icon}} style={styles.carryItemIcon} />
-        {components.length > 0 && (
-          <View style={styles.itemComponentsRow}>
-            {components.map((component: string, idx: number) => (
-              <Image
-                key={idx}
-                source={{
-                  uri: `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`,
-                }}
-                style={styles.componentIcon}
-              />
-            ))}
-          </View>
-        )}
+      <View style={styles.itemsGrid}>
+        {items.slice(0, 3).map((item, idx) => {
+          const itemDetail = itemsDetails[idx];
+          const components = itemDetail?.data?.composition || [];
+          
+          return (
+            <View key={idx} style={styles.itemsGridColumn}>
+              {/* Main item */}
+              <RNBounceable 
+                onPress={() => handleItemPress(item, itemDetail)}
+                style={styles.itemsGridMainItem}>
+                <Image source={{uri: item.icon}} style={styles.itemsGridMainItemIcon} />
+              </RNBounceable>
+              {/* Components below main item */}
+              {components.length > 0 && (
+                <View style={styles.itemsGridComponentsRow}>
+                  {components.slice(0, 2).map((component: string, compIdx: number) => (
+                    <View key={compIdx} style={styles.itemsGridComponentItem}>
+                      <Image
+                        source={{
+                          uri: `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`,
+                        }}
+                        style={styles.itemsGridComponentIcon}
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        })}
       </View>
     );
   };
@@ -413,7 +549,6 @@ console.log('compositionData', compositionData);
     if (!team) return null;
     // Filter units that have items
     const unitsWithItems = team.units.filter(unit => unit.items && unit.items.length > 0);
-    console.log('unitsWithItems', team.units);
     if (unitsWithItems.length === 0) {
       return null;
     }
@@ -475,39 +610,90 @@ console.log('compositionData', compositionData);
 
     return (
       <View style={styles.carryCard}>
-        <Text style={styles.sectionLabel}>Tướng chủ lực</Text>
+        <Text style={styles.sectionLabel}>Tướng và Trang bị Chủ chốt</Text>
         {unitsWithItems.map((unit, unitIndex) => {
           const unitTraits = getUnitTraits(unit);
           const isLast = unitIndex === unitsWithItems.length - 1;
+          
+          const handleUnitPress = () => {
+            if (unit.championKey) {
+              NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.championKey});
+            } else if (unit.id) {
+              NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: unit.id});
+            }
+          };
+          
           return (
-            <View key={unit.id} style={[styles.carryRow, isLast && styles.carryRowLast]}>
-              <View style={styles.carryChampion}>
-                <Image source={{uri: unit.image}} style={styles.carryAvatar} />
-                <View style={styles.carryInfo}>
-                  <Text style={styles.carryName}>{unit.name}</Text>
-                  {unit.star && (
-                    <Text style={styles.carryRole}>
-                      {'★★★'}
-                    </Text>
-                  )}
-                  {/* Show traits */}
-                  {unitTraits.length > 0 && (
-                    <View style={styles.traitsRow}>
-                      {unitTraits.slice(0, 3).map((trait, idx) => (
+            <RNBounceable 
+              key={unit.id} 
+              style={[styles.carryRowNew, isLast && styles.carryRowLast]}
+              onPress={handleUnitPress}>
+              {/* Left: Champion hexagon */}
+              <View style={styles.carryChampionLeft}>
+                <View style={styles.carryHexagonWrapper}>
+                  <View style={styles.carryHexagonBorder}>
+                    <Hexagon
+                      size={64}
+                      backgroundColor="transparent"
+                      borderColor={colors.primary}
+                      borderWidth={1}
+                    />
+                  </View>
+                  <View style={styles.carryHexagonInner}>
+                    <Hexagon
+                      size={60}
+                      backgroundColor={colors.card}
+                      borderColor={colors.border}
+                      borderWidth={2}
+                      imageUri={unit.image}
+                    />
+                  </View>
+                </View>
+                {/* Cost badge */}
+                {unit.cost && (
+                  <View style={styles.carryCostBadge}>
+                    <Icon
+                      name="diamond"
+                      type={IconType.FontAwesome}
+                      color={colors.primary}
+                      size={10}
+                    />
+                    <Text style={styles.carryCostText}>{unit.cost}</Text>
+                  </View>
+                )}
+                {/* Champion name below avatar */}
+                <Text style={styles.carryNameBelow}>{unit.name}</Text>
+              </View>
+              
+              {/* Right: Traits and items */}
+              <View style={styles.carryInfoRight}>
+                {/* Traits */}
+                {unitTraits.length > 0 && (
+                  <View style={styles.traitsRow}>
+                    {unitTraits.slice(0, 2).map((trait, idx) => {
+                      const traitIconUrl = getTraitIconUrl(trait);
+                      return (
                         <View key={idx} style={styles.traitBadge}>
+                          {traitIconUrl ? (
+                            <Image
+                              source={{uri: traitIconUrl}}
+                              style={styles.traitIcon}
+                              resizeMode="contain"
+                            />
+                          ) : null}
                           <Text style={styles.traitText}>{trait}</Text>
                         </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
+                      );
+                    })}
+                  </View>
+                )}
+                
+                {/* Items grid */}
+                {unit.items && unit.items.length > 0 && (
+                  <ItemsGrid items={unit.items} />
+                )}
               </View>
-              <View style={styles.carryItemsRow}>
-                {unit.items.map((item, itemIdx) => (
-                  <ItemWithComponents key={itemIdx} item={item} />
-                ))}
-              </View>
-            </View>
+            </RNBounceable>
           );
         })}
       </View>

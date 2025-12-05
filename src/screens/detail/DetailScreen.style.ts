@@ -76,12 +76,39 @@ interface Style {
   carryCard: ViewStyle;
   sectionLabel: TextStyle;
   carryRow: ViewStyle;
+  carryRowNew: ViewStyle;
+  carryRowLast: ViewStyle;
   carryChampion: ViewStyle;
-  carryAvatar: ImageStyle;
-  carryName: TextStyle;
+    carryChampionLeft: ViewStyle;
+    carryHexagonWrapper: ViewStyle;
+    carryHexagonBorder: ViewStyle;
+    carryHexagonInner: ViewStyle;
+    carryCostBadge: ViewStyle;
+    carryCostText: TextStyle;
+    carryAvatar: ImageStyle;
+    carryInfo: ViewStyle;
+    carryInfoRight: ViewStyle;
+    carryName: TextStyle;
+    carryNameBelow: TextStyle;
   carryRole: TextStyle;
+  traitsRow: ViewStyle;
+  traitBadge: ViewStyle;
+  traitText: TextStyle;
   carryItemsRow: ViewStyle;
+  itemsGrid: ViewStyle;
+  itemsGridRow: ViewStyle;
+  itemsGridColumn: ViewStyle;
+  itemsGridItem: ViewStyle;
+  itemsGridMainItem: ViewStyle;
+  itemsGridMainItemIcon: ImageStyle;
+  itemsGridComponentsRow: ViewStyle;
+  itemsGridComponentItem: ViewStyle;
+  itemsGridComponentIcon: ImageStyle;
+  traitIcon: ImageStyle;
+  itemWithComponents: ViewStyle;
   carryItemIcon: ImageStyle;
+  itemComponentsRow: ViewStyle;
+  componentIcon: ImageStyle;
   highlightsCard: ViewStyle;
   highlightItem: ViewStyle;
   highlightBullet: ViewStyle;
@@ -557,6 +584,14 @@ export default (theme: ExtendedTheme) => {
       borderBottomWidth: 1,
       borderBottomColor: colors.border + '40',
     },
+    carryRowNew: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: 24,
+      paddingBottom: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border + '40',
+    },
     carryRowLast: {
       marginBottom: 0,
       paddingBottom: 0,
@@ -566,6 +601,42 @@ export default (theme: ExtendedTheme) => {
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
+    },
+    carryChampionLeft: {
+      alignItems: 'center',
+      marginRight: 16,
+      position: 'relative',
+      minWidth: 80,
+    },
+    carryHexagonWrapper: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 8,
+    },
+    carryHexagonBorder: {
+      position: 'absolute',
+      zIndex: 1,
+    },
+    carryHexagonInner: {
+      position: 'relative',
+      zIndex: 2,
+    },
+    carryCostBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.primary + '20',
+      paddingHorizontal: 6,
+      paddingVertical: 4,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.primary + '30',
+      gap: 4,
+    },
+    carryCostText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.primary,
     },
     carryAvatar: {
       width: 56,
@@ -578,11 +649,22 @@ export default (theme: ExtendedTheme) => {
     carryInfo: {
       flex: 1,
     },
+    carryInfoRight: {
+      flex: 1,
+    },
     carryName: {
-      fontSize: 16,
+      fontSize: 18,
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 4,
+      marginBottom: 8,
+    },
+    carryNameBelow: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.text,
+      marginTop: 8,
+      textAlign: 'center',
+      maxWidth: 80,
     },
     carryRole: {
       fontSize: 14,
@@ -597,12 +679,19 @@ export default (theme: ExtendedTheme) => {
       marginTop: 4,
     },
     traitBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: colors.primary + '15',
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 6,
       borderWidth: 1,
       borderColor: colors.primary + '30',
+      gap: 4,
+    },
+    traitIcon: {
+      width: 14,
+      height: 14,
     },
     traitText: {
       fontSize: 11,
@@ -613,6 +702,59 @@ export default (theme: ExtendedTheme) => {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
+    },
+    itemsGrid: {
+      marginTop: 12,
+      flexDirection: 'row',
+      gap: 8,
+    },
+    itemsGridRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    itemsGridColumn: {
+      alignItems: 'center',
+      gap: 4,
+    },
+    itemsGridItem: {
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    itemsGridMainItem: {
+      width: 48,
+      height: 48,
+      borderRadius: 6,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    itemsGridMainItemIcon: {
+      width: '100%',
+      height: '100%',
+    },
+    itemsGridComponentsRow: {
+      flexDirection: 'row',
+      gap: 4,
+      justifyContent: 'center',
+    },
+    itemsGridComponentItem: {
+      width: 24,
+      height: 24,
+      borderRadius: 4,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border + '80',
+    },
+    itemsGridComponentIcon: {
+      width: '100%',
+      height: '100%',
     },
     itemWithComponents: {
       alignItems: 'center',

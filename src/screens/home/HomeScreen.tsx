@@ -12,6 +12,9 @@ import {useCompositionsWithPagination} from '@services/api/hooks/listQueryHooks'
 import type {IComposition} from '@services/models/composition';
 import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
+import LocalStorage from '@services/local-storage';
+import {getLocaleFromLanguage} from '@services/api/data';
+import useStore from '@services/zustand/store';
 
 interface TeamComp {
   id: string;
@@ -21,7 +24,7 @@ interface TeamComp {
   champions: Array<{
     id: string;
     image: string;
-    items?: Array<{icon: string}>;
+    items?: Array<{id?: string; name?: string; icon: string; apiName?: string}>;
     need3Star?: boolean;
     needUnlock?: boolean;
   }>;
@@ -33,6 +36,7 @@ const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const language = useStore((state) => state.language);
 
   // Fetch compositions from API
   const {
@@ -43,21 +47,129 @@ const HomeScreen: React.FC = () => {
     refresh,
     isRefetching,
   } = useCompositionsWithPagination(10);
+
+  // Helper function to get localized item data
+  const getLocalizedItem = (itemApiName: string, itemsData: any) => {
+    if (!itemApiName) {
+      return {
+        id: '',
+        name: '',
+        icon: '',
+        apiName: '',
+      };
+    }
+    
+    if (!itemsData) {
+      // Fallback: return item with apiName only
+      return {
+        id: itemApiName,
+        name: itemApiName,
+        icon: getItemIconUrlFromPath(null, itemApiName),
+        apiName: itemApiName,
+      };
+    }
+
+    let localizedItem: any = null;
+
+    // Handle both array and object formats
+    if (Array.isArray(itemsData)) {
+      localizedItem = itemsData.find((localItem: any) => {
+        if (localItem.apiName === itemApiName) {
+          return true;
+        }
+        return false;
+      });
+    } else if (typeof itemsData === 'object' && itemsData !== null) {
+      // Try to find by apiName as key first
+      if (itemsData[itemApiName]) {
+        localizedItem = itemsData[itemApiName];
+      } else {
+        // Otherwise, search through object values
+        const itemsArray = Object.values(itemsData) as any[];
+        localizedItem = itemsArray.find((localItem: any) => {
+          return localItem.apiName === itemApiName;
+        });
+      }
+    }
+
+    if (localizedItem) {
+      return {
+        id: localizedItem.id || itemApiName,
+        name: localizedItem.name || itemApiName,
+        icon: getItemIconUrlFromPath(localizedItem.icon, localizedItem.apiName || itemApiName),
+        apiName: localizedItem.apiName || itemApiName,
+      };
+    }
+
+    // Fallback: return item with apiName only
+    return {
+      id: itemApiName,
+      name: itemApiName,
+      icon: getItemIconUrlFromPath(null, itemApiName),
+      apiName: itemApiName,
+    };
+  };
+
   // Map IComposition to TeamComp format
   const teamComps = useMemo<TeamComp[]>(() => {
     if (!compositions) return [];
 
+    // Get localized items data
+    let itemsData: any = null;
+    if (language) {
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const itemsKey = `data_items_${locale}`;
+        const itemsDataString = LocalStorage.getString(itemsKey);
+        if (itemsDataString) {
+          itemsData = JSON.parse(itemsDataString);
+        }
+      } catch (error) {
+        console.error('Error loading items data:', error);
+      }
+    }
+
     return compositions.map(comp => {
       // Map units to champions
-      const champions = comp.units.map(unit => ({
-        id: unit.championId || unit.championKey,
-        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-        items: (unit.itemsDetails || []).map(itemDetail => ({
-          icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
-        })),
-        need3Star: unit.need3Star || false,
-        needUnlock: unit.needUnlock || false,
-      }));
+      const champions = comp.units.map(unit => {
+        // Map items from itemsDetails or items array
+        let mappedItems: Array<{id?: string; name?: string; icon: string; apiName?: string}> = [];
+        
+        if (unit.itemsDetails && unit.itemsDetails.length > 0) {
+          // Use itemsDetails if available
+          mappedItems = unit.itemsDetails.map(itemDetail => {
+            // Try to get localized data
+            if (itemsData) {
+              const localizedItem = getLocalizedItem(itemDetail.tag || itemDetail.id, itemsData);
+              // If localized item has a proper name (not just apiName), use it
+              if (localizedItem.name && localizedItem.name !== localizedItem.apiName) {
+                return localizedItem;
+              }
+            }
+            
+            // Fallback to itemDetail
+            return {
+              id: itemDetail.id,
+              name: itemDetail.name,
+              icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.tag || itemDetail.id),
+              apiName: itemDetail.tag || itemDetail.id,
+            };
+          });
+        } else if (unit.items && unit.items.length > 0) {
+          // Use items array (string[]) and map with local data
+          mappedItems = unit.items.map(itemApiName => {
+            return getLocalizedItem(itemApiName, itemsData);
+          });
+        }
+
+        return {
+          id: unit.championId || unit.championKey,
+          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+          items: mappedItems,
+          need3Star: unit.need3Star || false,
+          needUnlock: unit.needUnlock || false,
+        };
+      });
 
       // Extract all items from units (flatten and deduplicate by ID)
       const allItems = comp.units
@@ -91,7 +203,7 @@ const HomeScreen: React.FC = () => {
         composition: comp,
       };
     });
-  }, [compositions]);
+  }, [compositions, language]);
 
   const handleTeamPress = (team: TeamComp) => {
     // Navigate to detail screen with compId to fetch from API
@@ -123,7 +235,6 @@ const HomeScreen: React.FC = () => {
     return '#000000';
   };
   const renderTeamCard = ({item}: {item: TeamComp}) => {
-    console.log('item', item?.items);
     const displayTier = item.tier || item.rank;
     const backgroundColor = getRankColor(displayTier);
     const textColor = getContrastTextColor();

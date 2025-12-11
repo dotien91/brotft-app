@@ -354,7 +354,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
 
     return displayTraits.map((trait, index) => {
       const traitName = typeof trait === 'string' ? trait : String(trait);
-      const traitIconUrl = getTraitIconUrl(traitName, 20);
+      const traitIconUrl = getTraitIconUrl(trait?.apiName, 20);
 
       return (
         <RNBounceable

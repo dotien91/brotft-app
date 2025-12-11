@@ -574,7 +574,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     }
 
     // Get traits for each unit from LocalStorage
-    const getUnitTraits = (unit: TeamUnit): string[] => {
+    const getUnitTraits = (unit: TeamUnit): Array<{name: string; apiName?: string}> => {
       if (!unit.championKey || !language) {
         return [];
       }
@@ -620,7 +620,37 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         }
 
         if (localizedUnit && localizedUnit.traits) {
-          return Array.isArray(localizedUnit.traits) ? localizedUnit.traits : [];
+          const traits = Array.isArray(localizedUnit.traits) ? localizedUnit.traits : [];
+          
+          // Get trait details from local storage to get apiName
+          const traitsKey = `data_traits_${locale}`;
+          const traitsDataString = LocalStorage.getString(traitsKey);
+          let traitsData: any = null;
+          if (traitsDataString) {
+            traitsData = JSON.parse(traitsDataString);
+          }
+
+          return traits.map((traitName: string) => {
+            let traitDetail: any = null;
+            
+            // Find trait detail from local storage
+            if (traitsData) {
+              if (Array.isArray(traitsData)) {
+                traitDetail = traitsData.find((trait: any) => 
+                  trait.name === traitName || trait.apiName === traitName
+                );
+              } else if (typeof traitsData === 'object' && traitsData !== null) {
+                traitDetail = Object.values(traitsData).find((trait: any) => 
+                  trait.name === traitName || trait.apiName === traitName
+                );
+              }
+            }
+
+            return {
+              name: traitName,
+              apiName: traitDetail?.apiName || traitName,
+            };
+          });
         }
         return [];
       } catch (error) {
@@ -693,7 +723,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                 {unitTraits.length > 0 && (
                   <View style={styles.traitsRow}>
                     {unitTraits.slice(0, 2).map((trait, idx) => {
-                      const traitIconUrl = getTraitIconUrl(trait);
+                      const traitIconUrl = getTraitIconUrl(trait.apiName || trait.name);
                       return (
                         <View key={idx} style={styles.traitBadge}>
                           {traitIconUrl ? (
@@ -703,7 +733,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                               resizeMode="contain"
                             />
                           ) : null}
-                          <Text style={styles.traitText}>{trait}</Text>
+                          <Text style={styles.traitText}>{trait.name}</Text>
                         </View>
                       );
                     })}

@@ -19,14 +19,14 @@ const TraitItem: React.FC<TraitItemProps> = ({trait, index}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = React.useMemo(() => createStyles(theme), [theme]);
-
+console.log('trait', trait);
   const handleTraitPress = () => {
     if (trait.id) {
       NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: trait.id});
     }
   };
 
-  const traitIconUrl = getTraitIconUrl(trait.name);
+  const traitIconUrl = getTraitIconUrl(trait.apiName);
 
   return (
     <RNBounceable
@@ -36,22 +36,11 @@ const TraitItem: React.FC<TraitItemProps> = ({trait, index}) => {
       disabled={!trait.id}>
       {/* Left: Icon */}
       <View style={styles.traitCardIconContainer}>
-        {traitIconUrl ? (
-          <Image
+      <Image
             source={{uri: traitIconUrl}}
             style={styles.traitCardIconNew}
             resizeMode="contain"
           />
-        ) : (
-          <View style={styles.traitCardIconPlaceholderNew}>
-            <Icon
-              name="shield"
-              type={IconType.Ionicons}
-              color={colors.primary}
-              size={24}
-            />
-          </View>
-        )}
       </View>
       {/* Right: Name and Breakpoints */}
       <View style={styles.traitCardInfoContainer}>

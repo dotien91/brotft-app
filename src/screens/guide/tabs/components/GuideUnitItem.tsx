@@ -158,7 +158,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
       <View style={styles.traitsContainer}>
         {displayTraits.slice(0, 3).map((trait, index) => {
           const traitName = typeof trait === 'string' ? trait : String(trait);
-          const traitIconUrl = getTraitIconUrl(traitName, 14);
+          const traitIconUrl = getTraitIconUrl(trait?.apiName, 14);
           
           return (
             <View key={index} style={styles.traitItem}>

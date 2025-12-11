@@ -45,6 +45,8 @@ export interface IComposition {
   };
   synergies: ICompositionSynergy[];
   units: ICompositionUnit[];
+  earlyGame?: ICompositionUnit[];
+  midGame?: ICompositionUnit[];
   notes: string[];
   createdAt?: string;
   updatedAt?: string;

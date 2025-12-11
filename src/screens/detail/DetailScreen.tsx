@@ -87,6 +87,8 @@ type TeamComposition = {
   };
   synergies: TeamSynergy[];
   units: TeamUnit[];
+  earlyGame?: TeamUnit[];
+  midGame?: TeamUnit[];
   bench: TeamUnit[];
   carryItems: TeamCarry[];
   notes: string[];
@@ -124,6 +126,56 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   } = useCompositionByCompId(compIdFromParams || '', {
     enabled: !!compIdFromParams,
   });
+
+  // Helper function to map units with items
+  const mapUnitsWithItems = (units: any[], itemsData: any): TeamUnit[] => {
+    return units.map(unit => {
+      // Map items from itemsDetails or items array
+      let mappedItems: TeamUnitItem[] = [];
+      
+      if (unit.itemsDetails && unit.itemsDetails.length > 0) {
+        // Use itemsDetails if available
+        mappedItems = unit.itemsDetails.map(itemDetail => {
+          // Try to get localized data
+          if (itemsData) {
+            const localizedItem = getLocalizedItem(itemDetail.tag || itemDetail.id, itemsData);
+            // If localized item has a proper name (not just apiName), use it
+            if (localizedItem.name && localizedItem.name !== localizedItem.apiName) {
+              return localizedItem;
+            }
+          }
+          
+          // Fallback to itemDetail
+          return {
+            id: itemDetail.id,
+            name: itemDetail.name,
+            icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.tag || itemDetail.id),
+            apiName: itemDetail.tag || itemDetail.id,
+          };
+        });
+      } else if (unit.items && unit.items.length > 0) {
+        // Use items array (string[]) and map with local data
+        mappedItems = unit.items.map(itemApiName => {
+          return getLocalizedItem(itemApiName, itemsData);
+        });
+      }
+
+      return {
+        ...unit,
+        id: unit.championId || unit.championKey,
+        name: unit.name,
+        cost: unit.cost,
+        star: unit.star,
+        carry: unit.carry || false,
+        need3Star: unit.need3Star || false,
+        needUnlock: unit.needUnlock || false,
+        position: unit.position,
+        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+        items: mappedItems,
+        championKey: unit.championKey,
+      };
+    });
+  };
 
   // Helper function to get localized item data
   const getLocalizedItem = (itemApiName: string, itemsData: any): TeamUnitItem => {
@@ -215,52 +267,9 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         isLateGame: compositionData.isLateGame,
         boardSize: compositionData.boardSize,
         synergies: compositionData.synergies || [],
-        units: compositionData.units.map(unit => {
-          // Map items from itemsDetails or items array
-          let mappedItems: TeamUnitItem[] = [];
-          
-          if (unit.itemsDetails && unit.itemsDetails.length > 0) {
-            // Use itemsDetails if available
-            mappedItems = unit.itemsDetails.map(itemDetail => {
-              // Try to get localized data
-              if (itemsData) {
-                const localizedItem = getLocalizedItem(itemDetail.tag || itemDetail.id, itemsData);
-                // If localized item has a proper name (not just apiName), use it
-                if (localizedItem.name && localizedItem.name !== localizedItem.apiName) {
-                  return localizedItem;
-                }
-              }
-              
-              // Fallback to itemDetail
-              return {
-                id: itemDetail.id,
-                name: itemDetail.name,
-                icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.tag || itemDetail.id),
-                apiName: itemDetail.tag || itemDetail.id,
-              };
-            });
-          } else if (unit.items && unit.items.length > 0) {
-            // Use items array (string[]) and map with local data
-            mappedItems = unit.items.map(itemApiName => {
-              return getLocalizedItem(itemApiName, itemsData);
-            });
-          }
-
-          return {
-            ...unit,
-            id: unit.championId || unit.championKey,
-            name: unit.name,
-            cost: unit.cost,
-            star: unit.star,
-            carry: unit.carry || false,
-            need3Star: unit.need3Star || false,
-            needUnlock: unit.needUnlock || false,
-            position: unit.position,
-            image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-            items: mappedItems,
-            championKey: unit.championKey,
-          };
-        }),
+        units: mapUnitsWithItems(compositionData.units || [], itemsData),
+        earlyGame: compositionData.earlyGame ? mapUnitsWithItems(compositionData.earlyGame, itemsData) : undefined,
+        midGame: compositionData.midGame ? mapUnitsWithItems(compositionData.midGame, itemsData) : undefined,
         bench: [],
         carryItems: [],
         notes: compositionData.notes || [],
@@ -274,14 +283,22 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     return teamFromParams;
   }, [compositionData, routeProp, route, language]);
 
-  const [isLateGame, setIsLateGame] = useState(team?.isLateGame ?? false);
+  // Game phase state: 'early' | 'mid' | 'late'
+  const [gamePhase, setGamePhase] = useState<'early' | 'mid' | 'late'>('late');
 
-  // Update isLateGame when team changes
-  useEffect(() => {
-    if (team) {
-      setIsLateGame(team.isLateGame);
+  // Get current phase units
+  const currentPhaseUnits = useMemo(() => {
+    if (!team) return [];
+    switch (gamePhase) {
+      case 'early':
+        return team.earlyGame || [];
+      case 'mid':
+        return team.midGame || [];
+      case 'late':
+      default:
+        return team.units || [];
     }
-  }, [team?.isLateGame]);
+  }, [team, gamePhase]);
 
   // Get tier color
   const getRankColor = (tier?: string) => {
@@ -333,7 +350,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         const apiCol = colIndex + 1;
         
         // Find unit at this position (API uses 1-based)
-        const unit = team.units.find(
+        const unit = currentPhaseUnits.find(
           champ =>
             champ.position.row === apiRow &&
             champ.position.col === apiCol,
@@ -341,7 +358,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         return unit || null;
       }),
     );
-  }, [team]);
+  }, [team, currentPhaseUnits]);
 
   const renderBackButton = () => (
     <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
@@ -648,6 +665,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                       imageUri={unit.image}
                     />
                   </View>
+                  {/* Champion name at bottom absolute */}
+                  <View style={styles.carryNameBelowContainer}>
+                    <Text style={styles.carryNameBelow} numberOfLines={1}>{unit.name}</Text>
+                  </View>
                 </View>
                 {/* Cost badge */}
                 {unit.cost && (
@@ -661,8 +682,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                     <Text style={styles.carryCostText}>{unit.cost}</Text>
                   </View>
                 )}
-                {/* Champion name below avatar */}
-                <Text style={styles.carryNameBelow}>{unit.name}</Text>
               </View>
               
               {/* Right: Traits and items */}
@@ -762,6 +781,33 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         {!!team?.synergies && <View style={styles.synergyRow}>
           {team.synergies.map(renderSynergy)}
          </View>}
+
+        {/* Game Phase Tabs */}
+        {(team?.earlyGame || team?.midGame) && (
+          <View style={styles.phaseTabsContainer}>
+            <RNBounceable
+              style={[styles.phaseTab, gamePhase === 'early' && styles.phaseTabActive]}
+              onPress={() => setGamePhase('early')}>
+              <Text style={[styles.phaseTabText, gamePhase === 'early' && styles.phaseTabTextActive]}>
+                Đầu trận
+              </Text>
+            </RNBounceable>
+            <RNBounceable
+              style={[styles.phaseTab, gamePhase === 'mid' && styles.phaseTabActive]}
+              onPress={() => setGamePhase('mid')}>
+              <Text style={[styles.phaseTabText, gamePhase === 'mid' && styles.phaseTabTextActive]}>
+                Giữa trận
+              </Text>
+            </RNBounceable>
+            <RNBounceable
+              style={[styles.phaseTab, gamePhase === 'late' && styles.phaseTabActive]}
+              onPress={() => setGamePhase('late')}>
+              <Text style={[styles.phaseTabText, gamePhase === 'late' && styles.phaseTabTextActive]}>
+                Cuối trận
+              </Text>
+            </RNBounceable>
+          </View>
+        )}
 
         <View style={styles.mainLayout}>
           <View style={styles.boardColumn}>

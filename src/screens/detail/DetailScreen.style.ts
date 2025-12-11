@@ -85,12 +85,13 @@ interface Style {
     carryHexagonInner: ViewStyle;
     carryCostBadge: ViewStyle;
     carryCostText: TextStyle;
+    carryNameBelowContainer: ViewStyle;
     carryAvatar: ImageStyle;
     carryInfo: ViewStyle;
     carryInfoRight: ViewStyle;
     carryName: TextStyle;
     carryNameBelow: TextStyle;
-  carryRole: TextStyle;
+    carryRole: TextStyle;
   traitsRow: ViewStyle;
   traitBadge: ViewStyle;
   traitText: TextStyle;
@@ -113,6 +114,11 @@ interface Style {
   highlightItem: ViewStyle;
   highlightBullet: ViewStyle;
   highlightText: TextStyle;
+  phaseTabsContainer: ViewStyle;
+  phaseTab: ViewStyle;
+  phaseTabActive: ViewStyle;
+  phaseTabText: TextStyle;
+  phaseTabTextActive: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -613,6 +619,7 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 8,
+      overflow: 'visible',
     },
     carryHexagonBorder: {
       position: 'absolute',
@@ -632,6 +639,7 @@ export default (theme: ExtendedTheme) => {
       borderWidth: 1,
       borderColor: colors.primary + '30',
       gap: 4,
+      marginTop: 8,
     },
     carryCostText: {
       fontSize: 11,
@@ -658,11 +666,20 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
       marginBottom: 8,
     },
+    carryNameBelowContainer: {
+      position: 'absolute',
+      bottom: -5,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+      zIndex: 10,
+    },
     carryNameBelow: {
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: '700',
       color: colors.text,
-      marginTop: 8,
       textAlign: 'center',
       maxWidth: 80,
     },
@@ -804,6 +821,36 @@ export default (theme: ExtendedTheme) => {
       fontSize: 14,
       lineHeight: 20,
       color: colors.text,
+    },
+    phaseTabsContainer: {
+      flexDirection: 'row',
+      marginHorizontal: 16,
+      marginBottom: 16,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    phaseTab: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    phaseTabActive: {
+      backgroundColor: colors.primary,
+    },
+    phaseTabText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    phaseTabTextActive: {
+      color: colors.white,
+      fontWeight: '700',
     },
   });
 };

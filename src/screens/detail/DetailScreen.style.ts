@@ -119,6 +119,29 @@ interface Style {
   phaseTabActive: ViewStyle;
   phaseTabText: TextStyle;
   phaseTabTextActive: TextStyle;
+  traitsSection: ViewStyle;
+  traitsSectionTitle: TextStyle;
+  traitsGrid: ViewStyle;
+  traitsColumnsContainer: ViewStyle;
+  traitsColumn: ViewStyle;
+  traitCard: ViewStyle;
+  traitCardNew: ViewStyle;
+  traitCardIcon: ImageStyle;
+  traitCardIconContainer: ViewStyle;
+  traitCardIconNew: ImageStyle;
+  traitCardIconPlaceholder: ViewStyle;
+  traitCardIconPlaceholderNew: ViewStyle;
+  traitCardInfoContainer: ViewStyle;
+  traitCardIconText: TextStyle;
+  traitCardName: TextStyle;
+  traitCardNameRow: ViewStyle;
+  traitCardNameNew: TextStyle;
+  traitCardCount: TextStyle;
+  traitBreakpointsRow: ViewStyle;
+  traitBreakpoint: TextStyle;
+  traitBreakpointActive: TextStyle;
+  traitBreakpointSeparator: TextStyle;
+  traitBreakpointSeparatorActive: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -851,6 +874,135 @@ export default (theme: ExtendedTheme) => {
     phaseTabTextActive: {
       color: colors.white,
       fontWeight: '700',
+    },
+    traitsSection: {
+      marginHorizontal: 16,
+      marginBottom: 20,
+      padding: 16,
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    traitsSectionTitle: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: colors.text,
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+    traitsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    traitsColumnsContainer: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    traitsColumn: {
+      flex: 1,
+      gap: 12,
+    },
+    traitCard: {
+      width: '30%',
+      minWidth: 100,
+      alignItems: 'center',
+      padding: 12,
+      backgroundColor: colors.background,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    traitCardNew: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 12,
+      backgroundColor: colors.background,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 12,
+    },
+    traitCardIcon: {
+      width: 48,
+      height: 48,
+      marginBottom: 8,
+    },
+    traitCardIconContainer: {
+      marginRight: 8,
+    },
+    traitCardIconNew: {
+      width: 40,
+      height: 40,
+    },
+    traitCardIconPlaceholder: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 8,
+      borderWidth: 2,
+    },
+    traitCardIconPlaceholderNew: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.primary + '20',
+      borderWidth: 1,
+      borderColor: colors.primary + '40',
+    },
+    traitCardIconText: {
+      fontSize: 14,
+      fontWeight: '800',
+    },
+    traitCardName: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.text,
+      textAlign: 'center',
+      marginBottom: 4,
+    },
+    traitCardInfoContainer: {
+      flex: 1,
+      flexDirection: 'column',
+      gap: 4,
+    },
+    traitCardNameNew: {
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    traitCardCount: {
+      fontSize: 11,
+      fontWeight: '600',
+    },
+    traitBreakpointsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    traitCardNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 4,
+    },
+    traitBreakpoint: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    traitBreakpointActive: {
+      fontWeight: '800',
+    },
+    traitBreakpointSeparator: {
+      fontSize: 10,
+      marginHorizontal: 2,
+    },
+    traitBreakpointSeparatorActive: {
+      // Color handled by prop
     },
   });
 };

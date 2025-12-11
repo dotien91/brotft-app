@@ -8,6 +8,7 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
+import TraitsSection from './components/TraitsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
 import {getUnitAvatarUrl, getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
@@ -385,6 +386,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
       <Text style={styles.synergyCount}>{synergy.count}</Text>
     </View>
   );
+
 
   const renderUnit = (unit: TeamUnit) => {
     const costBadgeSize = hexSize * 0.35;
@@ -778,9 +780,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
             {team.name}
           </Text>
         </View>
-        {!!team?.synergies && <View style={styles.synergyRow}>
-          {team.synergies.map(renderSynergy)}
-         </View>}
+        <TraitsSection units={currentPhaseUnits} />
 
         {/* Game Phase Tabs */}
         {(team?.earlyGame || team?.midGame) && (

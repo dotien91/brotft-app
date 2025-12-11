@@ -163,11 +163,11 @@ const HomeScreen: React.FC = () => {
         }
 
         return {
-          id: unit.championId || unit.championKey,
-          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+        id: unit.championId || unit.championKey,
+        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
           items: mappedItems,
-          need3Star: unit.need3Star || false,
-          needUnlock: unit.needUnlock || false,
+        need3Star: unit.need3Star || false,
+        needUnlock: unit.needUnlock || false,
         };
       });
 

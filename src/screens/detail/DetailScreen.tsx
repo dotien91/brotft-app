@@ -17,6 +17,7 @@ import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import {SCREENS} from '@shared-constants';
+import {translations} from '../../shared/localization';
 
 const TFT_IMAGE_VERSION = '14.15.1';
 const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
@@ -629,7 +630,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
     return (
       <View style={styles.carryCard}>
-        <Text style={styles.sectionLabel}>Tướng và Trang bị Chủ chốt</Text>
+        <Text style={styles.sectionLabel}>{translations.carryUnitsSection}</Text>
         {unitsWithItems.map((unit, unitIndex) => {
           const unitTraits = getUnitTraits(unit);
           const isLast = unitIndex === unitsWithItems.length - 1;
@@ -731,7 +732,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text color={colors.placeholder} style={{marginTop: 12}}>
-            Loading composition...
+            {translations.loadingComposition}
           </Text>
         </View>
       </SafeAreaView>
@@ -747,10 +748,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         </View>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20}}>
           <Text h4 color={colors.danger}>
-            Error loading composition
+            {translations.errorLoadingComposition}
           </Text>
           <Text color={colors.placeholder} style={{marginTop: 8, textAlign: 'center'}}>
-            {error?.message || 'Something went wrong'}
+            {error?.message || translations.somethingWentWrong}
           </Text>
         </View>
       </SafeAreaView>
@@ -789,21 +790,21 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
               style={[styles.phaseTab, gamePhase === 'early' && styles.phaseTabActive]}
               onPress={() => setGamePhase('early')}>
               <Text style={[styles.phaseTabText, gamePhase === 'early' && styles.phaseTabTextActive]}>
-                Đầu trận
+                {translations.earlyGame}
               </Text>
             </RNBounceable>
             <RNBounceable
               style={[styles.phaseTab, gamePhase === 'mid' && styles.phaseTabActive]}
               onPress={() => setGamePhase('mid')}>
               <Text style={[styles.phaseTabText, gamePhase === 'mid' && styles.phaseTabTextActive]}>
-                Giữa trận
+                {translations.midGame}
               </Text>
             </RNBounceable>
             <RNBounceable
               style={[styles.phaseTab, gamePhase === 'late' && styles.phaseTabActive]}
               onPress={() => setGamePhase('late')}>
               <Text style={[styles.phaseTabText, gamePhase === 'late' && styles.phaseTabTextActive]}>
-                Cuối trận
+                {translations.lateGame}
               </Text>
             </RNBounceable>
           </View>

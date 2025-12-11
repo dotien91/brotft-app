@@ -7,6 +7,7 @@ import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import createStyles from '../DetailScreen.style';
 import TraitItem from './TraitItem';
+import {translations} from '../../../shared/localization';
 
 export interface TraitData {
   name: string;
@@ -145,7 +146,7 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
 
   return (
     <View style={styles.traitsSection}>
-      <Text style={styles.traitsSectionTitle}>Tộc/Hệ</Text>
+      <Text style={styles.traitsSectionTitle}>{translations.traitsSection}</Text>
       <View style={styles.traitsColumnsContainer}>
         {/* Left Column */}
         <View style={styles.traitsColumn}>

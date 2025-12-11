@@ -101,6 +101,8 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
         let traitDetail: any = null;
         
         // Find trait detail from local storage
+        // First try to match by name (localized name from units)
+        // Then try to match by apiName if available
         if (traitsData) {
           if (Array.isArray(traitsData)) {
             traitDetail = traitsData.find((trait: any) => 
@@ -110,6 +112,31 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
             traitDetail = Object.values(traitsData).find((trait: any) => 
               trait.name === traitName || trait.apiName === traitName
             );
+          }
+        }
+
+        // If not found by name, try to find by matching with units data to get apiName
+        if (!traitDetail && unitsData) {
+          // Try to find a unit that has this trait to get the trait's apiName
+          let foundTraitApiName: string | null = null;
+          if (Array.isArray(unitsData)) {
+            const unitWithTrait = unitsData.find((unit: any) => 
+              unit.traits && Array.isArray(unit.traits) && unit.traits.includes(traitName)
+            );
+            if (unitWithTrait) {
+              // Now find the trait detail using the trait name from unit
+              if (traitsData) {
+                if (Array.isArray(traitsData)) {
+                  traitDetail = traitsData.find((trait: any) => 
+                    trait.name === traitName || trait.apiName === traitName
+                  );
+                } else if (typeof traitsData === 'object' && traitsData !== null) {
+                  traitDetail = Object.values(traitsData).find((trait: any) => 
+                    trait.name === traitName || trait.apiName === traitName
+                  );
+                }
+              }
+            }
           }
         }
 
@@ -123,8 +150,11 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
             .filter((value: number, index: number, self: number[]) => self.indexOf(value) === index); // Remove duplicates
         }
 
+        // Use localized name from traitDetail if available, otherwise use traitName from units
+        const localizedName = traitDetail?.name || traitName;
+
         return {
-          name: traitName,
+          name: localizedName, // Use localized name from traits data
           count: count,
           id: traitDetail?.id,
           apiName: traitDetail?.apiName || traitName,

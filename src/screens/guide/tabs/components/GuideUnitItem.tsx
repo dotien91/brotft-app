@@ -10,7 +10,7 @@ import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
-import TraitBadge from './TraitBadge';
+import TraitItem from '@screens/detail/components/TraitItem';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -24,6 +24,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
 
   const language = useStore((state) => state.language);
   const [localizedName, setLocalizedName] = useState<string | null>(null);
+  const [localizedTraits, setLocalizedTraits] = useState<Array<{name: string; apiName?: string; id?: string}>>([]);
 
   const {name, cost, traits, icon, squareIcon, apiName} = data;
 
@@ -101,6 +102,57 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
     }
   }, [data, language]);
 
+  // Get localized traits from storage
+  useEffect(() => {
+    if (!traits || !Array.isArray(traits) || traits.length === 0 || !language) {
+      setLocalizedTraits([]);
+      return;
+    }
+
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const traitsKey = `data_traits_${locale}`;
+      const traitsDataString = LocalStorage.getString(traitsKey);
+      
+      if (!traitsDataString) {
+        setLocalizedTraits(traits.map(t => ({name: typeof t === 'string' ? t : String(t)})));
+        return;
+      }
+
+      const traitsData = JSON.parse(traitsDataString);
+      const localized: Array<{name: string; apiName?: string; id?: string}> = [];
+
+      traits.forEach((traitName: string) => {
+        const traitNameStr = typeof traitName === 'string' ? traitName : String(traitName);
+        let traitDetail: any = null;
+
+        // Find trait detail from local storage
+        if (traitsData) {
+          if (Array.isArray(traitsData)) {
+            traitDetail = traitsData.find((trait: any) => 
+              trait.name === traitNameStr || trait.apiName === traitNameStr
+            );
+          } else if (typeof traitsData === 'object' && traitsData !== null) {
+            traitDetail = Object.values(traitsData).find((trait: any) => 
+              trait.name === traitNameStr || trait.apiName === traitNameStr
+            );
+          }
+        }
+
+        localized.push({
+          name: traitDetail?.name || traitNameStr, // Use localized name if available
+          apiName: traitDetail?.apiName || traitNameStr,
+          id: traitDetail?.id,
+        });
+      });
+
+      setLocalizedTraits(localized);
+    } catch (error) {
+      console.error('Error loading localized traits:', error);
+      setLocalizedTraits(traits.map(t => ({name: typeof t === 'string' ? t : String(t)})));
+    }
+  }, [traits, language]);
+
   // Get TFT unit avatar URL from metatft.com
   // Size: 64x64 for hexagon display (56px hexagon needs ~64px image)
   const getTftUnitAvatarUrl = () => {
@@ -119,8 +171,10 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
 
   const imageUri = getTftUnitAvatarUrl();
 
-  // Get traits to display (TFT units have traits as string array)
-  const displayTraits = traits || [];
+  // Use localized traits if available, otherwise fallback to original traits
+  const displayTraits = localizedTraits.length > 0 
+    ? localizedTraits 
+    : (traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)}));
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
@@ -157,7 +211,15 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
       {/* Traits */}
       <View style={styles.traitsContainer}>
         {displayTraits.slice(0, 3).map((trait, index) => (
-          <TraitBadge key={index} trait={trait} index={index} />
+          <TraitItem
+            key={index}
+            trait={trait}
+            index={index}
+            variant="badge"
+            badgeStyle={styles.traitItem}
+            badgeIconStyle={styles.traitIcon}
+            badgeTextStyle={styles.traitText}
+          />
         ))}
         {displayTraits.length > 3 && (
           <Text style={styles.traitMoreText}>+{displayTraits.length - 3}</Text>

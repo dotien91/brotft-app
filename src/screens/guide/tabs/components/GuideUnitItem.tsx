@@ -10,7 +10,7 @@ import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
-import UnitCost from '@shared-components/unit-cost/UnitCost';
+import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -150,7 +150,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
           )}
         </View>
         {cost !== null && cost !== undefined && (
-          <UnitCost cost={cost} size={16} active={false} />
+          <UnitCostBadge cost={cost} />
         )}
       </View>
 

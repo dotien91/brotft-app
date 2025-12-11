@@ -9,6 +9,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
 import TraitsSection from './components/TraitsSection';
+import UnitCostBadge from './components/UnitCostBadge';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
 import {getUnitAvatarUrl, getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
@@ -288,6 +289,13 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   // Game phase state: 'early' | 'mid' | 'late'
   const [gamePhase, setGamePhase] = useState<'early' | 'mid' | 'late'>('late');
 
+  // Reset to 'late' when team data changes (when entering detail screen)
+  useEffect(() => {
+    if (team) {
+      setGamePhase('late');
+    }
+  }, [team?.id]); // Reset when composition changes
+
   // Get current phase units
   const currentPhaseUnits = useMemo(() => {
     if (!team) return [];
@@ -320,6 +328,27 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         return '#bffe7f';
       default:
         return colors.primary;
+    }
+  };
+
+  // Get unit border color based on cost
+  const getUnitCostBorderColor = (cost?: number): string => {
+    if (!cost) return colors.border;
+    switch (cost) {
+      case 1:
+        return '#c0c0c0'; // Xám/Trắng
+      case 2:
+        return '#4ade80'; // Xanh lá
+      case 3:
+        return '#60a5fa'; // Xanh dương
+      case 4:
+        return '#a78bfa'; // Tím
+      case 5:
+        return '#ffd700'; // Vàng (Huyền thoại)
+      case 6:
+        return '#ff6b35'; // Đỏ/Cam
+      default:
+        return colors.border;
     }
   };
 
@@ -444,7 +473,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                         <Hexagon
                           size={hexSize + 4}
                           backgroundColor="transparent"
-                          borderColor={colors.primary}
+                          borderColor={getUnitCostBorderColor(unit.cost)}
                           borderWidth={1}
                         />
                       </View>
@@ -453,7 +482,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                         <Hexagon
                           size={hexSize}
                           backgroundColor="#252836"
-                          borderColor={colors.border}
+                          borderColor={getUnitCostBorderColor(unit.cost)}
                           borderWidth={2}
                           imageUri={unit.image}>
                           {renderUnit(unit)}
@@ -680,23 +709,23 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
               onPress={handleUnitPress}>
               {/* Left: Champion hexagon */}
               <View style={styles.carryChampionLeft}>
-                <View style={styles.carryHexagonWrapper}>
-                  <View style={styles.carryHexagonBorder}>
-                    <Hexagon
-                      size={64}
-                      backgroundColor="transparent"
-                      borderColor={colors.primary}
-                      borderWidth={1}
-                    />
-                  </View>
-                  <View style={styles.carryHexagonInner}>
-                    <Hexagon
-                      size={60}
-                      backgroundColor={colors.card}
-                      borderColor={colors.border}
-                      borderWidth={2}
-                      imageUri={unit.image}
-                    />
+                    <View style={styles.carryHexagonWrapper}>
+                      <View style={styles.carryHexagonBorder}>
+                        <Hexagon
+                          size={64}
+                          backgroundColor="transparent"
+                          borderColor={getUnitCostBorderColor(unit.cost)}
+                          borderWidth={1}
+                        />
+                      </View>
+                      <View style={styles.carryHexagonInner}>
+                        <Hexagon
+                          size={60}
+                          backgroundColor={colors.card}
+                          borderColor={getUnitCostBorderColor(unit.cost)}
+                          borderWidth={2}
+                          imageUri={unit.image}
+                        />
                   </View>
                   {/* Champion name at bottom absolute */}
                   <View style={styles.carryNameBelowContainer}>
@@ -704,17 +733,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                   </View>
                 </View>
                 {/* Cost badge */}
-                {unit.cost && (
-                  <View style={styles.carryCostBadge}>
-                    <Icon
-                      name="diamond"
-                      type={IconType.FontAwesome}
-                      color={colors.primary}
-                      size={10}
-                    />
-                    <Text style={styles.carryCostText}>{unit.cost}</Text>
-                  </View>
-                )}
+                {unit.cost && <UnitCostBadge cost={unit.cost} />}
               </View>
               
               {/* Right: Traits and items */}

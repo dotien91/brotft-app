@@ -616,8 +616,8 @@ export default (theme: ExtendedTheme) => {
     carryRowNew: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      marginBottom: 24,
-      paddingBottom: 24,
+      marginBottom: 20,
+      paddingBottom: 20,
       borderBottomWidth: 1,
       borderBottomColor: colors.border + '40',
     },
@@ -655,19 +655,16 @@ export default (theme: ExtendedTheme) => {
     carryCostBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.primary + '20',
       paddingHorizontal: 6,
       paddingVertical: 4,
       borderRadius: 8,
       borderWidth: 1,
-      borderColor: colors.primary + '30',
       gap: 4,
       marginTop: 8,
     },
     carryCostText: {
-      fontSize: 11,
+      fontSize: 12,
       fontWeight: '700',
-      color: colors.primary,
     },
     carryAvatar: {
       width: 56,
@@ -700,7 +697,7 @@ export default (theme: ExtendedTheme) => {
       zIndex: 10,
     },
     carryNameBelow: {
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: '700',
       color: colors.text,
       textAlign: 'center',
@@ -734,7 +731,7 @@ export default (theme: ExtendedTheme) => {
       height: 14,
     },
     traitText: {
-      fontSize: 11,
+      fontSize: 12,
       color: colors.primary,
       fontWeight: '600',
     },
@@ -759,7 +756,7 @@ export default (theme: ExtendedTheme) => {
     itemsGridItem: {
       width: 48,
       height: 48,
-      borderRadius: 8,
+      borderRadius: 7,
       overflow: 'hidden',
       backgroundColor: colors.card,
       borderWidth: 1,
@@ -768,7 +765,7 @@ export default (theme: ExtendedTheme) => {
     itemsGridMainItem: {
       width: 48,
       height: 48,
-      borderRadius: 6,
+      borderRadius: 5,
       overflow: 'hidden',
       backgroundColor: colors.card,
       borderWidth: 1,
@@ -786,7 +783,7 @@ export default (theme: ExtendedTheme) => {
     itemsGridComponentItem: {
       width: 24,
       height: 24,
-      borderRadius: 4,
+      borderRadius: 3,
       overflow: 'hidden',
       backgroundColor: colors.card,
       borderWidth: 1,
@@ -878,17 +875,17 @@ export default (theme: ExtendedTheme) => {
     traitsSection: {
       marginHorizontal: 16,
       marginBottom: 20,
-      padding: 16,
+      padding: 12,
       backgroundColor: colors.card,
-      borderRadius: 16,
+      borderRadius: 12,
       borderWidth: 1,
       borderColor: colors.border,
     },
     traitsSectionTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '800',
       color: colors.text,
-      marginBottom: 16,
+      marginBottom: 12,
       textAlign: 'center',
     },
     traitsGrid: {
@@ -898,11 +895,11 @@ export default (theme: ExtendedTheme) => {
     },
     traitsColumnsContainer: {
       flexDirection: 'row',
-      gap: 12,
+      gap: 8,
     },
     traitsColumn: {
       flex: 1,
-      gap: 12,
+      gap: 8,
     },
     traitCard: {
       width: '30%',
@@ -917,12 +914,12 @@ export default (theme: ExtendedTheme) => {
     traitCardNew: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 12,
+      padding: 8,
       backgroundColor: colors.background,
-      borderRadius: 12,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
-      gap: 12,
+      gap: 8,
     },
     traitCardIcon: {
       width: 48,
@@ -930,11 +927,11 @@ export default (theme: ExtendedTheme) => {
       marginBottom: 8,
     },
     traitCardIconContainer: {
-      marginRight: 8,
+      marginRight: 6,
     },
     traitCardIconNew: {
-      width: 40,
-      height: 40,
+      width: 32,
+      height: 32,
     },
     traitCardIconPlaceholder: {
       width: 48,
@@ -946,9 +943,9 @@ export default (theme: ExtendedTheme) => {
       borderWidth: 2,
     },
     traitCardIconPlaceholderNew: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.primary + '20',
@@ -969,29 +966,29 @@ export default (theme: ExtendedTheme) => {
     traitCardInfoContainer: {
       flex: 1,
       flexDirection: 'column',
-      gap: 4,
+      gap: 3,
     },
     traitCardNameNew: {
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: '600',
     },
     traitCardCount: {
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: '600',
     },
     traitBreakpointsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
+      gap: 3,
     },
     traitCardNameRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 4,
+      marginBottom: 3,
     },
     traitBreakpoint: {
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: '600',
     },
     traitBreakpointActive: {

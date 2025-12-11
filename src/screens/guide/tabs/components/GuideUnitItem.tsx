@@ -1,16 +1,16 @@
 import React, {useMemo, useEffect, useState} from 'react';
 import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl, getTraitIconUrl} from '../../../../utils/metatft';
+import {getUnitAvatarUrl} from '../../../../utils/metatft';
 import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
+import TraitBadge from './TraitBadge';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -156,32 +156,9 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
 
       {/* Traits */}
       <View style={styles.traitsContainer}>
-        {displayTraits.slice(0, 3).map((trait, index) => {
-          const traitName = typeof trait === 'string' ? trait : String(trait);
-          const traitIconUrl = getTraitIconUrl(trait?.apiName, 14);
-          
-          return (
-            <View key={index} style={styles.traitItem}>
-              {traitIconUrl ? (
-                <Image
-                  source={{uri: traitIconUrl}}
-                  style={styles.traitIcon}
-                  resizeMode="contain"
-                />
-              ) : (
-                <Icon
-                  name="shield"
-                  type={IconType.Ionicons}
-                  color={colors.primary}
-                  size={14}
-                />
-              )}
-              <Text style={styles.traitText} numberOfLines={1}>
-                {traitName}
-              </Text>
-            </View>
-          );
-        })}
+        {displayTraits.slice(0, 3).map((trait, index) => (
+          <TraitBadge key={index} trait={trait} index={index} />
+        ))}
         {displayTraits.length > 3 && (
           <Text style={styles.traitMoreText}>+{displayTraits.length - 3}</Text>
         )}

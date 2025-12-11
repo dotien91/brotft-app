@@ -80,6 +80,12 @@ export default (theme: ExtendedTheme) => {
     traitItem: {
       flexDirection: 'row',
       alignItems: 'center',
+      backgroundColor: colors.primary + '15',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.primary + '30',
       gap: 4,
       maxWidth: '48%',
     },
@@ -89,8 +95,8 @@ export default (theme: ExtendedTheme) => {
     },
     traitText: {
       fontSize: 11,
-      fontWeight: '500',
-      color: colors.text,
+      fontWeight: '600',
+      color: colors.primary,
       flexShrink: 1,
     },
     traitMoreText: {

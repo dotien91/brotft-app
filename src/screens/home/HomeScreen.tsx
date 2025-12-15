@@ -304,6 +304,19 @@ const HomeScreen: React.FC = () => {
     );
   };
 
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      <Image
+        source={require('@assets/images/home-cover.jpg')}
+        style={styles.headerImage}
+        resizeMode="cover"
+      />
+      <View style={styles.headerOverlay}>
+        <Text style={styles.welcomeText}>Welcome to TFTBuddy</Text>
+      </View>
+    </View>
+  );
+
   const renderLoading = () => (
     <View style={[styles.container, {justifyContent: 'center', alignItems: 'center', flex: 1}]}>
       <ActivityIndicator size="large" color={colors.primary} />
@@ -338,37 +351,55 @@ const HomeScreen: React.FC = () => {
 
   if (isLoading && teamComps.length === 0) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        {renderLoading()}
-      </SafeAreaView>
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeContent} edges={[]}>
+          {renderHeader()}
+          {renderLoading()}
+        </SafeAreaView>
+      </View>
     );
   }
 
   if (isError) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        {renderError()}
-      </SafeAreaView>
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeContent} edges={[]}>
+          {renderHeader()}
+          {renderError()}
+        </SafeAreaView>
+      </View>
     );
   }
 
+  const renderListHeader = () => (
+    <View>
+      {renderHeader()}
+      <View style={styles.sectionTitleContainer}>
+        <Text style={styles.sectionTitle}>Đội hình</Text>
+      </View>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <FlatList
-        data={teamComps}
-        renderItem={renderTeamCard}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshing={isRefetching}
-        onRefresh={refresh}
-        ListEmptyComponent={
-          <View style={{padding: 20, alignItems: 'center'}}>
-            <Text color={colors.placeholder}>No compositions found</Text>
-          </View>
-        }
-      />
-    </SafeAreaView>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.safeContent} edges={[]}>
+        <FlatList
+          data={teamComps}
+          renderItem={renderTeamCard}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshing={isRefetching}
+          onRefresh={refresh}
+          ListHeaderComponent={renderListHeader}
+          ListEmptyComponent={
+            <View style={{padding: 20, alignItems: 'center'}}>
+              <Text color={colors.placeholder}>No compositions found</Text>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </View>
   );
 };
 

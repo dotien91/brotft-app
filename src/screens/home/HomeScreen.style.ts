@@ -3,6 +3,13 @@ import {ExtendedTheme} from '@react-navigation/native';
 
 interface Style {
   container: ViewStyle;
+  safeContent: ViewStyle;
+  headerContainer: ViewStyle;
+  headerImage: ImageStyle;
+  headerOverlay: ViewStyle;
+  welcomeText: TextStyle;
+  sectionTitleContainer: ViewStyle;
+  sectionTitle: TextStyle;
   listContent: ViewStyle;
   teamCard: ViewStyle;
   teamHeader: ViewStyle;
@@ -29,8 +36,49 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       backgroundColor: colors.background,
     },
+    safeContent: {
+      flex: 1,
+    },
+    headerContainer: {
+      width: '100%',
+      height: 200,
+      position: 'relative',
+      marginHorizontal: -12,
+    },
+    headerImage: {
+      width: '100%',
+      height: '100%',
+    },
+    headerOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    welcomeText: {
+      fontSize: 24,
+      fontWeight: '900',
+      color: colors.white,
+      textAlign: 'center',
+    },
+    sectionTitleContainer: {
+      paddingHorizontal: 12,
+      paddingTop: 24,
+      paddingBottom: 16,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+      letterSpacing: -0.2,
+    },
     listContent: {
       paddingHorizontal: 12,
+      paddingBottom: 16,
     },
     teamCard: {
       backgroundColor: colors.card,

@@ -15,6 +15,16 @@ interface Style {
   traitIcon: ImageStyle;
   traitText: TextStyle;
   traitMoreText: TextStyle;
+  compactContainer: ViewStyle;
+  compactHexagonWrapper: ViewStyle;
+  compactHexagonBorderWrapper: ViewStyle;
+  compactHexagonBorder: ViewStyle;
+  compactHexagonInner: ViewStyle;
+  compactTier3Icon: ViewStyle;
+  compactNameRow: ViewStyle;
+  compactUnitName: TextStyle;
+  compactUnlockIconNextToName: ImageStyle;
+  compactCostContainer: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -103,6 +113,67 @@ export default (theme: ExtendedTheme) => {
       fontSize: 12,
       fontWeight: '600',
       color: colors.placeholder,
+    },
+    compactContainer: {
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      paddingVertical: 8,
+      paddingHorizontal: 4,
+      width: 70,
+    },
+    compactHexagonWrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 6,
+    },
+    compactHexagonBorderWrapper: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'visible',
+    },
+    compactHexagonBorder: {
+      position: 'absolute',
+      zIndex: 1,
+    },
+    compactHexagonInner: {
+      position: 'relative',
+      zIndex: 2,
+    },
+    compactUnitName: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.text,
+      textAlign: 'center',
+      flexShrink: 1,
+    },
+    compactTier3Icon: {
+      position: 'absolute',
+      zIndex: 10,
+    },
+    compactNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+      marginTop: 4,
+      maxWidth: 70,
+    },
+    compactUnitName: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.text,
+      textAlign: 'center',
+      flexShrink: 1,
+    },
+    compactUnlockIconNextToName: {
+      width: 12,
+      height: 12,
+    },
+    compactCostContainer: {
+      marginTop: 4,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 };

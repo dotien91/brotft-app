@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useEffect, useState} from 'react';
 import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
@@ -8,10 +8,14 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftTraitById, useTftUnits} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
-import {getTraitIconUrl, getUnitAvatarUrl} from '../../utils/metatft';
-import Hexagon from '../detail/components/Hexagon';
-import type {ITftUnit} from '@services/models/tft-unit';
+import {getTraitIconUrl} from '../../utils/metatft';
 import BackButton from '@shared-components/back-button/BackButton';
+import * as NavigationService from 'react-navigation-helpers';
+import useStore from '@services/zustand/store';
+import LocalStorage from '@services/local-storage';
+import {getLocaleFromLanguage} from '@services/api/data';
+import GuideUnitItem from '../guide/tabs/components/GuideUnitItem';
+import {translations} from '../../shared/localization';
 
 interface TraitDetailScreenProps {
   route?: {
@@ -28,6 +32,19 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
   const route = useRoute();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const language = useStore((state) => state.language);
+
+  // Update translations when language changes
+  useEffect(() => {
+    if (language && translations.getLanguage() !== language) {
+      translations.setLanguage(language);
+    }
+  }, [language]);
+
+  const [localizedName, setLocalizedName] = useState<string | null>(null);
+  const [localizedDesc, setLocalizedDesc] = useState<string | null>(null);
+  const [localizedIcon, setLocalizedIcon] = useState<string | null>(null);
+  const [localizedEffects, setLocalizedEffects] = useState<any[] | null>(null);
 
   const traitId =
     (routeProp?.params?.traitId ||
@@ -60,6 +77,76 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
 
   const units = unitsData?.data || [];
 
+  // Get localized data from LocalStorage
+  useEffect(() => {
+    if (!trait || !language) {
+      setLocalizedName(null);
+      setLocalizedDesc(null);
+      setLocalizedIcon(null);
+      setLocalizedEffects(null);
+      return;
+    }
+
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const traitsKey = `data_traits_${locale}`;
+      const traitsDataString = LocalStorage.getString(traitsKey);
+      
+      if (!traitsDataString) {
+        // Fallback to API data
+        setLocalizedName(trait.name || null);
+        setLocalizedDesc(trait.desc || null);
+        setLocalizedIcon(trait.icon || null);
+        setLocalizedEffects(trait.effects || null);
+        return;
+      }
+
+      const traitsData = JSON.parse(traitsDataString);
+      let localizedTrait: any = null;
+
+      // Find trait from local storage
+      if (traitsData) {
+        if (Array.isArray(traitsData)) {
+          localizedTrait = traitsData.find((t: any) => 
+            (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
+            (trait.name && t.name === trait.name)
+          );
+        } else if (typeof traitsData === 'object' && traitsData !== null) {
+          // Try by apiName first
+          if (trait.apiName && traitsData[trait.apiName]) {
+            localizedTrait = traitsData[trait.apiName];
+          } else {
+            // Search through values
+            const traitsArray = Object.values(traitsData) as any[];
+            localizedTrait = traitsArray.find((t: any) => 
+              (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
+              (trait.name && t.name === trait.name)
+            );
+          }
+        }
+      }
+
+      if (localizedTrait) {
+        setLocalizedName(localizedTrait.name || trait.name || null);
+        setLocalizedDesc(localizedTrait.desc || localizedTrait.description || trait.desc || null);
+        setLocalizedIcon(localizedTrait.icon || trait.icon || null);
+        setLocalizedEffects(localizedTrait.effects || trait.effects || null);
+      } else {
+        // Fallback to API data
+        setLocalizedName(trait.name || null);
+        setLocalizedDesc(trait.desc || null);
+        setLocalizedIcon(trait.icon || null);
+        setLocalizedEffects(trait.effects || null);
+      }
+    } catch (error) {
+      // Fallback to API data on error
+      setLocalizedName(trait.name || null);
+      setLocalizedDesc(trait.desc || null);
+      setLocalizedIcon(trait.icon || null);
+      setLocalizedEffects(trait.effects || null);
+    }
+  }, [trait, language]);
+
   const renderHeader = () => (
     <View style={styles.header}>
       <BackButton />
@@ -69,9 +156,6 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.loadingText}>
-        Loading trait...
-      </Text>
     </View>
   );
 
@@ -83,15 +167,15 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
         color={colors.danger}
         size={48}
       />
-      <Text h4 color={colors.danger} style={styles.errorText}>
-        Error loading trait
+      <Text style={styles.errorText}>
+        {translations.errorLoadingTrait}
       </Text>
-      <Text color={colors.placeholder} style={styles.errorDescription}>
-        {error?.message || 'Something went wrong'}
+      <Text style={styles.errorDescription}>
+        {error?.message || translations.somethingWentWrong}
       </Text>
       <RNBounceable style={styles.retryButton} onPress={() => refetch()}>
-        <Text color={colors.white} bold>
-          Retry
+        <Text style={styles.retryButtonText}>
+          {translations.retry}
         </Text>
       </RNBounceable>
     </View>
@@ -113,13 +197,14 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
   };
 
   const renderEffects = () => {
-    if (!trait?.effects || trait.effects.length === 0) return null;
+    const effects = localizedEffects || trait?.effects;
+    if (!effects || effects.length === 0) return null;
     return (
       <View style={styles.section}>
-        <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-          Hiệu ứng Trait
+        <Text style={styles.sectionTitle}>
+          {translations.traitEffects}
         </Text>
-        {trait.effects.map((effect, index) => (
+        {effects.map((effect, index) => (
           <View key={index} style={styles.tierCard}>
             <View style={styles.tierHeader}>
               <View style={styles.tierCountBadge}>
@@ -127,7 +212,7 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
                   {effect.minUnits || 0}
                   {effect.maxUnits ? `-${effect.maxUnits}` : '+'}
                 </Text>
-                <Text style={styles.tierCountLabel}>units</Text>
+                <Text style={styles.tierCountLabel}>{translations.units.toLowerCase()}</Text>
               </View>
               <View style={styles.tierEffectContainer}>
                 <Icon
@@ -143,7 +228,7 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
             </View>
             {effect.variableMatches && effect.variableMatches.length > 0 && (
               <View style={styles.variablesContainer}>
-                {effect.variableMatches.map((match, matchIndex) => (
+                {effect.variableMatches.map((match: any, matchIndex: number) => (
                   <View key={matchIndex} style={styles.variableItem}>
                     <Text style={styles.variableText}>
                       {match.match || match.type}: {match.value || 'N/A'}
@@ -161,90 +246,48 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
   const renderUnits = () => {
     const unitsCount = units.length;
 
-    const handleUnitPress = (unit: ITftUnit) => {
-      if (unit.apiName) {
-        NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.apiName});
-      } else if (unit.id) {
-        NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unit.id)});
+    const handleUnitPress = (unitId: string | number) => {
+      const unit = units.find(u => String(u.id) === String(unitId));
+      if (unit) {
+        if (unit.apiName) {
+          NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.apiName});
+        } else if (unit.id) {
+          NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unit.id)});
+        }
       }
-    };
-
-    // Get unit avatar URL
-    const getUnitAvatar = (unit: ITftUnit) => {
-      if (unit.icon && unit.icon.startsWith('http')) {
-        return unit.icon;
-      }
-      if (unit.squareIcon && unit.squareIcon.startsWith('http')) {
-        return unit.squareIcon;
-      }
-      return getUnitAvatarUrl(unit.apiName || unit.name, 48);
     };
 
     return (
       <View style={styles.section}>
-        <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-          Units ({unitsCount})
+        <Text style={styles.sectionTitle}>
+          {translations.units} ({unitsCount})
         </Text>
         {isLoadingUnits ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color={colors.primary} />
-            <Text color={colors.placeholder} style={styles.loadingText}>
-              Loading units...
-            </Text>
           </View>
         ) : isErrorUnits ? (
           <View style={styles.errorContainer}>
-            <Text color={colors.danger} style={styles.errorDescription}>
-              Error loading units
+            <Text style={[styles.errorDescription, {color: colors.danger, opacity: 1}]}>
+              {translations.errorLoadingUnits}
             </Text>
           </View>
         ) : unitsCount === 0 ? (
           <View style={styles.errorContainer}>
-            <Text color={colors.placeholder} style={styles.errorDescription}>
-              No units found with this trait
+            <Text style={styles.errorDescription}>
+              {translations.noUnitsFound}
             </Text>
           </View>
         ) : (
-          <View style={styles.championsContainer}>
-            {units.map((unit, index) => {
-              const avatarUri = getUnitAvatar(unit);
-              return (
-                <RNBounceable
-                  key={unit.id || unit.apiName || index}
-                  style={styles.championBadge}
-                  onPress={() => handleUnitPress(unit)}>
-                  <View style={styles.championContent}>
-                    <View style={styles.championAvatarContainer}>
-                      <Hexagon
-                        size={40}
-                        backgroundColor={colors.card}
-                        borderColor={colors.border}
-                        borderWidth={2}
-                        imageUri={avatarUri}
-                      />
-                    </View>
-                    <View style={styles.championInfo}>
-                      {unit.cost !== null && unit.cost !== undefined && (
-                        <View style={styles.championCostBadge}>
-                          <Icon
-                            name="diamond"
-                            type={IconType.FontAwesome}
-                            color={colors.primary}
-                            size={10}
-                          />
-                          <Text style={styles.championCostText}>
-                            {unit.cost}
-                          </Text>
-                        </View>
-                      )}
-                      <Text style={styles.championText} numberOfLines={1}>
-                        {unit.name || unit.apiName}
-                      </Text>
-                    </View>
-                  </View>
-                </RNBounceable>
-              );
-            })}
+          <View style={styles.unitsContainer}>
+            {units.map((unit) => (
+              <GuideUnitItem
+                key={unit.id || unit.apiName}
+                data={unit}
+                onPress={() => handleUnitPress(unit.id)}
+                compact={true}
+              />
+            ))}
           </View>
         )}
       </View>
@@ -268,11 +311,11 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
         {/* Header Section */}
         <View style={styles.headerSection}>
           <View style={[styles.typeIndicator, {backgroundColor: colors.primary + '15'}]}>
-            {trait.icon || trait.apiName ? (
+            {localizedIcon || trait.icon || trait.apiName ? (
               <Image
                 source={{
-                  uri: trait.icon?.startsWith('http')
-                    ? trait.icon
+                  uri: (localizedIcon || trait.icon)?.startsWith('http')
+                    ? (localizedIcon || trait.icon) || ''
                     : getTraitIconUrl(trait.apiName || trait.name, 64),
                 }}
                 style={styles.traitIcon}
@@ -293,11 +336,11 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
         <View style={styles.content}>
           {/* Name and Badges */}
           <View style={styles.titleSection}>
-            <Text h1 bold color={colors.text} style={styles.title}>
-              {trait.name}
+            <Text style={styles.title}>
+              {localizedName || trait.name}
             </Text>
-            {trait.enName && trait.enName !== trait.name && (
-              <Text h5 color={colors.placeholder} style={styles.enName}>
+            {trait.enName && trait.enName !== (localizedName || trait.name) && (
+              <Text style={styles.enName}>
                 {trait.enName}
               </Text>
             )}
@@ -307,13 +350,13 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
           </View>
 
           {/* Description */}
-          {trait.desc && (
+          {(localizedDesc || trait.desc) && (
             <View style={styles.section}>
-              <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-                Mô tả
+              <Text style={styles.sectionTitle}>
+                {translations.description}
               </Text>
-              <Text color={colors.placeholder} style={styles.description}>
-                {trait.desc}
+              <Text style={styles.description}>
+                {localizedDesc || trait.desc}
               </Text>
             </View>
           )}
@@ -323,39 +366,6 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
 
           {/* Units */}
           {renderUnits()}
-
-          {/* Additional Info */}
-          <View style={styles.section}>
-            <Text h4 bold color={colors.text} style={styles.sectionTitle}>
-              Thông tin
-            </Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>ID:</Text>
-              <Text style={styles.infoValue}>{trait.id}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>API Name:</Text>
-              <Text style={styles.infoValue}>{trait.apiName}</Text>
-            </View>
-            {trait.enName && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>English Name:</Text>
-                <Text style={styles.infoValue}>{trait.enName}</Text>
-              </View>
-            )}
-            {trait.effects && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Effects Count:</Text>
-                <Text style={styles.infoValue}>{trait.effects.length}</Text>
-              </View>
-            )}
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Units Count:</Text>
-              <Text style={styles.infoValue}>
-                {isLoadingUnits ? 'Loading...' : units.length}
-              </Text>
-            </View>
-          </View>
         </View>
       </ScrollView>
     );

@@ -36,6 +36,7 @@ interface Style {
   variableItem: ViewStyle;
   variableText: TextStyle;
   championsContainer: ViewStyle;
+  unitsContainer: ViewStyle;
   championBadge: ViewStyle;
   championContent: ViewStyle;
   championAvatarContainer: ViewStyle;
@@ -53,6 +54,7 @@ interface Style {
   errorText: TextStyle;
   errorDescription: TextStyle;
   retryButton: ViewStyle;
+  retryButtonText: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -60,26 +62,26 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     header: {
       width: '100%',
       paddingHorizontal: 20,
       paddingTop: 12,
       paddingBottom: 16,
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderBottomWidth: 1,
-      borderBottomColor: '#2a2d3a',
+      borderBottomColor: colors.borderColor,
     },
     backButton: {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
     },
     scrollView: {
       flex: 1,
@@ -122,12 +124,15 @@ export default (theme: ExtendedTheme) => {
     },
     title: {
       fontSize: 36,
+      fontWeight: '700',
+      color: colors.text,
       marginBottom: 8,
       letterSpacing: -0.5,
       textAlign: 'center',
     },
     enName: {
       fontSize: 18,
+      color: colors.placeholder,
       marginBottom: 20,
       opacity: 0.7,
       textAlign: 'center',
@@ -206,22 +211,25 @@ export default (theme: ExtendedTheme) => {
     },
     sectionTitle: {
       fontSize: 22,
+      fontWeight: '700',
+      color: colors.text,
       marginBottom: 16,
       letterSpacing: -0.3,
     },
     description: {
       fontSize: 17,
+      color: colors.placeholder,
       lineHeight: 26,
       opacity: 0.85,
       letterSpacing: 0.2,
     },
     tierCard: {
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderRadius: 16,
       padding: 20,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
     },
     tierHeader: {
       flexDirection: 'row',
@@ -260,7 +268,7 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
       padding: 16,
       borderRadius: 12,
     },
@@ -276,12 +284,12 @@ export default (theme: ExtendedTheme) => {
       marginTop: 16,
       paddingTop: 16,
       borderTopWidth: 1,
-      borderTopColor: '#2a2d3a',
+      borderTopColor: colors.borderColor,
     },
     variableItem: {
       paddingVertical: 8,
       paddingHorizontal: 12,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
       borderRadius: 8,
       marginBottom: 8,
     },
@@ -296,13 +304,20 @@ export default (theme: ExtendedTheme) => {
       marginHorizontal: -6,
       marginBottom: 12,
     },
+    unitsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'flex-start',
+      gap: 8,
+      paddingHorizontal: 4,
+    },
     championBadge: {
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       paddingHorizontal: 14,
       paddingVertical: 12,
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
       marginHorizontal: 6,
       marginBottom: 10,
       minWidth: ScreenWidth * 0.4,
@@ -390,13 +405,15 @@ export default (theme: ExtendedTheme) => {
     errorText: {
       marginTop: 20,
       fontSize: 22,
-      fontWeight: '800',
+      fontWeight: '700',
+      color: colors.danger,
       textAlign: 'center',
       letterSpacing: -0.3,
     },
     errorDescription: {
       marginTop: 12,
       fontSize: 16,
+      color: colors.placeholder,
       textAlign: 'center',
       opacity: 0.75,
       lineHeight: 24,
@@ -418,6 +435,11 @@ export default (theme: ExtendedTheme) => {
         height: 6,
       },
       elevation: 5,
+    },
+    retryButtonText: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: '700',
     },
   });
 };

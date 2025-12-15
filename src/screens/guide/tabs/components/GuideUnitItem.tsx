@@ -11,14 +11,17 @@ import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import TraitItem from '@screens/detail/components/TraitItem';
+import ThreeStars from '@shared-components/three-stars/ThreeStars';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
   onPress: () => void;
+  compact?: boolean; // If true, only show avatar, name and cost (hide traits)
 }
 
-const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
+const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = false}) => {
   const theme = useTheme();
+  const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const language = useStore((state) => state.language);
@@ -224,6 +227,87 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
     ? localizedTraits 
     : (traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)}));
 
+  // Get unit border color based on cost
+  const getUnitCostBorderColor = (cost?: number): string => {
+    if (!cost) return colors.border;
+    switch (cost) {
+      case 1:
+        return '#c0c0c0'; // Xám/Trắng
+      case 2:
+        return '#4ade80'; // Xanh lá
+      case 3:
+        return '#60a5fa'; // Xanh dương
+      case 4:
+        return '#a78bfa'; // Tím
+      case 5:
+        return '#ffd700'; // Vàng (Huyền thoại)
+      case 6:
+        return '#ff6b35'; // Đỏ/Cam
+      default:
+        return colors.border;
+    }
+  };
+
+  const hexSize = compact ? 48 : 56;
+
+  if (compact) {
+    // Compact mode: vertical layout like in composition detail
+    return (
+      <TouchableOpacity style={styles.compactContainer} onPress={onPress} activeOpacity={0.7}>
+        <View style={styles.compactHexagonWrapper}>
+          <View style={styles.compactHexagonBorderWrapper}>
+            <View style={styles.compactHexagonBorder}>
+              <Hexagon
+                size={hexSize + 4}
+                backgroundColor="transparent"
+                borderColor={getUnitCostBorderColor(cost)}
+                borderWidth={1}
+              />
+            </View>
+            <View style={styles.compactHexagonInner}>
+              <Hexagon
+                size={hexSize}
+                backgroundColor={colors.card}
+                borderColor={getUnitCostBorderColor(cost)}
+                borderWidth={2}
+                imageUri={imageUri}>
+                {/* 3 Stars icon */}
+                {data.need3Star && (
+                  <View style={[styles.compactTier3Icon, {
+                    top: -8,
+                    right: 5,
+                  }]}>
+                    <ThreeStars size={Math.max(hexSize * 0.6, 28)} color="#fbbf24" />
+                  </View>
+                )}
+              </Hexagon>
+            </View>
+          </View>
+        </View>
+        {/* Name below hexagon with unlock icon */}
+        <View style={styles.compactNameRow}>
+          <Text style={styles.compactUnitName} numberOfLines={1}>
+            {localizedName || name}
+          </Text>
+          {data.needUnlock && (
+            <Image
+              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+              style={styles.compactUnlockIconNextToName}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+        {/* Cost below name */}
+        {cost !== null && cost !== undefined && (
+          <View style={styles.compactCostContainer}>
+            <UnitCostBadge cost={cost} />
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  }
+
+  // Full mode: horizontal layout with traits
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       {/* Hexagon Avatar */}
@@ -256,23 +340,25 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
         )}
       </View>
 
-      {/* Traits */}
-      <View style={styles.traitsContainer}>
-        {displayTraits.slice(0, 3).map((trait, index) => (
-          <TraitItem
-            key={index}
-            trait={trait}
-            index={index}
-            variant="badge"
-            badgeStyle={styles.traitItem}
-            badgeIconStyle={styles.traitIcon}
-            badgeTextStyle={styles.traitText}
-          />
-        ))}
-        {displayTraits.length > 3 && (
-          <Text style={styles.traitMoreText}>+{displayTraits.length - 3}</Text>
-        )}
-      </View>
+      {/* Traits - hide in compact mode */}
+      {!compact && (
+        <View style={styles.traitsContainer}>
+          {displayTraits.slice(0, 3).map((trait, index) => (
+            <TraitItem
+              key={index}
+              trait={trait}
+              index={index}
+              variant="badge"
+              badgeStyle={styles.traitItem}
+              badgeIconStyle={styles.traitIcon}
+              badgeTextStyle={styles.traitText}
+            />
+          ))}
+          {displayTraits.length > 3 && (
+            <Text style={styles.traitMoreText}>+{displayTraits.length - 3}</Text>
+          )}
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

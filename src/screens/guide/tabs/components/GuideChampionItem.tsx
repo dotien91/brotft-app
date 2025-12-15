@@ -78,8 +78,8 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
       <View style={styles.avatarContainer}>
         <Hexagon 
           size={56} 
-          backgroundColor="#252836" 
-          borderColor="#3a3d4a" 
+          backgroundColor={colors.card} 
+          borderColor={colors.highlight} 
           borderWidth={2}
           imageUri={imageUri}
         />

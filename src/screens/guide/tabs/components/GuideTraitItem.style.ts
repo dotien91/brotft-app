@@ -23,9 +23,9 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       paddingVertical: 14,
       paddingHorizontal: 16,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.card,
       borderBottomWidth: 1,
-      borderBottomColor: '#2a2d3a',
+      borderBottomColor: colors.border,
     },
     iconContainer: {
       width: 56,

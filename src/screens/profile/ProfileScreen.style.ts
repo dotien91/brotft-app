@@ -114,7 +114,7 @@ export default (theme: ExtendedTheme) => {
     },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: colors.blackOverlay,
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,

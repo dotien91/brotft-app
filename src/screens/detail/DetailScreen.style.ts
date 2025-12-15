@@ -149,7 +149,7 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     scrollView: {
       flex: 1,
@@ -163,7 +163,7 @@ export default (theme: ExtendedTheme) => {
       paddingHorizontal: 12,
       paddingTop: 12,
       paddingBottom: 16,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     compositionHeader: {
       flexDirection: 'row',
@@ -177,6 +177,7 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '800',
       letterSpacing: -0.5,
       flex: 1,
+      color: colors.text,
     },
     backButton: {
       width: 44,
@@ -242,8 +243,8 @@ export default (theme: ExtendedTheme) => {
       borderColor: colors.primary + '40',
     },
     metaPillSecondary: {
-      backgroundColor: '#f97316',
-      borderColor: '#f97316',
+      backgroundColor: colors.secondary,
+      borderColor: colors.secondary,
     },
     metaPillText: {
       fontSize: 13,
@@ -282,7 +283,7 @@ export default (theme: ExtendedTheme) => {
       paddingHorizontal: 20,
       paddingVertical: 12,
       gap: 12,
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderRadius: 16,
       marginHorizontal: 16,
       marginBottom: 16,
@@ -441,7 +442,7 @@ export default (theme: ExtendedTheme) => {
     },
     unitItemIcon: {
       borderRadius: 3,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: colors.blackOverlay,
     },
     hexCell: {
       width: 64,
@@ -449,16 +450,16 @@ export default (theme: ExtendedTheme) => {
       marginHorizontal: 2,
       marginVertical: 4,
       borderWidth: 2,
-      borderColor: '#2a2d3a',
-      backgroundColor: '#1e2130',
+      borderColor: colors.borderColor,
+      backgroundColor: colors.background,
       alignItems: 'center',
       justifyContent: 'center',
       position: 'relative',
       transform: [{rotate: '0deg'}],
     },
     hexCellOccupied: {
-      backgroundColor: '#252836',
-      borderColor: '#3a3d4a',
+      backgroundColor: colors.card,
+      borderColor: colors.highlight,
     },
     unitRing: {
       width: 48,
@@ -526,11 +527,6 @@ export default (theme: ExtendedTheme) => {
     },
     unlockBadge: {
       position: 'absolute',
-      bottom: -8,
-      right: -8,
-      width: 20,
-      height: 20,
-      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.background,
@@ -538,8 +534,7 @@ export default (theme: ExtendedTheme) => {
       borderColor: colors.borderColor,
     },
     unlockIcon: {
-      width: 14,
-      height: 14,
+      // Size will be set dynamically in component
     },
     itemRow: {
       position: 'absolute',

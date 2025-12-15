@@ -19,7 +19,6 @@ interface GuideUnitItemProps {
 
 const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
   const theme = useTheme();
-  const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const language = useStore((state) => state.language);
@@ -102,31 +101,80 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
     }
   }, [data, language]);
 
-  // Get localized traits from storage
+  // Get localized traits from storage - use same approach as TraitsSection
   useEffect(() => {
-    if (!traits || !Array.isArray(traits) || traits.length === 0 || !language) {
+    if (!data || !language) {
       setLocalizedTraits([]);
       return;
     }
 
     try {
       const locale = getLocaleFromLanguage(language);
+      const unitsKey = `data_units_${locale}`;
+      const unitsDataString = LocalStorage.getString(unitsKey);
+      
+      if (!unitsDataString) {
+        setLocalizedTraits((traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
+        return;
+      }
+
+      const unitsData = JSON.parse(unitsDataString);
+      let localizedUnit: any = null;
+
+      // Find localized unit data first
+      if (Array.isArray(unitsData)) {
+        localizedUnit = unitsData.find((localUnit: any) => {
+          if (apiName && localUnit.apiName === apiName) {
+            return true;
+          }
+          if (name && localUnit.name) {
+            return name.toLowerCase() === localUnit.name.toLowerCase();
+          }
+          return false;
+        });
+      } else if (typeof unitsData === 'object' && unitsData !== null) {
+        if (apiName && unitsData[apiName]) {
+          localizedUnit = unitsData[apiName];
+        } else {
+          const unitsArray = Object.values(unitsData) as any[];
+          localizedUnit = unitsArray.find((localUnit: any) => {
+            if (apiName && localUnit.apiName === apiName) {
+              return true;
+            }
+            if (name && localUnit.name) {
+              return name.toLowerCase() === localUnit.name.toLowerCase();
+            }
+            return false;
+          });
+        }
+      }
+
+      // Get traits from localized unit data
+      const unitTraits = localizedUnit?.traits || traits || [];
+      const traitsArray = Array.isArray(unitTraits) ? unitTraits : [];
+
+      if (traitsArray.length === 0) {
+        setLocalizedTraits([]);
+        return;
+      }
+
+      // Get trait details from local storage
       const traitsKey = `data_traits_${locale}`;
       const traitsDataString = LocalStorage.getString(traitsKey);
       
       if (!traitsDataString) {
-        setLocalizedTraits(traits.map(t => ({name: typeof t === 'string' ? t : String(t)})));
+        setLocalizedTraits(traitsArray.map(t => ({name: typeof t === 'string' ? t : String(t)})));
         return;
       }
 
       const traitsData = JSON.parse(traitsDataString);
       const localized: Array<{name: string; apiName?: string; id?: string}> = [];
 
-      traits.forEach((traitName: string) => {
+      traitsArray.forEach((traitName: string) => {
         const traitNameStr = typeof traitName === 'string' ? traitName : String(traitName);
         let traitDetail: any = null;
 
-        // Find trait detail from local storage
+        // Find trait detail from local storage - use same logic as GuideTraitItem
         if (traitsData) {
           if (Array.isArray(traitsData)) {
             traitDetail = traitsData.find((trait: any) => 
@@ -149,9 +197,9 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress}) => {
       setLocalizedTraits(localized);
     } catch (error) {
       console.error('Error loading localized traits:', error);
-      setLocalizedTraits(traits.map(t => ({name: typeof t === 'string' ? t : String(t)})));
+      setLocalizedTraits((traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
     }
-  }, [traits, language]);
+  }, [data, traits, apiName, name, language]);
 
   // Get TFT unit avatar URL from metatft.com
   // Size: 64x64 for hexagon display (56px hexagon needs ~64px image)

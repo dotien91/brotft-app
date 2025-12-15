@@ -438,15 +438,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
             <Text style={[styles.carryText, {fontSize: hexSize * 0.18}]}>C</Text>
           </View>
         ) : null}
-        {unit.needUnlock ? (
-          <View style={styles.unlockBadge}>
-            <Image
-              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
-              style={styles.unlockIcon}
-              resizeMode="contain"
-            />
-          </View>
-        ) : null}
       </>
     );
   };
@@ -481,7 +472,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                       <View style={styles.hexagonInner}>
                         <Hexagon
                           size={hexSize}
-                          backgroundColor="#252836"
+                          backgroundColor={colors.card}
                           borderColor={getUnitCostBorderColor(unit.cost)}
                           borderWidth={2}
                           imageUri={unit.image}>
@@ -512,13 +503,35 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                           <ThreeStars size={Math.max(hexSize * 0.6, 36)} color="#fbbf24" />
                           </View>
                       )}
+                      {/* Unlock icon */}
+                      {unit.needUnlock && (
+                        <View style={[
+                          styles.unlockBadge,
+                          {
+                            width: hexSize * 0.3,
+                            height: hexSize * 0.3,
+                            borderRadius: hexSize * 0.3 / 2,
+                            top: -0,
+                            right: -0,
+                          }
+                        ]}>
+                          <Image
+                            source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                            style={[styles.unlockIcon, {
+                              width: hexSize * 0.18,
+                              height: hexSize * 0.18,
+                            }]}
+                            resizeMode="contain"
+                          />
+                        </View>
+                      )}
                     </View>
                   </View>
                 ) : (
                   <Hexagon
                     size={hexSize}
-                    backgroundColor="#1e2130"
-                    borderColor="#2a2d3a"
+                    backgroundColor={colors.background}
+                    borderColor={colors.borderColor}
                     borderWidth={2}
                   />
                 )}
@@ -826,7 +839,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
               </Text>
             </View>
           )}
-          <Text h2 bold color={colors.text} style={styles.compositionName}>
+          <Text h2 bold style={styles.compositionName}>
             {team.name}
           </Text>
         </View>

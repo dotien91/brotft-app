@@ -24,9 +24,9 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       paddingVertical: 14,
       paddingHorizontal: 16,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.card,
       borderBottomWidth: 1,
-      borderBottomColor: '#2a2d3a',
+      borderBottomColor: colors.border,
     },
     iconContainer: {
       marginRight: 12,
@@ -34,9 +34,9 @@ export default (theme: ExtendedTheme) => {
       height: 48,
       borderRadius: 8,
       overflow: 'hidden',
-      backgroundColor: '#252836',
+      backgroundColor: colors.background,
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
     },
     icon: {
       width: '100%',
@@ -80,12 +80,12 @@ export default (theme: ExtendedTheme) => {
       flexWrap: 'wrap',
     },
     componentBadge: {
-      backgroundColor: '#252836',
+      backgroundColor: colors.background,
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 6,
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
     },
     componentText: {
       fontSize: 10,

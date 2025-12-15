@@ -423,9 +423,6 @@ const AugmentsTab: React.FC = () => {
             isLoadingMore ? (
               <View style={styles.footerLoader}>
                 <ActivityIndicator size="small" color={colors.primary} />
-                <Text color={colors.placeholder} style={styles.footerText}>
-                  Loading more...
-                </Text>
               </View>
             ) : !hasMore && augmentsList.length > 0 ? (
               <View style={styles.footerLoader}>

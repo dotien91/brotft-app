@@ -4,11 +4,11 @@ import {useTheme} from '@react-navigation/native';
 import type {ITftItem} from '@services/models/tft-item';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideItemItem.style';
-import {API_BASE_URL} from '@shared-constants';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import {deleteTftItem} from '@services/api/tft-items';
+import {getItemImageUrlWithCDN} from '../../../../utils/metatft';
 
 interface GuideItemItemProps {
   data: ITftItem;
@@ -99,24 +99,8 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
     }
   }, [data, language]);
 
-  // Get item image URL
-  const getItemImageUrl = () => {
-    // Try icon field first (from API)
-    if (icon) {
-      if (icon.startsWith('http')) {
-        return icon;
-      }
-      if (icon.startsWith('/')) {
-        return `${API_BASE_URL}${icon}`;
-      }
-    }
-    
-    // Fallback to Data Dragon
-    const itemKey = data.apiName || name?.toLowerCase() || '';
-    return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${itemKey}.png`;
-  };
-
-  const imageUri = getItemImageUrl();
+  // Get item image URL with CDN optimization - chỉ dùng MetaTFT
+  const imageUri = getItemImageUrlWithCDN(icon, data.apiName, name, 48);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>

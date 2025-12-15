@@ -92,7 +92,6 @@ type TeamComposition = {
   synergies: TeamSynergy[];
   units: TeamUnit[];
   earlyGame?: TeamUnit[];
-  midGame?: TeamUnit[];
   bench: TeamUnit[];
   carryItems: TeamCarry[];
   notes: string[];
@@ -173,7 +172,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         carry: unit.carry || false,
         need3Star: unit.need3Star || false,
         needUnlock: unit.needUnlock || false,
-        position: unit.position,
+        position: {
+          row: (unit.position?.row || 0) + 1,
+          col: (unit.position?.col || 0) + 1,
+        },
         image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
         items: mappedItems,
         championKey: unit.championKey,
@@ -273,7 +275,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         synergies: compositionData.synergies || [],
         units: mapUnitsWithItems(compositionData.units || [], itemsData),
         earlyGame: compositionData.earlyGame ? mapUnitsWithItems(compositionData.earlyGame, itemsData) : undefined,
-        midGame: compositionData.midGame ? mapUnitsWithItems(compositionData.midGame, itemsData) : undefined,
         bench: [],
         carryItems: [],
         notes: compositionData.notes || [],
@@ -287,8 +288,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     return teamFromParams;
   }, [compositionData, routeProp, route, language]);
 
-  // Game phase state: 'early' | 'mid' | 'late'
-  const [gamePhase, setGamePhase] = useState<'early' | 'mid' | 'late'>('late');
+  // Game phase state: 'early' | 'late'
+  const [gamePhase, setGamePhase] = useState<'early' | 'late'>('late');
 
   // Reset to 'late' when team data changes (when entering detail screen)
   useEffect(() => {
@@ -303,8 +304,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     switch (gamePhase) {
       case 'early':
         return team.earlyGame || [];
-      case 'mid':
-        return team.midGame || [];
       case 'late':
       default:
         return team.units || [];
@@ -784,9 +783,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         </View>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text color={colors.placeholder} style={{marginTop: 12}}>
-            {translations.loadingComposition}
-          </Text>
         </View>
       </SafeAreaView>
     );
@@ -814,7 +810,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.topHeader}>
-        {renderBackButton()}
+        <BackButton />
       </View>
 
       <ScrollView
@@ -837,20 +833,13 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         <TraitsSection units={currentPhaseUnits} />
 
         {/* Game Phase Tabs */}
-        {(team?.earlyGame || team?.midGame) && (
+        {team?.earlyGame && (
           <View style={styles.phaseTabsContainer}>
             <RNBounceable
               style={[styles.phaseTab, gamePhase === 'early' && styles.phaseTabActive]}
               onPress={() => setGamePhase('early')}>
               <Text style={[styles.phaseTabText, gamePhase === 'early' && styles.phaseTabTextActive]}>
                 {translations.earlyGame}
-              </Text>
-            </RNBounceable>
-            <RNBounceable
-              style={[styles.phaseTab, gamePhase === 'mid' && styles.phaseTabActive]}
-              onPress={() => setGamePhase('mid')}>
-              <Text style={[styles.phaseTabText, gamePhase === 'mid' && styles.phaseTabTextActive]}>
-                {translations.midGame}
               </Text>
             </RNBounceable>
             <RNBounceable

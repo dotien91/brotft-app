@@ -89,9 +89,6 @@ const ItemsTab: React.FC = () => {
         isLoadingMore || (isLoading && allItems.length > 0) ? (
           <View style={styles.footerLoader}>
             <ActivityIndicator size="small" color={colors.primary} />
-            <Text color={colors.placeholder} style={styles.footerText}>
-              Loading more...
-            </Text>
           </View>
         ) : !hasMore && allItems.length > 0 ? (
           <View style={styles.footerLoader}>

@@ -232,3 +232,73 @@ export const getItemIconUrlFromPath = (
   return '';
 };
 
+/**
+ * Get item image URL with CDN optimization - chỉ dùng MetaTFT CDN
+ * Wraps MetaTFT URLs with CDN optimization for better performance
+ * @param icon - Icon path or URL from API (optional)
+ * @param apiName - Item API name (e.g., "TFT_Item_BFSword") - preferred
+ * @param name - Item name as fallback (optional)
+ * @param size - Image size for CDN optimization (default: 48)
+ * @returns CDN-optimized MetaTFT item icon URL
+ */
+export const getItemImageUrlWithCDN = (
+  icon?: string | null,
+  apiName?: string | null,
+  name?: string | null,
+  size: number = 48,
+): string => {
+  // Helper to wrap MetaTFT URL with CDN optimization
+  const wrapWithCDN = (url: string): string => {
+    // If already CDN-optimized, return as is
+    if (url.includes('cdn-cgi/image')) {
+      return url;
+    }
+    // If it's a MetaTFT file URL, wrap it with CDN
+    if (url.includes('cdn.metatft.com/file/metatft')) {
+      return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/${url}`;
+    }
+    return url;
+  };
+  
+  // Helper to get MetaTFT URL from apiName
+  const getMetaTftUrlFromApiName = (itemApiName: string): string => {
+    // Format apiName: TFT_Item_BFSword -> tft_item_bfsword
+    const formattedKey = itemApiName.toLowerCase();
+    return `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
+  };
+  
+  // Try icon field first (from API)
+  if (icon) {
+    // If icon is already a full URL (CDN-optimized or MetaTFT)
+    if (icon.startsWith('http')) {
+      // Chỉ dùng nếu là MetaTFT URL
+      if (icon.includes('cdn.metatft.com')) {
+        return wrapWithCDN(icon);
+      }
+      // Nếu không phải MetaTFT, bỏ qua và dùng apiName
+    } else {
+      // If icon is a path, use getItemIconUrlFromPath utility
+      const metatftUrl = getItemIconUrlFromPath(icon, apiName || undefined);
+      if (metatftUrl && metatftUrl.includes('cdn.metatft.com')) {
+        return wrapWithCDN(metatftUrl);
+      }
+    }
+  }
+  
+  // Luôn dùng apiName để tạo MetaTFT URL
+  if (apiName) {
+    const baseUrl = getMetaTftUrlFromApiName(apiName);
+    return wrapWithCDN(baseUrl);
+  }
+  
+  // Last resort: nếu không có apiName, thử từ name
+  if (name) {
+    const formattedKey = name.toLowerCase().replace(/\s+/g, '_');
+    const baseUrl = `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
+    return wrapWithCDN(baseUrl);
+  }
+  
+  // Return empty string nếu không có gì
+  return '';
+};
+

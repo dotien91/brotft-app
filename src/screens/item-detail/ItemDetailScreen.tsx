@@ -7,12 +7,11 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftItemById} from '@services/api/hooks/listQueryHooks';
-import type {ITftItem} from '@services/models/tft-item';
-import {API_BASE_URL} from '@shared-constants';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import BackButton from '@shared-components/back-button/BackButton';
+import {getItemImageUrlWithCDN} from '../../utils/metatft';
 
 interface ItemDetailScreenProps {
   route?: {
@@ -31,6 +30,9 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
   const language = useStore((state) => state.language);
   const [localizedDesc, setLocalizedDesc] = useState<string | null>(null);
   const [localizedName, setLocalizedName] = useState<string | null>(null);
+  const [localizedIcon, setLocalizedIcon] = useState<string | null>(null);
+  const [localizedComposition, setLocalizedComposition] = useState<string[] | null>(null);
+  const [localizedEffects, setLocalizedEffects] = useState<any>(null);
 
   const itemId =
     (routeProp?.params?.itemId ||
@@ -46,11 +48,14 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
 
   // Get localized name and description from storage
   useEffect(() => {
-    if (!item || !language) {
-      setLocalizedDesc(null);
-      setLocalizedName(null);
-      return;
-    }
+      if (!item || !language) {
+        setLocalizedDesc(null);
+        setLocalizedName(null);
+        setLocalizedIcon(null);
+        setLocalizedComposition(null);
+        setLocalizedEffects(null);
+        return;
+      }
 
     try {
       const locale = getLocaleFromLanguage(language);
@@ -60,6 +65,9 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
       if (!itemsDataString) {
         setLocalizedDesc(null);
         setLocalizedName(null);
+        setLocalizedIcon(null);
+        setLocalizedComposition(null);
+        setLocalizedEffects(null);
         return;
       }
 
@@ -71,7 +79,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         // If it's an array, find the item
         localizedItem = itemsData.find((localItem: any) => {
           // Try to match by apiName first
-          if (item.apiName && localItem.apiName === item.apiName) {
+          if (item.apiName && localItem.apiName.toLowerCase() === item.apiName.toLowerCase()) {
             return true;
           }
           // Fallback to name matching (case insensitive)
@@ -123,14 +131,41 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         } else {
           setLocalizedDesc(null);
         }
+        
+        // Set localized icon if available
+        if (localizedItem.icon) {
+          setLocalizedIcon(localizedItem.icon);
+        } else {
+          setLocalizedIcon(null);
+        }
+        
+        // Set localized composition if available
+        if (localizedItem.composition && Array.isArray(localizedItem.composition)) {
+          setLocalizedComposition(localizedItem.composition);
+        } else {
+          setLocalizedComposition(null);
+        }
+        
+        // Set localized effects if available
+        if (localizedItem.effects && typeof localizedItem.effects === 'object') {
+          setLocalizedEffects(localizedItem.effects);
+        } else {
+          setLocalizedEffects(null);
+        }
       } else {
-        setLocalizedDesc(null);
-        setLocalizedName(null);
+        // Fallback to API data if no localized item found
+        setLocalizedName(item.name || null);
+        setLocalizedDesc(item.desc || null);
+        setLocalizedIcon(item.icon || null);
+        setLocalizedComposition(item.composition || null);
+        setLocalizedEffects(item.effects || null);
       }
     } catch (error) {
-      console.error('Error loading localized data:', error);
       setLocalizedDesc(null);
       setLocalizedName(null);
+      setLocalizedIcon(null);
+      setLocalizedComposition(null);
+      setLocalizedEffects(null);
     }
   }, [item, language]);
 
@@ -175,29 +210,16 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
       return renderError();
     }
 
-    // Get item image URL
-    const getItemImageUrl = () => {
-      // Try icon field first (from API)
-      if (item.icon) {
-        // If icon is a full URL
-        if (item.icon.startsWith('http')) {
-          return item.icon;
-        }
-        // If icon is a path, try to construct URL
-          if (item.icon.startsWith('/')) {
-            return `${API_BASE_URL}${item.icon}`;
-          }
-      }
-      
-      // Fallback to Data Dragon
-      const itemKey = item.apiName || item.name?.toLowerCase() || '';
-      return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${itemKey}.png`;
-    };
-
-    const imageUri = getItemImageUrl();
-
-    // Get components to display - prefer composition from API
-    const displayComponents = item.composition || [];
+    // Get item image URL with CDN optimization - chỉ dùng MetaTFT
+    // Dùng apiName từ API, icon và name từ localizedItem
+    const imageUri = getItemImageUrlWithCDN(
+      localizedIcon || item.icon, 
+      item.apiName, 
+      localizedName || item.name, 
+      80
+    );
+    // Get components to display - prefer composition from localizedItem
+    const displayComponents = localizedComposition || item.composition || [];
 
     // Get component image URL
     const getComponentImageUrl = (component: string) => {
@@ -216,8 +238,9 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
       // Replace <br> with newline
       parsed = parsed.replace(/<br\s*\/?>/gi, '\n');
 
-      // Parse @ variables from effects
-      if (item.effects && typeof item.effects === 'object') {
+      // Parse @ variables from effects - dùng localizedEffects nếu có
+      const effects = localizedEffects || item.effects;
+      if (effects && typeof effects === 'object') {
         // Find all @...@ patterns
         const variablePattern = /@([^@]+)@/g;
         const matches = [...parsed.matchAll(variablePattern)];
@@ -232,22 +255,22 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
           // Pattern 1: @TFTUnitProperty:KEY@ -> look for KEY in effects
           if (variableKey.startsWith('TFTUnitProperty:')) {
             const key = variableKey.replace('TFTUnitProperty:', '');
-            value = item.effects[key];
+            value = effects[key];
           }
           // Pattern 2: @KEY@ -> look for KEY directly in effects
           else {
-            value = item.effects[variableKey];
+            value = effects[variableKey];
           }
           
           // Pattern 3: Try with different case variations
           if (value === undefined || value === null) {
-            const keys = Object.keys(item.effects);
+            const keys = Object.keys(effects);
             const foundKey = keys.find(k => 
               k.toLowerCase() === variableKey.toLowerCase() ||
               k.toLowerCase() === variableKey.replace('TFTUnitProperty:', '').toLowerCase()
             );
             if (foundKey) {
-              value = item.effects[foundKey];
+              value = effects[foundKey];
             }
           }
     

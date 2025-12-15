@@ -86,9 +86,6 @@ const TraitsTab: React.FC = () => {
         isLoadingMore || (isLoading && allTraits.length > 0) ? (
           <View style={styles.footerLoader}>
             <ActivityIndicator size="small" color={colors.primary} />
-            <Text color={colors.placeholder} style={styles.footerText}>
-              Loading more...
-            </Text>
           </View>
         ) : !hasMore && allTraits.length > 0 ? (
           <View style={styles.footerLoader}>

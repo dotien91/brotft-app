@@ -29,6 +29,8 @@ export default (theme: ExtendedTheme) => {
     headerTitle: {
       fontSize: 28,
       letterSpacing: -0.5,
+      color: colors.text,
+      fontWeight: 'bold',
     },
     tabBar: {
       backgroundColor: colors.card,

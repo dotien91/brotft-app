@@ -14,6 +14,7 @@ interface Style {
   errorText: TextStyle;
   errorDescription: TextStyle;
   retryButton: ViewStyle;
+  retryButtonText: TextStyle;
   nameSection: ViewStyle;
   itemName: TextStyle;
   mainContent: ViewStyle;
@@ -39,7 +40,7 @@ export default (theme: ExtendedTheme) => {
   return StyleSheet.create<Style>({
     container: {
       flex: 1,
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
     },
     safeArea: {
       flex: 1,
@@ -58,11 +59,11 @@ export default (theme: ExtendedTheme) => {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: 'rgba(37, 40, 54, 0.8)',
+      backgroundColor: colors.card + 'CC',
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
     },
     scrollView: {
       flex: 1,
@@ -82,6 +83,7 @@ export default (theme: ExtendedTheme) => {
       opacity: 0.75,
       fontWeight: '500',
       letterSpacing: 0.3,
+      color: colors.text,
     },
     errorContainer: {
       flex: 1,
@@ -96,6 +98,7 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '800',
       textAlign: 'center',
       letterSpacing: -0.3,
+      color: colors.text,
     },
     errorDescription: {
       marginTop: 12,
@@ -104,6 +107,7 @@ export default (theme: ExtendedTheme) => {
       opacity: 0.75,
       lineHeight: 24,
       letterSpacing: 0.2,
+      color: colors.text,
     },
     retryButton: {
       height: 52,
@@ -122,6 +126,11 @@ export default (theme: ExtendedTheme) => {
     itemName: {
       fontSize: 24,
       letterSpacing: -0.5,
+      color: colors.text,
+      fontWeight: 'bold',
+    },
+    retryButtonText: {
+      fontWeight: 'bold',
     },
     mainContent: {
       flexDirection: 'row',
@@ -134,9 +143,9 @@ export default (theme: ExtendedTheme) => {
       height: 120,
       borderRadius: 12,
       overflow: 'hidden',
-      backgroundColor: '#252836',
+      backgroundColor: colors.card,
       borderWidth: 2,
-      borderColor: '#3a3d4a',
+      borderColor: colors.highlight,
     },
     itemIcon: {
       width: '100%',
@@ -165,9 +174,9 @@ export default (theme: ExtendedTheme) => {
       height: 48,
       borderRadius: 8,
       overflow: 'hidden',
-      backgroundColor: '#1a1d29',
+      backgroundColor: colors.background,
       borderWidth: 1,
-      borderColor: '#2a2d3a',
+      borderColor: colors.borderColor,
     },
     componentIcon: {
       width: '100%',

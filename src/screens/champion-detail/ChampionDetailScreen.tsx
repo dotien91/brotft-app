@@ -11,6 +11,7 @@ import {useChampionById} from '@services/api/hooks/listQueryHooks';
 import {SCREENS, API_BASE_URL} from '@shared-constants';
 import type {ITrait} from '@services/models/trait';
 import Hexagon from '@screens/detail/components/Hexagon';
+import BackButton from '@shared-components/back-button/BackButton';
 
 interface ChampionDetailScreenProps {
   route?: {
@@ -38,16 +39,6 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
     refetch,
   } = useChampionById(championId || '');
 
-  const renderBackButton = () => (
-    <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
-      <Icon
-        name="arrow-back"
-        type={IconType.Ionicons}
-        color={colors.text}
-        size={24}
-      />
-    </RNBounceable>
-  );
 
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
@@ -559,7 +550,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={[]}>
         <View style={styles.header}>
-          {renderBackButton()}
+          <BackButton />
         </View>
         {renderContent()}
       </SafeAreaView>

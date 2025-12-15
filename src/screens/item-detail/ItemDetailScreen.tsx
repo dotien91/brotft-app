@@ -2,7 +2,6 @@ import React, {useMemo, useEffect, useState} from 'react';
 import {View, Image, ScrollView, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
-import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './ItemDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
@@ -13,6 +12,7 @@ import {API_BASE_URL} from '@shared-constants';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
+import BackButton from '@shared-components/back-button/BackButton';
 
 interface ItemDetailScreenProps {
   route?: {
@@ -134,16 +134,6 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     }
   }, [item, language]);
 
-  const renderBackButton = () => (
-    <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
-      <Icon
-        name="arrow-back"
-        type={IconType.Ionicons}
-        color={colors.text}
-        size={24}
-      />
-    </RNBounceable>
-  );
 
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
@@ -169,7 +159,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         {error?.message || 'Something went wrong'}
       </Text>
       <RNBounceable style={styles.retryButton} onPress={() => refetch()}>
-        <Text color={colors.white} bold>
+        <Text color={colors.white} style={styles.retryButtonText}>
           Retry
         </Text>
       </RNBounceable>
@@ -331,7 +321,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         
         {/* Item Name */}
         <View style={styles.nameSection}>
-          <Text h1 bold color={colors.text} style={styles.itemName}>
+          <Text h1 style={styles.itemName}>
             {localizedName || item.name}
           </Text>
         </View>
@@ -394,7 +384,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={[]}>
         <View style={styles.header}>
-          {renderBackButton()}
+          <BackButton />
         </View>
         {renderContent()}
       </SafeAreaView>

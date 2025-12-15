@@ -54,9 +54,10 @@ export default (theme: ExtendedTheme) => {
     headerTitle: {
       fontSize: 28,
       letterSpacing: -0.5,
+      color: colors.text,
     },
     section: {
-      marginTop: 8,
+      marginTop: 24,
       paddingHorizontal: 20,
     },
     sectionHeader: {
@@ -69,6 +70,7 @@ export default (theme: ExtendedTheme) => {
       fontSize: 20,
       fontWeight: '600',
       letterSpacing: -0.3,
+      color: colors.text,
     },
     optionItem: {
       marginBottom: 12,
@@ -90,6 +92,7 @@ export default (theme: ExtendedTheme) => {
     optionText: {
       fontSize: 16,
       fontWeight: '500',
+      color: colors.text,
     },
     toggle: {
       width: 50,
@@ -142,6 +145,7 @@ export default (theme: ExtendedTheme) => {
     dropdownItemText: {
       fontSize: 16,
       fontWeight: '500',
+      color: colors.text,
     },
   });
 };

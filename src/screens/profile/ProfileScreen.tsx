@@ -10,6 +10,7 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import {translations} from '../../shared/localization';
 import {queryClient} from '@services/api/react-query';
 import {checkAndFetchDataByLocale} from '@services/api/data';
+import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
 
 interface ProfileScreenProps {}
 
@@ -86,11 +87,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           showsVerticalScrollIndicator={false}>
           
           {/* Header */}
-          <View style={styles.header}>
-            <Text h2 bold color={colors.text} style={styles.headerTitle}>
-              {translations.settings}
-            </Text>
-          </View>
+          <ScreenHeader title={translations.settings} />
 
           {/* Appearance Section */}
           <View style={styles.section}>

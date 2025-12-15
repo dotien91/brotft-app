@@ -2,7 +2,6 @@ import React, {useMemo} from 'react';
 import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
-import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './TraitDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
@@ -12,6 +11,7 @@ import {SCREENS} from '@shared-constants';
 import {getTraitIconUrl, getUnitAvatarUrl} from '../../utils/metatft';
 import Hexagon from '../detail/components/Hexagon';
 import type {ITftUnit} from '@services/models/tft-unit';
+import BackButton from '@shared-components/back-button/BackButton';
 
 interface TraitDetailScreenProps {
   route?: {
@@ -60,22 +60,9 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
 
   const units = unitsData?.data || [];
 
-  const renderBackButton = () => (
-    <RNBounceable
-      style={styles.backButton}
-      onPress={() => NavigationService.goBack()}>
-      <Icon
-        name="arrow-back"
-        type={IconType.Ionicons}
-        color={colors.text}
-        size={24}
-      />
-    </RNBounceable>
-  );
-
   const renderHeader = () => (
     <View style={styles.header}>
-      {renderBackButton()}
+      <BackButton />
     </View>
   );
 

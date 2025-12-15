@@ -397,6 +397,9 @@ export const useTftUnitsWithPagination = (
     staleTime: 0, // Always consider data stale to refetch on filter change
   });
 
+  // Track refresh state
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Reset when filters change - must run before data effect
   useEffect(() => {
     setPage(1);
@@ -404,6 +407,14 @@ export const useTftUnitsWithPagination = (
     setHasMore(true);
     setIsLoadingMore(false);
   }, [filters]);
+
+  // Refetch when page is set to 1 during refresh
+  useEffect(() => {
+    if (isRefreshing && page === 1) {
+      refetch();
+      setIsRefreshing(false);
+    }
+  }, [page, isRefreshing, refetch]);
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -440,10 +451,11 @@ export const useTftUnitsWithPagination = (
   };
 
   const refresh = () => {
-    setPage(1);
     setAllTftUnits([]);
     setHasMore(true);
-    refetch();
+    setIsLoadingMore(false);
+    setIsRefreshing(true);
+    setPage(1);
   };
 
   return {
@@ -607,7 +619,8 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
     setPage(1);
     setAllTftTraits([]);
     setHasMore(true);
-    refetch();
+    setIsLoadingMore(false);
+    // Don't call refetch() here - let React Query refetch automatically when page changes
   };
 
   return {
@@ -703,6 +716,7 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
   const [page, setPage] = useState(1);
   const [allTftItems, setAllTftItems] = useState<ITftItem[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
   const {
@@ -713,6 +727,14 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
     refetch,
     isRefetching,
   } = useTftItems({page, limit});
+
+  // Refetch when page is set to 1 during refresh
+  useEffect(() => {
+    if (isRefreshing && page === 1) {
+      refetch();
+      setIsRefreshing(false);
+    }
+  }, [page, isRefreshing, refetch]);
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -749,10 +771,11 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
   };
 
   const refresh = () => {
-    setPage(1);
     setAllTftItems([]);
     setHasMore(true);
-    refetch();
+    setIsLoadingMore(false);
+    setIsRefreshing(true);
+    setPage(1);
   };
 
   return {

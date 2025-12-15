@@ -1,9 +1,8 @@
 import React, {useState, useMemo} from 'react';
-import {View, useWindowDimensions} from 'react-native';
+import {useWindowDimensions} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
-import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideScreen.style';
 import UnitsTab from './tabs/UnitsTab';
 import TraitsTab from './tabs/TraitsTab';
@@ -11,6 +10,7 @@ import ItemsTab from './tabs/ItemsTab';
 import AugmentsTab from './tabs/AugmentsTab';
 import {translations} from '../../shared/localization';
 import useStore from '@services/zustand/store';
+import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
 
 const renderScene = SceneMap({
   units: UnitsTab,
@@ -50,11 +50,7 @@ const GuideScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text h2 bold color={colors.text} style={styles.headerTitle}>
-          {translations.guide}
-        </Text>
-      </View>
+      <ScreenHeader title={translations.guide} />
 
       <TabView
         navigationState={{index, routes}}

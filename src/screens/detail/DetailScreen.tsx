@@ -19,6 +19,7 @@ import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import {SCREENS} from '@shared-constants';
 import {translations} from '../../shared/localization';
+import BackButton from '@shared-components/back-button/BackButton';
 
 const TFT_IMAGE_VERSION = '14.15.1';
 const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
@@ -391,16 +392,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     );
   }, [team, currentPhaseUnits]);
 
-  const renderBackButton = () => (
-    <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
-      <Icon
-        name='arrow-back'
-        type={IconType.Ionicons}
-        color={colors.text}
-        size={22}
-      />
-    </RNBounceable>
-  );
 
   const renderSynergy = (synergy: TeamSynergy) => (
     <View key={synergy.id} style={styles.synergyCard}>
@@ -789,7 +780,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.topHeader}>
-          {renderBackButton()}
+          <BackButton />
         </View>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -806,7 +797,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.topHeader}>
-          {renderBackButton()}
+          <BackButton />
         </View>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20}}>
           <Text h4 color={colors.danger}>

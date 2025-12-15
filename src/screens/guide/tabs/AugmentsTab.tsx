@@ -3,7 +3,6 @@ import {
   FlatList,
   View,
   ActivityIndicator,
-  RefreshControl,
   TextInput,
   TouchableOpacity,
   ScrollView,
@@ -101,8 +100,6 @@ const AugmentsTab: React.FC = () => {
     isLoadingMore,
     hasMore,
     loadMore,
-    refresh,
-    isRefetching,
   } = useTftAugmentsWithPagination(20, filters, sort); // Limit 20 per page
 
   // Use augments directly from API (already sorted)
@@ -420,14 +417,6 @@ const AugmentsTab: React.FC = () => {
           keyExtractor={item => String(item.id)}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refresh}
-              tintColor={colors.primary}
-              colors={[colors.primary]}
-            />
-          }
           onEndReached={loadMore}
           onEndReachedThreshold={0.3}
           ListFooterComponent={

@@ -3,7 +3,6 @@ import {
   FlatList,
   View,
   ActivityIndicator,
-  RefreshControl,
   TextInput,
   TouchableOpacity,
   ScrollView,
@@ -112,8 +111,6 @@ const UnitsTab: React.FC = () => {
     isLoadingMore,
     hasMore,
     loadMore,
-    refresh,
-    isRefetching,
   } = useTftUnitsWithPagination(20, filters); // Limit 20 per page
 
   const handleItemPress = (unitId?: string | number) => {
@@ -313,14 +310,6 @@ const UnitsTab: React.FC = () => {
       keyExtractor={item => String(item.id)}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefetching}
-          onRefresh={refresh}
-          tintColor={colors.primary}
-          colors={[colors.primary]}
-        />
-      }
       onEndReached={loadMore}
       onEndReachedThreshold={0.3}
       ListFooterComponent={

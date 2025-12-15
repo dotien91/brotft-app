@@ -3,7 +3,6 @@ import {
   FlatList,
   View,
   ActivityIndicator,
-  RefreshControl,
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
@@ -26,8 +25,6 @@ const TraitsTab: React.FC = () => {
     isLoadingMore,
     hasMore,
     loadMore,
-    refresh,
-    isRefetching,
   } = useTftTraitsWithPagination(20);
 
   const handleItemPress = (traitId?: string | number) => {
@@ -83,14 +80,6 @@ const TraitsTab: React.FC = () => {
       keyExtractor={item => String(item.id)}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefetching}
-          onRefresh={refresh}
-          tintColor={colors.primary}
-          colors={[colors.primary]}
-        />
-      }
       onEndReached={loadMore}
       onEndReachedThreshold={0.3}
       ListFooterComponent={

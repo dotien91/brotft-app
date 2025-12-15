@@ -2,22 +2,23 @@ import React, {useMemo, useEffect, useState} from 'react';
 import {View, Image, ScrollView, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
-import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './UnitDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl, getUnitSplashUrl, getTraitIconUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
+import {getUnitAvatarUrl, getUnitSplashUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
-import GoldIcon from '@shared-components/gold-icon/GoldIcon';
 import AbilityDescription from '../../shared/components/ability-description/AbilityDescription';
 import TooltipElements from '../../shared/components/tooltip-elements/TooltipElements';
 import {parseTextWithVariables} from '../../shared/utils/parseTextWithVariables';
 import {translations} from '../../shared/localization';
+import TraitItem from '@screens/detail/components/TraitItem';
+import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
+import BackButton from '@shared-components/back-button/BackButton';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -41,6 +42,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const [localizedTooltipElements, setLocalizedTooltipElements] = useState<any[] | null>(null);
   // Có thể là string hoặc object (chứa levelRequired, conditions,...)
   const [localizedUnlockText, setLocalizedUnlockText] = useState<any | null>(null);
+  const [localizedTraits, setLocalizedTraits] = useState<Array<{name: string; apiName?: string; id?: string}>>([]);
 
   // Update translations when language changes
   useEffect(() => {
@@ -211,6 +213,106 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     }
   }, [unit, language]);
 
+  // Get localized traits from storage - use same approach as GuideUnitItem
+  useEffect(() => {
+    if (!unit || !language) {
+      setLocalizedTraits([]);
+      return;
+    }
+
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const unitsKey = `data_units_${locale}`;
+      const unitsDataString = LocalStorage.getString(unitsKey);
+      
+      if (!unitsDataString) {
+        setLocalizedTraits((unit.traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
+        return;
+      }
+
+      const unitsData = JSON.parse(unitsDataString);
+      let localizedUnit: any = null;
+
+      // Find localized unit data first
+      if (Array.isArray(unitsData)) {
+        localizedUnit = unitsData.find((localUnit: any) => {
+          if (unit.apiName && localUnit.apiName === unit.apiName) {
+            return true;
+          }
+          if (unit.name && localUnit.name) {
+            return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+          }
+          return false;
+        });
+      } else if (typeof unitsData === 'object' && unitsData !== null) {
+        if (unit.apiName && unitsData[unit.apiName]) {
+          localizedUnit = unitsData[unit.apiName];
+        } else {
+          const unitsArray = Object.values(unitsData) as any[];
+          localizedUnit = unitsArray.find((localUnit: any) => {
+            if (unit.apiName && localUnit.apiName === unit.apiName) {
+              return true;
+            }
+            if (unit.name && localUnit.name) {
+              return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+            }
+            return false;
+          });
+        }
+      }
+
+      // Get traits from localized unit data
+      const unitTraits = localizedUnit?.traits || unit.traits || [];
+      const traitsArray = Array.isArray(unitTraits) ? unitTraits : [];
+
+      if (traitsArray.length === 0) {
+        setLocalizedTraits([]);
+        return;
+      }
+
+      // Get trait details from local storage
+      const traitsKey = `data_traits_${locale}`;
+      const traitsDataString = LocalStorage.getString(traitsKey);
+      
+      if (!traitsDataString) {
+        setLocalizedTraits(traitsArray.map(t => ({name: typeof t === 'string' ? t : String(t)})));
+        return;
+      }
+
+      const traitsData = JSON.parse(traitsDataString);
+      const localized: Array<{name: string; apiName?: string; id?: string}> = [];
+
+      traitsArray.forEach((traitName: string) => {
+        const traitNameStr = typeof traitName === 'string' ? traitName : String(traitName);
+        let traitDetail: any = null;
+
+        // Find trait detail from local storage
+        if (traitsData) {
+          if (Array.isArray(traitsData)) {
+            traitDetail = traitsData.find((trait: any) => 
+              trait.name === traitNameStr || trait.apiName === traitNameStr
+            );
+          } else if (typeof traitsData === 'object' && traitsData !== null) {
+            traitDetail = Object.values(traitsData).find((trait: any) => 
+              trait.name === traitNameStr || trait.apiName === traitNameStr
+            );
+          }
+        }
+
+        localized.push({
+          name: traitDetail?.name || traitNameStr,
+          apiName: traitDetail?.apiName || traitNameStr,
+          id: traitDetail?.id,
+        });
+      });
+
+      setLocalizedTraits(localized);
+    } catch (error) {
+      console.error('Error loading localized traits:', error);
+      setLocalizedTraits((unit.traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
+    }
+  }, [unit, language]);
+
   // Unlock info ưu tiên lấy từ data local theo ngôn ngữ,
   // fallback nhẹ sang field từ API nếu local không có.
   // Đảm bảo luôn convert sang string trước khi render.
@@ -304,16 +406,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     return null;
   }, [localizedUnlockText, unit]);
 
-  const renderBackButton = () => (
-    <RNBounceable style={styles.backButton} onPress={() => NavigationService.goBack()}>
-      <Icon
-        name="arrow-back"
-        type={IconType.Ionicons}
-        color={colors.text}
-        size={24}
-      />
-    </RNBounceable>
-  );
 
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
@@ -347,37 +439,24 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   );
 
   const renderTraits = () => {
-    // TFT units have traits as string array
-    const displayTraits = unit?.traits || [];
+    // Use localized traits if available, otherwise fallback to original traits
+    const displayTraits = localizedTraits.length > 0 
+      ? localizedTraits 
+      : (unit?.traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)}));
     
     if (!displayTraits || displayTraits.length === 0) return null;
 
-    return displayTraits.map((trait, index) => {
-      const traitName = typeof trait === 'string' ? trait : String(trait);
-      const traitIconUrl = getTraitIconUrl(trait?.apiName, 20);
-
-      return (
-        <RNBounceable
-          key={index}
-          style={styles.traitBadge}>
-          {traitIconUrl ? (
-            <Image
-              source={{uri: traitIconUrl}}
-              style={styles.traitIcon}
-              resizeMode="contain"
-            />
-          ) : (
-            <Icon
-              name="shield"
-              type={IconType.Ionicons}
-              color={colors.primary}
-              size={16}
-            />
-          )}
-          <Text style={styles.traitText}>{traitName}</Text>
-        </RNBounceable>
-      );
-    });
+    return displayTraits.map((trait, index) => (
+      <TraitItem
+        key={index}
+        trait={trait}
+        index={index}
+        variant="badge"
+        badgeStyle={styles.traitBadge}
+        badgeIconStyle={styles.traitIcon}
+        badgeTextStyle={styles.traitText}
+      />
+    ));
   };
 
   const renderContent = () => {
@@ -443,8 +522,8 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               <View style={styles.unitAvatarContainer}>
                 <Hexagon 
                   size={70} 
-                  backgroundColor="#252836" 
-                  borderColor="#3a3d4a" 
+                  backgroundColor={colors.card} 
+                  borderColor={colors.highlight} 
                   borderWidth={2}
                   imageUri={avatarUri}
                 />
@@ -466,10 +545,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                   {renderTraits()}
                 </View>
                 {unit.cost !== null && unit.cost !== undefined && (
-                  <View style={styles.costBadgeContainer}>
-                    <GoldIcon size={18} color="#fbbf24" />
-                    <Text style={styles.costBadgeText}>{unit.cost}</Text>
-                  </View>
+                  <UnitCostBadge cost={unit.cost} />
                 )}
               </View>
             </View>
@@ -659,7 +735,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         )}
 
         {/* Suggested Items Section */}
-        <View style={styles.augmentsSection}>
+        {/* <View style={styles.augmentsSection}>
           <Text h3 bold color={colors.text} style={styles.sectionTitle}>
             {translations.suggestedItems}
           </Text>
@@ -670,15 +746,18 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 <Image
                   source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_GuinsoosRageblade.png'}}
                   style={styles.augmentIcon}
+                  resizeMode="cover"
                 />
                 <View style={styles.augmentItemBadges}>
                   <Image
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_RecurveBow.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode="cover"
                   />
                   <Image
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_NeedlesslyLargeRod.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode="cover"
                   />
                 </View>
               </View>
@@ -700,7 +779,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
               </View>
             </View>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
     );
   };
@@ -709,7 +788,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={[]}>
         <View style={styles.header}>
-          {renderBackButton()}
+          <BackButton />
         </View>
         {renderContent()}
       </SafeAreaView>

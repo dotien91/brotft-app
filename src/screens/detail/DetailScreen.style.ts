@@ -291,8 +291,8 @@ export default (theme: ExtendedTheme) => {
     mainLayout: {
       flexDirection: 'row',
       paddingHorizontal: 8,
-      minHeight: 400,
       justifyContent: 'center',
+      marginBottom: 24,
     },
     layoutCard: {
       borderRadius: 28,

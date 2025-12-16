@@ -24,6 +24,7 @@ interface TeamComp {
   champions: Array<{
     id: string;
     image: string;
+    cost?: number;
     items?: Array<{id?: string; name?: string; icon: string; apiName?: string}>;
     need3Star?: boolean;
     needUnlock?: boolean;
@@ -163,11 +164,12 @@ const HomeScreen: React.FC = () => {
         }
 
         return {
-        id: unit.championId || unit.championKey,
-        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+          id: unit.championId || unit.championKey,
+          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+          cost: unit.cost,
           items: mappedItems,
-        need3Star: unit.need3Star || false,
-        needUnlock: unit.needUnlock || false,
+          need3Star: unit.need3Star || false,
+          needUnlock: unit.needUnlock || false,
         };
       });
 
@@ -234,6 +236,28 @@ const HomeScreen: React.FC = () => {
   const getContrastTextColor = (): string => {
     return '#000000';
   };
+
+  // Get unit border color based on cost
+  const getUnitCostBorderColor = (cost?: number): string => {
+    if (!cost) return colors.primary;
+    switch (cost) {
+      case 1:
+        return '#c0c0c0'; // Xám/Trắng
+      case 2:
+        return '#4ade80'; // Xanh lá
+      case 3:
+        return '#60a5fa'; // Xanh dương
+      case 4:
+        return '#a78bfa'; // Tím
+      case 5:
+        return '#ffd700'; // Vàng (Huyền thoại)
+      case 6:
+        return '#ff6b35'; // Đỏ/Cam
+      default:
+        return colors.primary;
+    }
+  };
+
   const renderTeamCard = ({item}: {item: TeamComp}) => {
     const displayTier = item.tier || item.rank;
     const backgroundColor = getRankColor(displayTier);
@@ -256,7 +280,7 @@ const HomeScreen: React.FC = () => {
                 <Hexagon
                   size={50}
                   backgroundColor="transparent"
-                  borderColor={colors.primary}
+                  borderColor={getUnitCostBorderColor(champion.cost)}
                   borderWidth={1}
                 />
               </View>

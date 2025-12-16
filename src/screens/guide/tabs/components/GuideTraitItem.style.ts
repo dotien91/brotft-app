@@ -3,14 +3,19 @@ import {ExtendedTheme} from '@react-navigation/native';
 
 interface Style {
   container: ViewStyle;
+  headerRow: ViewStyle;
   iconContainer: ViewStyle;
   traitIcon: ImageStyle;
   iconPlaceholder: ViewStyle;
   infoContainer: ViewStyle;
   traitName: TextStyle;
+  unitsCount: TextStyle;
   traitDesc: TextStyle;
   unitsContainer: ViewStyle;
   unitsText: TextStyle;
+  unitsLoadingContainer: ViewStyle;
+  moreUnitsContainer: ViewStyle;
+  moreUnitsText: TextStyle;
   effectsBadge: ViewStyle;
   effectsText: TextStyle;
 }
@@ -19,13 +24,16 @@ export default (theme: ExtendedTheme) => {
   const {colors} = theme;
   return StyleSheet.create<Style>({
     container: {
-      flexDirection: 'row',
-      alignItems: 'center',
       paddingVertical: 14,
       paddingHorizontal: 16,
       backgroundColor: colors.card,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
     },
     iconContainer: {
       width: 56,
@@ -67,8 +75,25 @@ export default (theme: ExtendedTheme) => {
     },
     unitsContainer: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginTop: 8,
+    },
+    unitsLoadingContainer: {
+      paddingVertical: 12,
       alignItems: 'center',
-      gap: 4,
+      justifyContent: 'center',
+    },
+    moreUnitsContainer: {
+      width: 70,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 8,
+    },
+    moreUnitsText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.placeholder,
     },
     unitsText: {
       fontSize: 11,

@@ -18,6 +18,7 @@ const createStyles = (theme: Theme) => {
       color: colors.text,
       lineHeight: 24,
       opacity: 0.8,
+      flexShrink: 1,
     },
   });
 };

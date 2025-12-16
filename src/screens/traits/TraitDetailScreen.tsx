@@ -3,7 +3,7 @@ import {View, ScrollView} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme, useRoute} from '@react-navigation/native';
 import createStyles from './TraitDetailScreen.style';
-import BackButton from '@shared-components/back-button/BackButton';
+import {DetailHeader} from '@shared-components/detail-header';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
@@ -11,7 +11,6 @@ import {useTftTraitById, useTftUnits} from '@services/api/hooks/listQueryHooks';
 import {
   TraitHeader,
   TraitDescription,
-  TraitEffects,
   TraitUnits,
   TraitLoading,
   TraitError,
@@ -147,11 +146,6 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
     }
   }, [trait, language]);
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <BackButton />
-    </View>
-  );
 
   const renderContent = () => {
     if (isLoading && !trait) {
@@ -177,10 +171,10 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
           />
 
           {/* Description */}
-          <TraitDescription description={localizedDesc || trait.desc} />
-
-          {/* Effects */}
-          <TraitEffects effects={localizedEffects || trait.effects} />
+          <TraitDescription
+            description={localizedDesc || trait.desc}
+            effects={localizedEffects || trait.effects}
+          />
 
           {/* Units */}
           <TraitUnits
@@ -195,7 +189,7 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {renderHeader()}
+      <DetailHeader />
       {renderContent()}
     </SafeAreaView>
   );

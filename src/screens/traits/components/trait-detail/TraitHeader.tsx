@@ -77,9 +77,6 @@ const TraitHeader: React.FC<TraitHeaderProps> = ({
             {trait.enName}
           </Text>
         )}
-        <View style={styles.badgesRow}>
-          {renderApiNameBadge()}
-        </View>
       </View>
     </>
   );

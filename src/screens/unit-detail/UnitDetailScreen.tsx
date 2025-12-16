@@ -512,7 +512,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             source={{uri: splashUri}}
             style={styles.heroImage}
             resizeMode="cover"
-            defaultSource={require('@assets/splash/shifaaz-shamoon-unsplash.jpg')}
+            defaultSource={require('@assets/splash/splash.png')}
           />
           <View style={styles.heroOverlay} />
           

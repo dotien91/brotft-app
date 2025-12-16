@@ -1,5 +1,7 @@
-import {ImageStyle, StyleSheet, TextStyle, ViewStyle} from 'react-native';
+import {ImageStyle, StyleSheet, TextStyle, ViewStyle, Dimensions} from 'react-native';
 import {ExtendedTheme} from '@react-navigation/native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Style {
   container: ViewStyle;
@@ -40,10 +42,11 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
     },
     headerContainer: {
-      width: '100%',
+      width: SCREEN_WIDTH,
       height: 200,
       position: 'relative',
-      marginHorizontal: -12,
+      marginLeft: -12,
+      marginRight: -12,
     },
     headerImage: {
       width: '100%',

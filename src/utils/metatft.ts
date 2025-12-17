@@ -201,17 +201,7 @@ export const getItemIconUrlFromPath = (
   iconPath?: string | null,
   apiName?: string | null,
 ): string => {
-  if (iconPath) {
-    // If icon is a full URL
-    if (iconPath.startsWith('http')) {
-      return iconPath;
-    }
-    
-    // If icon is a path starting with /, it's a relative path from API
-    if (iconPath.startsWith('/')) {
-      // This would need API_BASE_URL, but we don't have it here
-      // So we'll try to parse it as a MetaTFT path
-    }
+
     
     // Try to parse icon path to get filename
     const filename = parseIconPath(iconPath);
@@ -221,13 +211,7 @@ export const getItemIconUrlFromPath = (
       const metatftUrl = `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
       return metatftUrl;
     }
-  }
-  
-  // Fallback to Data Dragon using apiName
-  if (apiName) {
-    return `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${apiName}.png`;
-  }
-  
+
   // Last resort: return empty string
   return '';
 };

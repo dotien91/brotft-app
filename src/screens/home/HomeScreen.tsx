@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useCallback} from 'react';
 import {FlatList, Image, View, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
@@ -6,38 +6,15 @@ import createStyles from './HomeScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import Hexagon from '@screens/detail/components/Hexagon';
 import {SCREENS} from '@shared-constants';
 import {useCompositionsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {IComposition} from '@services/models/composition';
-import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../utils/metatft';
-import ThreeStars from '@shared-components/three-stars/ThreeStars';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
-import useStore from '@services/zustand/store';
-
-interface TeamComp {
-  id: string;
-  name: string;
-  rank: string;
-  tier?: string; // S, A, B, C, D
-  champions: Array<{
-    id: string;
-    image: string;
-    cost?: number;
-    items?: Array<{id?: string; name?: string; icon: string; apiName?: string}>;
-    need3Star?: boolean;
-    needUnlock?: boolean;
-  }>;
-  items: Array<{icon: string}>;
-  composition: IComposition; // Store original composition for navigation
-}
+import UnitHexagonItem from './components/unit-hexagon-item/UnitHexagonItem';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const language = useStore((state) => state.language);
 
   // Fetch compositions from API
   const {
@@ -48,172 +25,12 @@ const HomeScreen: React.FC = () => {
     refresh,
     isRefetching,
   } = useCompositionsWithPagination(10);
-
-  // Helper function to get localized item data
-  const getLocalizedItem = (itemApiName: string, itemsData: any) => {
-    if (!itemApiName) {
-      return {
-        id: '',
-        name: '',
-        icon: '',
-        apiName: '',
-      };
-    }
-    
-    if (!itemsData) {
-      // Fallback: return item with apiName only
-      return {
-        id: itemApiName,
-        name: itemApiName,
-        icon: getItemIconUrlFromPath(null, itemApiName),
-        apiName: itemApiName,
-      };
-    }
-
-    let localizedItem: any = null;
-
-    // Handle both array and object formats
-    if (Array.isArray(itemsData)) {
-      localizedItem = itemsData.find((localItem: any) => {
-        if (localItem.apiName === itemApiName) {
-          return true;
-        }
-        return false;
-      });
-    } else if (typeof itemsData === 'object' && itemsData !== null) {
-      // Try to find by apiName as key first
-      if (itemsData[itemApiName]) {
-        localizedItem = itemsData[itemApiName];
-      } else {
-        // Otherwise, search through object values
-        const itemsArray = Object.values(itemsData) as any[];
-        localizedItem = itemsArray.find((localItem: any) => {
-          return localItem.apiName === itemApiName;
-        });
-      }
-    }
-
-    if (localizedItem) {
-      return {
-        id: localizedItem.id || itemApiName,
-        name: localizedItem.name || itemApiName,
-        icon: getItemIconUrlFromPath(localizedItem.icon, localizedItem.apiName || itemApiName),
-        apiName: localizedItem.apiName || itemApiName,
-      };
-    }
-
-    // Fallback: return item with apiName only
-    return {
-      id: itemApiName,
-      name: itemApiName,
-      icon: getItemIconUrlFromPath(null, itemApiName),
-      apiName: itemApiName,
-    };
-  };
-
-  // Map IComposition to TeamComp format
-  const teamComps = useMemo<TeamComp[]>(() => {
-    if (!compositions) return [];
-
-    // Get localized items data
-    let itemsData: any = null;
-    if (language) {
-      try {
-        const locale = getLocaleFromLanguage(language);
-        const itemsKey = `data_items_${locale}`;
-        const itemsDataString = LocalStorage.getString(itemsKey);
-        if (itemsDataString) {
-          itemsData = JSON.parse(itemsDataString);
-        }
-      } catch (error) {
-        console.error('Error loading items data:', error);
-      }
-    }
-
-    return compositions.map(comp => {
-      // Map units to champions
-      const champions = comp.units.map(unit => {
-        // Map items from itemsDetails or items array
-        let mappedItems: Array<{id?: string; name?: string; icon: string; apiName?: string}> = [];
-        
-        if (unit.itemsDetails && unit.itemsDetails.length > 0) {
-          // Use itemsDetails if available
-          mappedItems = unit.itemsDetails.map(itemDetail => {
-            // Try to get localized data
-            if (itemsData) {
-              const localizedItem = getLocalizedItem(itemDetail.tag || itemDetail.id, itemsData);
-              // If localized item has a proper name (not just apiName), use it
-              if (localizedItem.name && localizedItem.name !== localizedItem.apiName) {
-                return localizedItem;
-              }
-            }
-            
-            // Fallback to itemDetail
-            return {
-              id: itemDetail.id,
-              name: itemDetail.name,
-              icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.tag || itemDetail.id),
-              apiName: itemDetail.tag || itemDetail.id,
-            };
-          });
-        } else if (unit.items && unit.items.length > 0) {
-          // Use items array (string[]) and map with local data
-          mappedItems = unit.items.map(itemApiName => {
-            return getLocalizedItem(itemApiName, itemsData);
-          });
-        }
-
-        return {
-          id: unit.championId || unit.championKey,
-          image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
-          cost: unit.cost,
-          items: mappedItems,
-          need3Star: unit.need3Star || false,
-          needUnlock: unit.needUnlock || false,
-        };
-      });
-
-      // Extract all items from units (flatten and deduplicate by ID)
-      const allItems = comp.units
-        .flatMap(unit => unit.itemsDetails || [])
-        .filter((item, index, self) => {
-          // Deduplicate by item ID
-          return index === self.findIndex(i => i.id === item.id);
-        })
-        .map(itemDetail => ({
-          icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.apiName),
-        }));
-
-      // Map difficulty to rank
-      const getRank = (difficulty: string): string => {
-        if (difficulty === 'Dễ') return 'OP';
-        if (difficulty === 'Trung bình') return 'S';
-        if (difficulty === 'Khó') return 'A';
-        return 'S'; // Default
-      };
-
-      // Get tier from API or fallback to rank
-      const tier = comp.tier || getRank(comp.difficulty);
-
-      return {
-        id: comp.id,
-        name: comp.name,
-        rank: getRank(comp.difficulty),
-        tier: tier,
-        champions,
-        items: allItems,
-        composition: comp,
-      };
-    });
-  }, [compositions, language]);
-
-  const handleTeamPress = (team: TeamComp) => {
-    // Navigate to detail screen with compId to fetch from API
-    const comp = team.composition;
+console.log('compositions', compositions);
+  const handleTeamPress = useCallback((comp: IComposition) => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
-  };
+  }, []);
 
-  const getRankColor = (rankOrTier: string) => {
+  const getRankColor = useCallback((rankOrTier: string) => {
     switch (rankOrTier) {
       case 'OP':
         return '#ff4757';
@@ -230,103 +47,32 @@ const HomeScreen: React.FC = () => {
       default:
         return colors.primary;
     }
-  };
+  }, [colors.primary]);
 
-  // Always return black text color
-  const getContrastTextColor = (): string => {
-    return '#000000';
-  };
-
-  // Get unit border color based on cost
-  const getUnitCostBorderColor = (cost?: number): string => {
-    if (!cost) return colors.primary;
-    switch (cost) {
-      case 1:
-        return '#c0c0c0'; // Xám/Trắng
-      case 2:
-        return '#4ade80'; // Xanh lá
-      case 3:
-        return '#60a5fa'; // Xanh dương
-      case 4:
-        return '#a78bfa'; // Tím
-      case 5:
-        return '#ffd700'; // Vàng (Huyền thoại)
-      case 6:
-        return '#ff6b35'; // Đỏ/Cam
-      default:
-        return colors.primary;
-    }
-  };
-
-  const renderTeamCard = ({item}: {item: TeamComp}) => {
-    const displayTier = item.tier || item.rank;
+  const renderTeamCard = useCallback(({item}: {item: IComposition}) => {
+    const displayTier = item.tier || 'S';
     const backgroundColor = getRankColor(displayTier);
-    const textColor = getContrastTextColor();
     return (
       <RNBounceable style={styles.teamCard} onPress={() => handleTeamPress(item)}>
         <View style={styles.teamHeader}>
           <View style={[styles.rankBadge, {backgroundColor}]}>
-            <Text style={[styles.rankText, {color: textColor}]}>{displayTier}</Text>
+            <Text style={[styles.rankText, {color: '#000000'}]}>{displayTier}</Text>
           </View>
           <Text style={styles.teamName}>{item.name}</Text>
         </View>
 
-      <View style={styles.championsRow}>
-        {item.champions.map((champion, index) => (
-          <View key={`${champion.id}-${index}`} style={styles.championContainer}>
-            <View style={styles.championWrapper}>
-              {/* Border hexagon */}
-              <View style={styles.hexagonBorder}>
-                <Hexagon
-                  size={50}
-                  backgroundColor="transparent"
-                  borderColor={getUnitCostBorderColor(champion.cost)}
-                  borderWidth={1}
-                />
-              </View>
-              {/* Main hexagon with image */}
-              <View style={styles.hexagonInner}>
-                <Hexagon
-                  size={46}
-                  backgroundColor={colors.card}
-                  borderColor={colors.border}
-                  borderWidth={2}
-                  imageUri={champion.image}>
-                  {/* Items inside hexagon (absolute positioned) */}
-                  {champion.items && champion.items.length > 0 && (
-                    <View style={styles.championItemsRow}>
-                      {champion.items.map((itemObj, itemIndex) => (
-                        <Image
-                          key={`champion-${index}-item-${itemIndex}`}
-                          source={{uri: itemObj.icon}}
-                          style={styles.championItemIcon}
-                        />
-                      ))}
-                    </View>
-                  )}
-                </Hexagon>
-              </View>
-              {champion.need3Star && (
-                <View style={styles.tier3Icon}>
-                  <ThreeStars size={36} color="#fbbf24" />
-                </View>
-              )}
-              {champion.needUnlock && (
-                <View style={styles.unlockBadge}>
-                  <Image
-                    source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
-                    style={styles.unlockIcon}
-                    resizeMode="contain"
-                  />
-                </View>
-              )}
-            </View>
-          </View>
-        ))}
-      </View>
+        <View style={styles.championsRow}>
+          {item.units.map((unit, index) => (
+            <UnitHexagonItem
+              key={`${unit.championId}-${index}`}
+              unit={unit}
+              index={index}
+            />
+          ))}
+        </View>
       </RNBounceable>
     );
-  };
+  }, [styles, handleTeamPress, getRankColor]);
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
@@ -373,7 +119,7 @@ const HomeScreen: React.FC = () => {
     </View>
   );
 
-  if (isLoading && teamComps.length === 0) {
+  if (isLoading && (!compositions || compositions.length === 0)) {
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.safeContent} edges={[]}>
@@ -408,7 +154,7 @@ const HomeScreen: React.FC = () => {
     <View style={styles.container}>
       <SafeAreaView style={styles.safeContent} edges={[]}>
         <FlatList
-          data={teamComps}
+          data={compositions}
           renderItem={renderTeamCard}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}

@@ -40,8 +40,11 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
 
   const unitImage = getUnitAvatarUrl(unit.championKey, 64) || unit.image || '';
 
-  const getItemIcon = (item: {icon?: string; apiName?: string; tag?: string | null; id?: string}) => {
-    return getItemIconUrlFromPath(item.icon || null, item.apiName || item.tag || item.id || '');
+  // Get item icon from apiName string
+  const getItemIcon = (apiName: string) => {
+    const iconUrl = getItemIconUrlFromPath(null, apiName);
+    console.log('getItemIcon - apiName:', apiName, 'iconUrl:', iconUrl);
+    return iconUrl;
   };
 
   return (
@@ -64,13 +67,13 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             borderColor={colors.border}
             borderWidth={2}
             imageUri={unitImage}>
-            {/* Items inside hexagon (absolute positioned) */}
-            {unit.itemsDetails && unit.itemsDetails.length > 0 && (
+            {/* Items inside hexagon */}
+            {unit.items && unit.items.length > 0 && (
               <View style={styles.itemsRow}>
-                {unit.itemsDetails.map((itemDetail, itemIndex) => (
+                {unit.items.map((itemApiName, itemIndex) => (
                   <Image
                     key={`unit-${index}-item-${itemIndex}`}
-                    source={{uri: getItemIcon(itemDetail)}}
+                    source={{uri: getItemIcon(itemApiName)}}
                     style={styles.itemIcon}
                   />
                 ))}

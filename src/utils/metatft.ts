@@ -202,15 +202,19 @@ export const getItemIconUrlFromPath = (
   apiName?: string | null,
 ): string => {
 
-    
-    // Try to parse icon path to get filename
-    const filename = parseIconPath(iconPath);
-    if (filename) {
-      // Format filename: TFT_Item_BFSword -> tft_item_bfsword
-      const formattedKey = filename.toLowerCase();
-      const metatftUrl = `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
-      return metatftUrl;
-    }
+  // Fallback to apiName if iconPath parsing fails
+  if (apiName) {
+    const formattedKey = apiName.toLowerCase();
+    return `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
+  }
+  // Try to parse icon path to get filename
+  const filename = parseIconPath(iconPath);
+  if (filename) {
+    // Format filename: TFT_Item_BFSword -> tft_item_bfsword
+    const formattedKey = filename.toLowerCase();
+    return `https://cdn.metatft.com/file/metatft/items/${formattedKey}.png`;
+  }
+
 
   // Last resort: return empty string
   return '';

@@ -535,7 +535,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                   </Text>
                   {needUnlock && (
                     <Image
-                      source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                      source={require('@assets/icons/unlock.png')}
                       style={styles.unlockIcon}
                       resizeMode="contain"
                     />
@@ -724,7 +724,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             <View style={styles.unlockCard}>
               <View style={styles.unlockRow}>
                 <Image
-                  source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                  source={require('@assets/icons/unlock.png')}
                   style={styles.unlockIcon}
                   resizeMode="contain"
                 />

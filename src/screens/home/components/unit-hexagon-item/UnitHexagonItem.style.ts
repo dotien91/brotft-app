@@ -46,7 +46,7 @@ export default (theme: ExtendedTheme) => {
     },
     unlockBadge: {
       position: 'absolute',
-      bottom: -6,
+      top: 0,
       right: -4,
       width: 18,
       height: 18,

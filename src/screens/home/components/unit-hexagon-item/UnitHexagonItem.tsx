@@ -87,7 +87,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
         {unit.needUnlock && (
           <View style={styles.unlockBadge}>
             <Image
-              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+              source={require('@assets/icons/unlock.png')}
               style={styles.unlockIcon}
               resizeMode="contain"
             />

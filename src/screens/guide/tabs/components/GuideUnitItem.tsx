@@ -291,7 +291,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
           </Text>
           {data.needUnlock && (
             <Image
-              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+              source={require('@assets/icons/unlock.png')}
               style={styles.compactUnlockIconNextToName}
               resizeMode="contain"
             />
@@ -329,7 +329,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
           </Text>
           {data.needUnlock && (
             <Image
-              source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+              source={require('@assets/icons/unlock.png')}
               style={styles.unlockIcon}
               resizeMode="contain"
             />

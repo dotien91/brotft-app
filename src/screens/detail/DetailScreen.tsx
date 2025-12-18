@@ -506,7 +506,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                           }
                         ]}>
                           <Image
-                            source={{uri: 'https://www.metatft.com/icons/unlock.png'}}
+                            source={require('@assets/icons/unlock.png')}
                             style={[styles.unlockIcon, {
                               width: hexSize * 0.18,
                               height: hexSize * 0.18,

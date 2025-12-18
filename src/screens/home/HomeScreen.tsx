@@ -9,8 +9,8 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {SCREENS} from '@shared-constants';
 import {useCompositionsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {IComposition} from '@services/models/composition';
-import UnitHexagonItem from './components/unit-hexagon-item/UnitHexagonItem';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import TeamCard from './components/team-card/TeamCard';
 import {translations} from '../../shared/localization';
 
 const HomeScreen: React.FC = () => {
@@ -31,49 +31,12 @@ const HomeScreen: React.FC = () => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
   }, []);
 
-  const getRankColor = useCallback((rankOrTier: string) => {
-    switch (rankOrTier) {
-      case 'OP':
-        return '#ff4757';
-      case 'S':
-        return '#ff7e83';
-      case 'A':
-        return '#ffbf7f';
-      case 'B':
-        return '#ffdf80';
-      case 'C':
-        return '#feff7f';
-      case 'D':
-        return '#bffe7f';
-      default:
-        return colors.primary;
-    }
-  }, [colors.primary]);
-
-  const renderTeamCard = useCallback(({item}: {item: IComposition}) => {
-    const displayTier = item.tier || 'S';
-    const backgroundColor = getRankColor(displayTier);
-    return (
-      <RNBounceable style={styles.teamCard} onPress={() => handleTeamPress(item)}>
-        <View style={styles.teamHeader}>
-          <View style={[styles.rankBadge, {backgroundColor}]}>
-            <Text style={[styles.rankText, {color: '#000000'}]}>{displayTier}</Text>
-          </View>
-          <Text style={styles.teamName}>{item.name}</Text>
-        </View>
-
-        <View style={styles.championsRow}>
-          {item.units.map((unit, index) => (
-            <UnitHexagonItem
-              key={`${unit.championId}-${index}`}
-              unit={unit}
-              index={index}
-            />
-          ))}
-        </View>
-      </RNBounceable>
-    );
-  }, [styles, handleTeamPress, getRankColor]);
+  const renderTeamCard = useCallback(
+    ({item}: {item: IComposition}) => (
+      <TeamCard composition={item} onPress={handleTeamPress} />
+    ),
+    [handleTeamPress],
+  );
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>

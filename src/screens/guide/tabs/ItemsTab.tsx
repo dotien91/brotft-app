@@ -10,6 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideItemItem from './components/GuideItemItem';
 import {useTftItemsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
+import EmptyList from '@shared-components/empty-list/EmptyList';
 import createStyles from './TabContent.style';
 
 const ItemsTab: React.FC = () => {
@@ -51,14 +52,6 @@ const ItemsTab: React.FC = () => {
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.centerContainer}>
-      <Text h4 color={colors.placeholder}>
-        No items found
-      </Text>
-    </View>
-  );
-
   if (isLoading && allItems.length === 0) {
     return renderLoading();
   }
@@ -68,7 +61,7 @@ const ItemsTab: React.FC = () => {
   }
 
   if (allItems.length === 0 && !isLoading) {
-    return renderEmpty();
+    return <EmptyList message="No items found" />;
   }
 
   return (

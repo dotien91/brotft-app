@@ -40,10 +40,8 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
 
   const unitImage = getUnitAvatarUrl(unit.championKey, 64) || unit.image || '';
 
-  // Get item icon from apiName string
   const getItemIcon = (apiName: string) => {
     const iconUrl = getItemIconUrlFromPath(null, apiName);
-    console.log('getItemIcon - apiName:', apiName, 'iconUrl:', iconUrl);
     return iconUrl;
   };
 

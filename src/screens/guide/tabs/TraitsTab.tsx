@@ -10,6 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideTraitItem from './components/GuideTraitItem';
 import {useTftTraitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
+import EmptyList from '@shared-components/empty-list/EmptyList';
 import createStyles from './TabContent.style';
 
 const TraitsTab: React.FC = () => {
@@ -51,14 +52,6 @@ const TraitsTab: React.FC = () => {
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.centerContainer}>
-      <Text h4 color={colors.placeholder}>
-        No traits found
-      </Text>
-    </View>
-  );
-
   if (isLoading && allTraits.length === 0) {
     return renderLoading();
   }
@@ -68,7 +61,7 @@ const TraitsTab: React.FC = () => {
   }
 
   if (allTraits.length === 0 && !isLoading) {
-    return renderEmpty();
+    return <EmptyList message="No traits found" />;
   }
 
   return (

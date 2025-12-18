@@ -10,6 +10,8 @@ import {SCREENS} from '@shared-constants';
 import {useCompositionsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {IComposition} from '@services/models/composition';
 import UnitHexagonItem from './components/unit-hexagon-item/UnitHexagonItem';
+import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../shared/localization';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
@@ -25,7 +27,6 @@ const HomeScreen: React.FC = () => {
     refresh,
     isRefetching,
   } = useCompositionsWithPagination(10);
-console.log('compositions', compositions);
   const handleTeamPress = useCallback((comp: IComposition) => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
   }, []);
@@ -162,11 +163,7 @@ console.log('compositions', compositions);
           refreshing={isRefetching}
           onRefresh={refresh}
           ListHeaderComponent={renderListHeader}
-          ListEmptyComponent={
-            <View style={{padding: 20, alignItems: 'center'}}>
-              <Text color={colors.placeholder}>No compositions found</Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyList message={translations.noCompositionsFound} />}
         />
       </SafeAreaView>
     </View>

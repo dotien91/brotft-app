@@ -20,6 +20,7 @@ import {SCREENS} from '@shared-constants';
 import {useListData} from '../../hooks/useListData';
 import {getTraitsForList} from '@services/api/traitsForList';
 import type {ITrait} from '@services/models/trait';
+import EmptyList from '@shared-components/empty-list/EmptyList';
 
 const profileURI =
   // eslint-disable-next-line max-len
@@ -75,26 +76,19 @@ const TraitsList: React.FC<TraitsListProps> = ({
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Icon
-        name="inbox"
-        type={IconType.Ionicons}
-        color={colors.placeholder}
-        size={48}
-      />
-      <Text h4 color={colors.placeholder} style={styles.emptyText}>
-        No traits found
-      </Text>
-    </View>
-  );
-
   if (isLoading && listData.length === 0) {
     return renderLoading();
   }
 
   if (noData && listData.length === 0 && !isLoading) {
-    return renderEmpty();
+    return (
+      <EmptyList
+        message="No traits found"
+        iconName="inbox"
+        iconType={IconType.Ionicons}
+        style={styles.emptyContainer}
+      />
+    );
   }
 
   return (

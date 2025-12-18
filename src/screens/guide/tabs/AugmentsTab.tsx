@@ -15,6 +15,7 @@ import FilterModal from './components/FilterModal';
 import AugmentTier from '@shared-components/augment-tier/AugmentTier';
 import {useTftAugmentsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftAugmentsFilters, ITftAugmentsSort} from '@services/models/tft-augment';
+import EmptyList from '@shared-components/empty-list/EmptyList';
 import createStyles from './TabContent.style';
 
 const AugmentsTab: React.FC = () => {
@@ -129,13 +130,6 @@ const AugmentsTab: React.FC = () => {
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.centerContainer}>
-      <Text h4 color={colors.placeholder}>
-        {filters ? 'No augments found matching your filters' : 'No augments found'}
-      </Text>
-    </View>
-  );
 
   // Initialize temp filters when opening modal
   useEffect(() => {
@@ -404,7 +398,9 @@ const AugmentsTab: React.FC = () => {
 
       {/* Augments List */}
       {augmentsList.length === 0 && !isLoading ? (
-        renderEmpty()
+        <EmptyList
+          message={filters ? 'No augments found matching your filters' : 'No augments found'}
+        />
       ) : (
         <FlatList
           data={augmentsList}

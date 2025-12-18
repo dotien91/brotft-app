@@ -17,6 +17,7 @@ import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnitsFilters} from '@services/models/tft-unit';
 import {SCREENS} from '@shared-constants';
 import UnitCost from '@shared-components/unit-cost/UnitCost';
+import EmptyList from '@shared-components/empty-list/EmptyList';
 import createStyles from './TabContent.style';
 
 const UnitsTab: React.FC = () => {
@@ -137,13 +138,6 @@ const UnitsTab: React.FC = () => {
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.centerContainer}>
-      <Text h4 color={colors.placeholder}>
-        {filters ? 'No units found matching your filters' : 'No units found'}
-      </Text>
-    </View>
-  );
 
   const hasActiveFilters = appliedCost !== undefined || appliedTrait || appliedRole || searchQuery.trim();
   const hasTempFilters = !!(tempCost !== undefined || tempTrait || tempRole);
@@ -297,7 +291,9 @@ const UnitsTab: React.FC = () => {
 
       {/* Units List */}
       {unitsList.length === 0 && !isLoading ? (
-        renderEmpty()
+        <EmptyList
+          message={filters ? 'No units found matching your filters' : 'No units found'}
+        />
       ) : (
     <FlatList
           data={unitsList}

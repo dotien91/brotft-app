@@ -10,6 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideChampionItem from './components/GuideChampionItem';
 import {useChampionsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
+import EmptyList from '@shared-components/empty-list/EmptyList';
 import createStyles from './TabContent.style';
 
 const ChampionsTab: React.FC = () => {
@@ -51,14 +52,6 @@ const ChampionsTab: React.FC = () => {
     </View>
   );
 
-  const renderEmpty = () => (
-    <View style={styles.centerContainer}>
-      <Text h4 color={colors.placeholder}>
-        No champions found
-      </Text>
-    </View>
-  );
-
   if (isLoading && allChampions.length === 0) {
     return renderLoading();
   }
@@ -68,7 +61,7 @@ const ChampionsTab: React.FC = () => {
   }
 
   if (allChampions.length === 0 && !isLoading) {
-    return renderEmpty();
+    return <EmptyList message="No champions found" />;
   }
 
   return (

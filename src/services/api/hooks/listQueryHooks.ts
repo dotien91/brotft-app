@@ -56,6 +56,7 @@ import type {
 } from '@services/models/tft-unit';
 import type {
   ITftTraitsQueryParams,
+  ITftTraitsFilters,
   ITftTrait,
 } from '@services/models/tft-trait';
 import type {
@@ -593,12 +594,31 @@ export const useTftTraits = (
 };
 
 // Hook with pagination handling built-in for TFT traits
-export const useTftTraitsWithPagination = (limit: number = 20) => {
+export const useTftTraitsWithPagination = (
+  limit: number = 20,
+  filters?: ITftTraitsFilters,
+) => {
   const [page, setPage] = useState(1);
   const [allTftTraits, setAllTftTraits] = useState<ITftTrait[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isNoData, setIsNoData] = useState(false);
+
+  // Create params object - ensure filters object identity changes when filters change
+  const queryParams = useMemo(() => {
+    const params: ITftTraitsQueryParams = {
+      page,
+      limit,
+      filters: filters
+        ? {
+            name: filters.name || undefined,
+            apiName: filters.apiName || undefined,
+            type: filters.type || undefined,
+          }
+        : undefined,
+    };
+    return params;
+  }, [page, limit, filters]);
 
   const {
     data: tftTraitsData,
@@ -607,7 +627,21 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
     error,
     refetch,
     isRefetching,
-  } = useTftTraits({page, limit});
+  } = useTftTraits(queryParams, {
+    // Ensure query refetches when filters change
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to refetch on filter change
+  });
+
+  // Reset when filters change - must run before data effect
+  useEffect(() => {
+    setPage(1);
+    setAllTftTraits([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+    setIsNoData(false);
+  }, [filters]);
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -659,7 +693,7 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
     setHasMore(true);
     setIsLoadingMore(false);
     setIsNoData(false);
-    // Don't call refetch() here - let React Query refetch automatically when page changes
+    refetch();
   };
 
   return {

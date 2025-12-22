@@ -99,6 +99,8 @@ export const translations = new LocalizedStrings({
     searchUnitsPlaceholder: "Birim adına göre ara...",
     role: "Rol",
     all: "Tümü",
+    origin: "Köken",
+    class: "Sınıf",
   },
   en: {
     noLocationService: "Location Service Not Available",
@@ -199,6 +201,8 @@ export const translations = new LocalizedStrings({
     searchUnitsPlaceholder: "Search units by name...",
     role: "Role",
     all: "All",
+    origin: "Origin",
+    class: "Class",
   },
   vi: {
     noLocationService: "Dịch vụ vị trí không khả dụng",
@@ -299,6 +303,8 @@ export const translations = new LocalizedStrings({
     searchUnitsPlaceholder: "Tìm kiếm tướng theo tên...",
     role: "Vai trò",
     all: "Tất cả",
+    origin: "Tộc",
+    class: "Hệ",
   },
   "zh-CN": {
     noLocationService: "位置服务不可用",
@@ -399,6 +405,8 @@ export const translations = new LocalizedStrings({
     searchUnitsPlaceholder: "按名称搜索单位...",
     role: "角色",
     all: "全部",
+    origin: "起源",
+    class: "职业",
   },
 });
 

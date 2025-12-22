@@ -27,6 +27,9 @@ export const getTftTraits = async (
     if (filters.apiName) {
       queryParams.append('apiName', filters.apiName);
     }
+    if (filters.type) {
+      queryParams.append('type', filters.type);
+    }
   }
   if (params?.sort && params.sort.length > 0) {
     // Only use the first sort item (flat format supports single sort)

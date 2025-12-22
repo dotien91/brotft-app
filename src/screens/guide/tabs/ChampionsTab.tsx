@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useCallback} from 'react';
 import {
   FlatList,
   View,
@@ -25,20 +25,61 @@ const ChampionsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
   } = useChampionsWithPagination(10);
 
-  const handleItemPress = (championId?: string) => {
-    NavigationService.push(SCREENS.CHAMPION_DETAIL, {championId});
-  };
+  const championsList = allChampions || [];
 
-  const renderLoading = () => (
+  const handleItemPress = useCallback((championId?: string) => {
+    NavigationService.push(SCREENS.CHAMPION_DETAIL, {championId});
+  }, []);
+
+  const renderItem = useCallback(
+    ({item}: {item: typeof championsList[0]}) => (
+      <GuideChampionItem
+        data={item}
+        onPress={() => handleItemPress(item.id)}
+      />
+    ),
+    [handleItemPress],
+  );
+
+  const keyExtractor = useCallback((item: typeof championsList[0]) => item.id, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  const ListFooter = useCallback(() => {
+    if (isLoadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      );
+    }
+    if (!hasMore && championsList.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text color={colors.placeholder} style={styles.footerText}>
+            No more champions to load
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, hasMore, championsList.length, styles.footerLoader, styles.footerText, colors.primary, colors.placeholder]);
+
+  const renderLoading = useCallback(() => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
     </View>
-  );
+  ), [styles.centerContainer, colors.primary]);
 
-  const renderError = () => (
+  const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
         Error loading champions
@@ -47,47 +88,36 @@ const ChampionsTab: React.FC = () => {
         {error?.message || 'Something went wrong'}
       </Text>
     </View>
-  );
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error]);
 
-  if (isLoading && allChampions.length === 0) {
+  if (isLoading && championsList.length === 0) {
     return renderLoading();
   }
 
-  if (isError && allChampions.length === 0) {
+  if (isError && championsList.length === 0) {
     return renderError();
   }
 
-  if (allChampions.length === 0 && !isLoading) {
+  if (isNoData) {
     return <EmptyList message="No champions found" />;
   }
 
   return (
     <FlatList
-      data={allChampions}
-      renderItem={({item}) => (
-        <GuideChampionItem
-          data={item}
-          onPress={() => handleItemPress(item.id)}
-        />
-      )}
-      keyExtractor={item => item.id}
+      data={championsList}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
+      onEndReached={handleLoadMore}
       onEndReachedThreshold={0.3}
-      ListFooterComponent={
-        isLoadingMore || (isLoading && allChampions.length > 0) ? (
-          <View style={styles.footerLoader}>
-            <ActivityIndicator size="small" color={colors.primary} />
-          </View>
-        ) : !hasMore && allChampions.length > 0 ? (
-          <View style={styles.footerLoader}>
-            <Text color={colors.placeholder} style={styles.footerText}>
-              No more champions to load
-            </Text>
-          </View>
-        ) : null
-      }
+      ListFooterComponent={ListFooter}
+      // Performance optimizations
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={5}
+      removeClippedSubviews={true}
+      updateCellsBatchingPeriod={50}
     />
   );
 };

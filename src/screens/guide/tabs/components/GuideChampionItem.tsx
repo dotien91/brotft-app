@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useCallback} from 'react';
 import {View, Image, TouchableOpacity} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
@@ -19,10 +19,10 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const {name, cost, traitDetails, traits, image, imageUrl} = data;
+  const {name, cost, traitDetails, traits, image, imageUrl, key: championKey} = data;
 
-  // Get champion image URL from metatft.com
-  const getChampionImageUrl = () => {
+  // Get champion image URL from metatft.com - memoized
+  const imageUri = useMemo(() => {
     if (image?.path) {
       if (image.path.startsWith('http')) {
         return image.path;
@@ -37,30 +37,32 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
     }
     
     // Use metatft.com for avatar (48x48)
-    const championKey = data.key || name?.toLowerCase() || '';
-    const formattedKey = championKey.startsWith('tft') ? championKey : `tft15_${championKey.toLowerCase()}`;
+    const key = championKey || name?.toLowerCase() || '';
+    const formattedKey = key.startsWith('tft') ? key : `tft15_${key.toLowerCase()}`;
     return `https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/champions/${formattedKey}.png`;
-  };
+  }, [image?.path, imageUrl, championKey, name]);
 
-  const imageUri = getChampionImageUrl();
+  // Get traits to display - memoized
+  const displayTraits = useMemo(() => 
+    traitDetails && traitDetails.length > 0
+      ? traitDetails
+      : traits || [],
+    [traitDetails, traits]
+  );
 
-  // Get traits to display
-  const displayTraits = traitDetails && traitDetails.length > 0
-    ? traitDetails
-    : traits || [];
-
-  const isTraitObject = (trait: string | ITrait): trait is ITrait => {
+  // Helper functions - memoized
+  const isTraitObject = useCallback((trait: string | ITrait): trait is ITrait => {
     return typeof trait === 'object' && trait !== null && 'name' in trait;
-  };
+  }, []);
 
-  const getTraitName = (trait: string | ITrait): string => {
+  const getTraitName = useCallback((trait: string | ITrait): string => {
     if (typeof trait === 'string') return trait;
     if (isTraitObject(trait)) return trait.name;
     return String(trait);
-  };
+  }, [isTraitObject]);
 
   // Get trait icon based on type or default
-  const getTraitIcon = (trait: string | ITrait) => {
+  const getTraitIcon = useCallback((trait: string | ITrait) => {
     if (isTraitObject(trait)) {
       if (trait.type === 'origin') {
         return 'star';
@@ -70,7 +72,7 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
       }
     }
     return 'shield';
-  };
+  }, [isTraitObject]);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
@@ -100,9 +102,10 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
         {displayTraits.slice(0, 3).map((trait, index) => {
           const traitName = isTraitObject(trait) ? trait.name : getTraitName(trait);
           const iconName = getTraitIcon(trait);
+          const key = isTraitObject(trait) ? trait.id : index;
           
           return (
-            <View key={isTraitObject(trait) ? trait.id : index} style={styles.traitItem}>
+            <View key={key} style={styles.traitItem}>
               <Icon
                 name={iconName}
                 type={IconType.Ionicons}
@@ -123,5 +126,8 @@ const GuideChampionItem: React.FC<GuideChampionItemProps> = ({data, onPress}) =>
   );
 };
 
-export default GuideChampionItem;
+export default React.memo(GuideChampionItem, (prevProps, nextProps) => {
+  // Only re-render if data.id changes, ignore onPress changes
+  return prevProps.data?.id === nextProps.data?.id;
+});
 

@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import {
   FlatList,
   View,
@@ -82,17 +82,55 @@ const AugmentsTab: React.FC = () => {
   // Use augments directly from API (already sorted)
   const augmentsList = augments || [];
 
-  const handleItemPress = () => {
+  const handleItemPress = useCallback(() => {
     // TODO: Navigate to augment detail screen when available
-  };
+  }, []);
 
-  const renderLoading = () => (
+  const renderItem = useCallback(
+    ({item}: {item: typeof augmentsList[0]}) => (
+      <GuideAugmentItem
+        data={item}
+        onPress={handleItemPress}
+      />
+    ),
+    [handleItemPress],
+  );
+
+  const keyExtractor = useCallback((item: typeof augmentsList[0]) => String(item.id), []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  const ListFooter = useCallback(() => {
+    if (isLoadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      );
+    }
+    if (!hasMore && augmentsList.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text color={colors.placeholder} style={styles.footerText}>
+            {translations.noMoreAugmentsToLoad}
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, hasMore, augmentsList.length, styles.footerLoader, styles.footerText, colors.primary, colors.placeholder, translations.noMoreAugmentsToLoad]);
+
+  const renderLoading = useCallback(() => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
     </View>
-  );
+  ), [styles.centerContainer, colors.primary]);
 
-  const renderError = () => (
+  const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
         {translations.errorLoadingAugments}
@@ -101,7 +139,7 @@ const AugmentsTab: React.FC = () => {
         {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  );
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingAugments, translations.somethingWentWrong]);
 
   // Initialize temp filters when opening modal
   useEffect(() => {
@@ -112,30 +150,47 @@ const AugmentsTab: React.FC = () => {
     }
   }, [isFilterModalVisible, appliedStage, appliedTrait, appliedTier]);
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = useCallback(() => {
     setAppliedStage(tempStage);
     setAppliedTrait(tempTrait);
     setAppliedTier(tempTier);
     setIsFilterModalVisible(false);
-  };
+  }, [tempStage, tempTrait, tempTier]);
 
-  const handleClearAllFilters = () => {
+  const handleClearAllFilters = useCallback(() => {
     setTempStage(undefined);
     setTempTrait(undefined);
     setTempTier(undefined);
-  };
+  }, []);
 
-  const handleClearAppliedFilters = () => {
+  const handleClearAppliedFilters = useCallback(() => {
     setAppliedStage(undefined);
     setAppliedTrait(undefined);
     setAppliedTier(undefined);
-  };
+  }, []);
 
-  const hasActiveFilters = appliedStage || appliedTrait || appliedTier !== undefined;
-  const hasTempFilters = !!(tempStage || tempTrait || tempTier !== undefined);
+  const handleFilterModalOpen = useCallback(() => setIsFilterModalVisible(true), []);
+  const handleFilterModalClose = useCallback(() => setIsFilterModalVisible(false), []);
+
+  const handleRemoveStageFilter = useCallback(() => setAppliedStage(undefined), []);
+  const handleRemoveTraitFilter = useCallback(() => setAppliedTrait(undefined), []);
+  const handleRemoveTierFilter = useCallback(() => setAppliedTier(undefined), []);
+
+  const hasActiveFilters = useMemo(() => appliedStage || appliedTrait || appliedTier !== undefined, [appliedStage, appliedTrait, appliedTier]);
+  const hasTempFilters = useMemo(() => !!(tempStage || tempTrait || tempTier !== undefined), [tempStage, tempTrait, tempTier]);
+
+  const activeFiltersCount = useMemo(() => [appliedStage, appliedTrait, appliedTier].filter(Boolean).length, [appliedStage, appliedTrait, appliedTier]);
 
   // Common stages
-  const stages = ['2-1', '2-2', '3-1', '3-2', '4-1', '4-2'];
+  const stages = useMemo(() => ['2-1', '2-2', '3-1', '3-2', '4-1', '4-2'], []);
+
+  const handleTierSelect = useCallback((value: string | number | boolean) => {
+    setTempTier(tempTier === value ? undefined : (value as number));
+  }, [tempTier]);
+
+  const handleStageSelect = useCallback((value: string | number | boolean) => {
+    setTempStage(tempStage === value ? undefined : (value as string));
+  }, [tempStage]);
 
   // Filter sections for modal
   const filterSections = useMemo(() => [
@@ -161,9 +216,7 @@ const AugmentsTab: React.FC = () => {
         },
       ],
       selected: tempTier,
-      onSelect: (value: string | number | boolean) => {
-        setTempTier(tempTier === value ? undefined : (value as number));
-      },
+      onSelect: handleTierSelect,
     },
     {
       title: translations.stage,
@@ -171,11 +224,9 @@ const AugmentsTab: React.FC = () => {
       compact: true,
       options: stages.map(stage => ({label: stage, value: stage})),
       selected: tempStage,
-      onSelect: (value: string | number | boolean) => {
-        setTempStage(tempStage === value ? undefined : (value as string));
-      },
+      onSelect: handleStageSelect,
     },
-  ], [tempStage, tempTier, stages]);
+  ], [tempStage, tempTier, stages, handleTierSelect, handleStageSelect, translations.tier, translations.stage]);
 
   if (isLoading && augmentsList.length === 0) {
     return renderLoading();
@@ -194,7 +245,7 @@ const AugmentsTab: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.activeFiltersContent}>
           <TouchableOpacity
-            onPress={() => setIsFilterModalVisible(true)}
+            onPress={handleFilterModalOpen}
             style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
             <Icon
               name="filter"
@@ -205,7 +256,7 @@ const AugmentsTab: React.FC = () => {
             {hasActiveFilters && (
               <View style={styles.filterBadge}>
                 <Text style={styles.filterBadgeText}>
-                  {[appliedStage, appliedTrait, appliedTier].filter(Boolean).length}
+                  {activeFiltersCount}
                 </Text>
               </View>
             )}
@@ -219,7 +270,7 @@ const AugmentsTab: React.FC = () => {
               <View style={styles.activeFilterChip}>
                 <AugmentTier tier={appliedTier} size={20} active={false} showLabel={true} noBackground={true} />
                 <TouchableOpacity
-                  onPress={() => setAppliedTier(undefined)}
+                  onPress={handleRemoveTierFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -234,7 +285,7 @@ const AugmentsTab: React.FC = () => {
               <View style={styles.activeFilterChip}>
                 <Text style={styles.activeFilterText}>{translations.stage}: {appliedStage}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedStage(undefined)}
+                  onPress={handleRemoveStageFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -249,7 +300,7 @@ const AugmentsTab: React.FC = () => {
               <View style={styles.activeFilterChip}>
                 <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedTrait(undefined)}
+                  onPress={handleRemoveTraitFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -273,7 +324,7 @@ const AugmentsTab: React.FC = () => {
       {/* Filter Modal */}
       <FilterModal
         visible={isFilterModalVisible}
-        onClose={() => setIsFilterModalVisible(false)}
+        onClose={handleFilterModalClose}
         onApply={handleApplyFilters}
         sections={filterSections}
         hasActiveFilters={hasTempFilters}
@@ -288,30 +339,19 @@ const AugmentsTab: React.FC = () => {
       ) : (
         <FlatList
           data={augmentsList}
-          renderItem={({item}) => (
-            <GuideAugmentItem
-              data={item}
-              onPress={handleItemPress}
-            />
-          )}
-          keyExtractor={item => String(item.id)}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          onEndReached={loadMore}
+          onEndReached={handleLoadMore}
           onEndReachedThreshold={0.3}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color={colors.primary} />
-              </View>
-            ) : !hasMore && augmentsList.length > 0 ? (
-              <View style={styles.footerLoader}>
-                <Text color={colors.placeholder} style={styles.footerText}>
-                  {translations.noMoreAugmentsToLoad}
-                </Text>
-              </View>
-            ) : null
-          }
+          ListFooterComponent={ListFooter}
+          // Performance optimizations
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
         />
       )}
     </View>

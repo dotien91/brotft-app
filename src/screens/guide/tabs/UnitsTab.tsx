@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import {
   FlatList,
   View,
@@ -99,17 +99,58 @@ const UnitsTab: React.FC = () => {
     loadMore,
   } = useTftUnitsWithPagination(20, filters); // Limit 20 per page
 
-  const handleItemPress = (unitId?: string | number) => {
-    NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unitId)});
-  };
+  // Ensure units is always an array
+  const unitsList = units || [];
 
-  const renderLoading = () => (
+  const handleItemPress = useCallback((unitId?: string | number) => {
+    NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unitId)});
+  }, []);
+
+  const renderItem = useCallback(
+    ({item}: {item: typeof unitsList[0]}) => (
+      <GuideUnitItem
+        data={item}
+        onPress={() => handleItemPress(item.id)}
+      />
+    ),
+    [handleItemPress],
+  );
+
+  const keyExtractor = useCallback((item: typeof unitsList[0]) => String(item.id), []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  const ListFooter = useCallback(() => {
+    if (isLoadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      );
+    }
+    if (!hasMore && unitsList.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text color={colors.placeholder} style={styles.footerText}>
+            {translations.noMoreUnitsToLoad}
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, hasMore, unitsList.length, styles.footerLoader, styles.footerText, colors.primary, colors.placeholder, translations.noMoreUnitsToLoad]);
+
+  const renderLoading = useCallback(() => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
     </View>
-  );
+  ), [styles.centerContainer, colors.primary]);
 
-  const renderError = () => (
+  const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
         {translations.errorLoadingUnitsTab}
@@ -118,11 +159,23 @@ const UnitsTab: React.FC = () => {
         {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  );
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingUnitsTab, translations.somethingWentWrong]);
 
+  const hasActiveFilters = useMemo(() => appliedCost !== undefined || appliedTrait || appliedRole, [appliedCost, appliedTrait, appliedRole]);
+  const hasTempFilters = useMemo(() => !!(tempCost !== undefined || tempTrait || tempRole), [tempCost, tempTrait, tempRole]);
 
-  const hasActiveFilters = appliedCost !== undefined || appliedTrait || appliedRole;
-  const hasTempFilters = !!(tempCost !== undefined || tempTrait || tempRole);
+  const activeFiltersCount = useMemo(() => [appliedCost, appliedTrait, appliedRole].filter(Boolean).length, [appliedCost, appliedTrait, appliedRole]);
+
+  const handleFilterModalOpen = useCallback(() => setIsFilterModalVisible(true), []);
+  const handleFilterModalClose = useCallback(() => setIsFilterModalVisible(false), []);
+
+  const handleRemoveCostFilter = useCallback(() => setAppliedCost(undefined), []);
+  const handleRemoveTraitFilter = useCallback(() => setAppliedTrait(undefined), []);
+  const handleRemoveRoleFilter = useCallback(() => setAppliedRole(undefined), []);
+
+  const handleCostSelect = useCallback((value: string | number | boolean) => {
+    setTempCost(tempCost === value ? undefined : (value as number));
+  }, [tempCost]);
 
   // Filter sections for modal
   const filterSections = useMemo(() => [
@@ -132,14 +185,9 @@ const UnitsTab: React.FC = () => {
       compact: true, // Enable compact layout for short content
       options: [1, 2, 3, 4, 5].map(cost => ({label: `${translations.cost} ${cost}`, value: cost})),
       selected: tempCost,
-      onSelect: (value: string | number | boolean) => {
-        setTempCost(tempCost === value ? undefined : (value as number));
-      },
+      onSelect: handleCostSelect,
     },
-  ], [tempCost]);
-
-  // Ensure units is always an array
-  const unitsList = units || [];
+  ], [tempCost, translations.cost, handleCostSelect]);
 
   if (isLoading && unitsList.length === 0) {
     return renderLoading();
@@ -158,7 +206,7 @@ const UnitsTab: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.activeFiltersContent}>
           <TouchableOpacity
-            onPress={() => setIsFilterModalVisible(true)}
+            onPress={handleFilterModalOpen}
             style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
             <Icon
               name="filter"
@@ -169,7 +217,7 @@ const UnitsTab: React.FC = () => {
             {hasActiveFilters && (
               <View style={styles.filterBadge}>
                 <Text style={styles.filterBadgeText}>
-                  {[appliedCost, appliedTrait, appliedRole].filter(Boolean).length}
+                  {activeFiltersCount}
                 </Text>
               </View>
             )}
@@ -183,7 +231,7 @@ const UnitsTab: React.FC = () => {
               <View style={styles.activeFilterChip}>
                 <UnitCost cost={appliedCost} size={14} active={true} />
                 <TouchableOpacity
-                  onPress={() => setAppliedCost(undefined)}
+                  onPress={handleRemoveCostFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -198,7 +246,7 @@ const UnitsTab: React.FC = () => {
               <View style={styles.activeFilterChip}>
                 <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedTrait(undefined)}
+                  onPress={handleRemoveTraitFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -213,7 +261,7 @@ const UnitsTab: React.FC = () => {
               <View style={styles.activeFilterChip}>
                 <Text style={styles.activeFilterText}>{translations.role}: {appliedRole}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedRole(undefined)}
+                  onPress={handleRemoveRoleFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -237,7 +285,7 @@ const UnitsTab: React.FC = () => {
       {/* Filter Modal */}
       <FilterModal
         visible={isFilterModalVisible}
-        onClose={() => setIsFilterModalVisible(false)}
+        onClose={handleFilterModalClose}
         onApply={handleApplyFilters}
         sections={filterSections}
         hasActiveFilters={hasTempFilters}
@@ -250,33 +298,22 @@ const UnitsTab: React.FC = () => {
           message={filters ? translations.noUnitsFoundWithFilters : translations.noUnitsFoundTab}
         />
       ) : (
-    <FlatList
+        <FlatList
           data={unitsList}
-      renderItem={({item}) => (
-        <GuideUnitItem
-          data={item}
-          onPress={() => handleItemPress(item.id)}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={ListFooter}
+          // Performance optimizations
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
         />
-      )}
-      keyExtractor={item => String(item.id)}
-      contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.3}
-      ListFooterComponent={
-            isLoadingMore ? (
-          <View style={styles.footerLoader}>
-            <ActivityIndicator size="small" color={colors.primary} />
-          </View>
-            ) : !hasMore && unitsList.length > 0 ? (
-          <View style={styles.footerLoader}>
-            <Text color={colors.placeholder} style={styles.footerText}>
-              {translations.noMoreUnitsToLoad}
-            </Text>
-          </View>
-        ) : null
-      }
-    />
       )}
     </View>
   );

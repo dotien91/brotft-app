@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {
   FlatList,
   View,
@@ -25,11 +25,11 @@ const TraitsTab: React.FC = () => {
   // Applied filters (used for API calls)
   const [appliedType, setAppliedType] = useState<'origin' | 'class' | undefined>(undefined);
 
-  const handleTypeToggle = (type: 'origin' | 'class') => {
+  const handleTypeToggle = useCallback((type: 'origin' | 'class') => {
     // If clicking the same type, clear it (toggle off)
     // Otherwise, set it (toggle on)
-    setAppliedType(appliedType === type ? undefined : type);
-  };
+    setAppliedType(currentType => currentType === type ? undefined : type);
+  }, []);
 
   // Build filters object from applied filters
   const filters = useMemo<ITftTraitsFilters | undefined>(() => {
@@ -58,17 +58,55 @@ const TraitsTab: React.FC = () => {
     loadMore,
   } = useTftTraitsWithPagination(20, filters);
 
-  const handleItemPress = (traitId?: string | number) => {
+  const handleItemPress = useCallback((traitId?: string | number) => {
     NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: String(traitId)});
-  };
+  }, []);
 
-  const renderLoading = () => (
+  // Ensure allTraits is always an array
+  const traitsList = allTraits || [];
+
+  const renderItem = useCallback(
+    ({item}: {item: typeof traitsList[0]}) => (
+      <GuideTraitItem data={item} onPress={() => handleItemPress(item.id)} />
+    ),
+    [handleItemPress],
+  );
+
+  const keyExtractor = useCallback((item: typeof traitsList[0]) => String(item.id), []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  const ListFooter = useCallback(() => {
+    if (isLoadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      );
+    }
+    if (!hasMore && traitsList.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text color={colors.placeholder} style={styles.footerText}>
+            {translations.noMoreTraitsToLoad}
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, hasMore, traitsList.length, styles.footerLoader, styles.footerText, colors.primary, colors.placeholder, translations.noMoreTraitsToLoad]);
+
+  const renderLoading = useCallback(() => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
     </View>
-  );
+  ), [styles.centerContainer, colors.primary]);
 
-  const renderError = () => (
+  const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
         {translations.errorLoadingTraits}
@@ -77,11 +115,38 @@ const TraitsTab: React.FC = () => {
         {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  );
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingTraits, translations.somethingWentWrong]);
 
+  const handleOriginPress = useCallback(() => handleTypeToggle('origin'), [handleTypeToggle]);
+  const handleClassPress = useCallback(() => handleTypeToggle('class'), [handleTypeToggle]);
 
-  // Ensure allTraits is always an array
-  const traitsList = allTraits || [];
+  const originButtonStyle = useMemo(() => [
+    styles.activeFilterChip,
+    appliedType === 'origin' 
+      ? {backgroundColor: colors.primary + '20', borderColor: colors.primary}
+      : {backgroundColor: colors.background, borderColor: colors.border},
+  ], [styles.activeFilterChip, appliedType, colors.primary, colors.background, colors.border]);
+
+  const classButtonStyle = useMemo(() => [
+    styles.activeFilterChip,
+    appliedType === 'class' 
+      ? {backgroundColor: colors.primary + '20', borderColor: colors.primary}
+      : {backgroundColor: colors.background, borderColor: colors.border},
+  ], [styles.activeFilterChip, appliedType, colors.primary, colors.background, colors.border]);
+
+  const originTextStyle = useMemo(() => [
+    styles.activeFilterText,
+    appliedType === 'origin' 
+      ? {color: colors.primary, fontWeight: '600'}
+      : {color: colors.text, fontWeight: '500'},
+  ], [styles.activeFilterText, appliedType, colors.primary, colors.text]);
+
+  const classTextStyle = useMemo(() => [
+    styles.activeFilterText,
+    appliedType === 'class' 
+      ? {color: colors.primary, fontWeight: '600'}
+      : {color: colors.text, fontWeight: '500'},
+  ], [styles.activeFilterText, appliedType, colors.primary, colors.text]);
 
   if (isLoading && traitsList.length === 0) {
     return renderLoading();
@@ -100,36 +165,16 @@ const TraitsTab: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.activeFiltersContent}>
           <TouchableOpacity
-            onPress={() => handleTypeToggle('origin')}
-            style={[
-              styles.activeFilterChip,
-              appliedType === 'origin' 
-                ? {backgroundColor: colors.primary + '20', borderColor: colors.primary}
-                : {backgroundColor: colors.background, borderColor: colors.border},
-            ]}>
-            <Text style={[
-              styles.activeFilterText,
-              appliedType === 'origin' 
-                ? {color: colors.primary, fontWeight: '600'}
-                : {color: colors.text, fontWeight: '500'},
-            ]}>
+            onPress={handleOriginPress}
+            style={originButtonStyle}>
+            <Text style={originTextStyle}>
               {translations.origin}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleTypeToggle('class')}
-            style={[
-              styles.activeFilterChip,
-              appliedType === 'class' 
-                ? {backgroundColor: colors.primary + '20', borderColor: colors.primary}
-                : {backgroundColor: colors.background, borderColor: colors.border},
-            ]}>
-            <Text style={[
-              styles.activeFilterText,
-              appliedType === 'class' 
-                ? {color: colors.primary, fontWeight: '600'}
-                : {color: colors.text, fontWeight: '500'},
-            ]}>
+            onPress={handleClassPress}
+            style={classButtonStyle}>
+            <Text style={classTextStyle}>
               {translations.class}
             </Text>
           </TouchableOpacity>
@@ -142,30 +187,22 @@ const TraitsTab: React.FC = () => {
           message={filters ? translations.noTraitsFound : translations.noTraitsFound}
         />
       ) : (
-    <FlatList
-      data={traitsList}
-      renderItem={({item}) => (
-        <GuideTraitItem data={item} onPress={() => handleItemPress(item.id)} />
-      )}
-      keyExtractor={item => String(item.id)}
-      contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.3}
-      ListFooterComponent={
-        isLoadingMore ? (
-          <View style={styles.footerLoader}>
-            <ActivityIndicator size="small" color={colors.primary} />
-          </View>
-        ) : !hasMore && traitsList.length > 0 ? (
-          <View style={styles.footerLoader}>
-            <Text color={colors.placeholder} style={styles.footerText}>
-              {translations.noMoreTraitsToLoad}
-            </Text>
-          </View>
-        ) : null
-      }
-    />
+        <FlatList
+          data={traitsList}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={ListFooter}
+          // Performance optimizations
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
+        />
       )}
     </View>
   );

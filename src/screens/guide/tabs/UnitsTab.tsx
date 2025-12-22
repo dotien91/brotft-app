@@ -20,7 +20,11 @@ import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
-const UnitsTab: React.FC = () => {
+interface UnitsTabProps {
+  enabled?: boolean;
+}
+
+const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -97,7 +101,7 @@ const UnitsTab: React.FC = () => {
     hasMore,
     isNoData,
     loadMore,
-  } = useTftUnitsWithPagination(20, filters); // Limit 20 per page
+  } = useTftUnitsWithPagination(20, filters, enabled); // Limit 20 per page
 
   // Ensure units is always an array
   const unitsList = units || [];

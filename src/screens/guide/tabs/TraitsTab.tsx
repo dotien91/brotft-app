@@ -17,7 +17,11 @@ import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
-const TraitsTab: React.FC = () => {
+interface TraitsTabProps {
+  enabled?: boolean;
+}
+
+const TraitsTab: React.FC<TraitsTabProps> = ({enabled = true}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -56,7 +60,7 @@ const TraitsTab: React.FC = () => {
     hasMore,
     isNoData,
     loadMore,
-  } = useTftTraitsWithPagination(20, filters);
+  } = useTftTraitsWithPagination(20, filters, enabled);
 
   const handleItemPress = useCallback((traitId?: string | number) => {
     NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: String(traitId)});

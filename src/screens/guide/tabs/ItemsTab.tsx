@@ -13,7 +13,11 @@ import {SCREENS} from '@shared-constants';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import createStyles from './TabContent.style';
 
-const ItemsTab: React.FC = () => {
+interface ItemsTabProps {
+  enabled?: boolean;
+}
+
+const ItemsTab: React.FC<ItemsTabProps> = ({enabled = true}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -27,7 +31,7 @@ const ItemsTab: React.FC = () => {
     hasMore,
     isNoData,
     loadMore,
-  } = useTftItemsWithPagination(20);
+  } = useTftItemsWithPagination(20, enabled);
 
   const itemsList = allItems || [];
 

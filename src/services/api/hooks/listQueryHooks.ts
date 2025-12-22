@@ -173,7 +173,7 @@ export const useChampions = (
 };
 
 // Hook with pagination handling built-in
-export const useChampionsWithPagination = (limit: number = 10) => {
+export const useChampionsWithPagination = (limit: number = 10, enabled: boolean = true) => {
   const [page, setPage] = useState(1);
   const [allChampions, setAllChampions] = useState<IChampion[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -187,7 +187,7 @@ export const useChampionsWithPagination = (limit: number = 10) => {
     error,
     refetch,
     isRefetching,
-  } = useChampions({page, limit});
+  } = useChampions({page, limit}, {enabled});
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -373,6 +373,7 @@ export const useTftUnits = (
 export const useTftUnitsWithPagination = (
   limit: number = 10,
   filters?: ITftUnitsFilters,
+  enabled: boolean = true,
 ) => {
   const [page, setPage] = useState(1);
   const [allTftUnits, setAllTftUnits] = useState<ITftUnit[]>([]);
@@ -410,6 +411,7 @@ export const useTftUnitsWithPagination = (
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to refetch on filter change
+    enabled,
   });
 
   // Track refresh state
@@ -597,6 +599,7 @@ export const useTftTraits = (
 export const useTftTraitsWithPagination = (
   limit: number = 20,
   filters?: ITftTraitsFilters,
+  enabled: boolean = true,
 ) => {
   const [page, setPage] = useState(1);
   const [allTftTraits, setAllTftTraits] = useState<ITftTrait[]>([]);
@@ -632,6 +635,7 @@ export const useTftTraitsWithPagination = (
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to refetch on filter change
+    enabled,
   });
 
   // Reset when filters change - must run before data effect
@@ -786,7 +790,7 @@ export const useTftItems = (
 };
 
 // Hook with pagination handling built-in for TFT items
-export const useTftItemsWithPagination = (limit: number = 20) => {
+export const useTftItemsWithPagination = (limit: number = 20, enabled: boolean = true) => {
   const [page, setPage] = useState(1);
   const [allTftItems, setAllTftItems] = useState<ITftItem[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -801,7 +805,7 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
     error,
     refetch,
     isRefetching,
-  } = useTftItems({page, limit});
+  } = useTftItems({page, limit}, {enabled});
 
   // Refetch when page is set to 1 during refresh
   useEffect(() => {
@@ -958,6 +962,7 @@ export const useTftAugmentsWithPagination = (
   limit: number = 20,
   filters?: ITftAugmentsFilters,
   sort?: ITftAugmentsSort[],
+  enabled: boolean = true,
 ) => {
   const [page, setPage] = useState(1);
   const [allTftAugments, setAllTftAugments] = useState<ITftAugment[]>([]);
@@ -996,6 +1001,7 @@ export const useTftAugmentsWithPagination = (
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to refetch on filter change
+    enabled,
   });
 
   // Reset when filters or sort change - must run before data effect

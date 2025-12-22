@@ -18,7 +18,11 @@ import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
-const AugmentsTab: React.FC = () => {
+interface AugmentsTabProps {
+  enabled?: boolean;
+}
+
+const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -77,7 +81,7 @@ const AugmentsTab: React.FC = () => {
     hasMore,
     isNoData,
     loadMore,
-  } = useTftAugmentsWithPagination(20, filters, sort); // Limit 20 per page
+  } = useTftAugmentsWithPagination(20, filters, sort, enabled); // Limit 20 per page
 
   // Use augments directly from API (already sorted)
   const augmentsList = augments || [];

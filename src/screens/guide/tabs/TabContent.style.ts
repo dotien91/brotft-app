@@ -21,6 +21,7 @@ interface Style {
   activeFilterClose: ViewStyle;
   clearAllButton: ViewStyle;
   clearAllText: TextStyle;
+  allText: TextStyle;
   listContent: ViewStyle;
   scrollContent: ViewStyle;
   centerContainer: ViewStyle;
@@ -39,15 +40,11 @@ export default (theme: ExtendedTheme) => {
     searchContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.card,
       marginHorizontal: 16,
       marginTop: 12,
       marginBottom: 8,
       paddingHorizontal: 12,
       paddingVertical: 8,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
     },
     searchInput: {
       flex: 1,
@@ -65,7 +62,6 @@ export default (theme: ExtendedTheme) => {
     },
     filterButton: {
       padding: 4,
-      marginLeft: 8,
       position: 'relative',
       borderRadius: 8,
       paddingHorizontal: 8,
@@ -90,6 +86,7 @@ export default (theme: ExtendedTheme) => {
     activeFiltersContainer: {
       marginHorizontal: 16,
       marginBottom: 8,
+      marginTop: 10,
       maxHeight: 50,
     },
     activeFiltersContent: {
@@ -129,6 +126,11 @@ export default (theme: ExtendedTheme) => {
       fontSize: 13,
       color: colors.text,
       fontWeight: '600',
+    },
+    allText: {
+      fontSize: 14,
+      color: colors.placeholder,
+      fontWeight: '500',
     },
     filtersContainer: {
       marginBottom: 8,

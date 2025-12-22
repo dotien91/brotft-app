@@ -25,6 +25,7 @@ const ItemsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
   } = useTftItemsWithPagination(20);
 
@@ -35,9 +36,6 @@ const ItemsTab: React.FC = () => {
   const renderLoading = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading items...
-      </Text>
     </View>
   );
 
@@ -60,7 +58,7 @@ const ItemsTab: React.FC = () => {
     return renderError();
   }
 
-  if (allItems.length === 0 && !isLoading) {
+  if (isNoData) {
     return <EmptyList message="No items found" />;
   }
 

@@ -95,6 +95,10 @@ export const translations = new LocalizedStrings({
     unique: "Benzersiz",
     trait: "Özellik",
     noMoreToLoad: "Yüklenecek daha fazla öğe yok",
+    clearAll: "Tümünü Temizle",
+    searchUnitsPlaceholder: "Birim adına göre ara...",
+    role: "Rol",
+    all: "Tümü",
   },
   en: {
     noLocationService: "Location Service Not Available",
@@ -191,6 +195,10 @@ export const translations = new LocalizedStrings({
     unique: "Unique",
     trait: "Trait",
     noMoreToLoad: "No more items to load",
+    clearAll: "Clear All",
+    searchUnitsPlaceholder: "Search units by name...",
+    role: "Role",
+    all: "All",
   },
   vi: {
     noLocationService: "Dịch vụ vị trí không khả dụng",
@@ -287,6 +295,10 @@ export const translations = new LocalizedStrings({
     unique: "Độc nhất",
     trait: "Tộc/Hệ",
     noMoreToLoad: "Không còn mục nào để tải",
+    clearAll: "Xóa tất cả",
+    searchUnitsPlaceholder: "Tìm kiếm tướng theo tên...",
+    role: "Vai trò",
+    all: "Tất cả",
   },
   "zh-CN": {
     noLocationService: "位置服务不可用",
@@ -383,6 +395,10 @@ export const translations = new LocalizedStrings({
     unique: "独特",
     trait: "特质",
     noMoreToLoad: "没有更多项目可加载",
+    clearAll: "清除全部",
+    searchUnitsPlaceholder: "按名称搜索单位...",
+    role: "角色",
+    all: "全部",
   },
 });
 

@@ -25,6 +25,7 @@ const TraitsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
   } = useTftTraitsWithPagination(20);
 
@@ -35,9 +36,6 @@ const TraitsTab: React.FC = () => {
   const renderLoading = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading traits...
-      </Text>
     </View>
   );
 
@@ -60,7 +58,7 @@ const TraitsTab: React.FC = () => {
     return renderError();
   }
 
-  if (allTraits.length === 0 && !isLoading) {
+  if (isNoData) {
     return <EmptyList message="No traits found" />;
   }
 

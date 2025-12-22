@@ -100,6 +100,7 @@ const AugmentsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
   } = useTftAugmentsWithPagination(20, filters, sort); // Limit 20 per page
 
@@ -113,9 +114,6 @@ const AugmentsTab: React.FC = () => {
   const renderLoading = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading augments...
-      </Text>
     </View>
   );
 
@@ -397,7 +395,7 @@ const AugmentsTab: React.FC = () => {
       />
 
       {/* Augments List */}
-      {augmentsList.length === 0 && !isLoading ? (
+      {isNoData ? (
         <EmptyList
           message={filters ? 'No augments found matching your filters' : 'No augments found'}
         />

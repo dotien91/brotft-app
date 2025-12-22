@@ -35,9 +35,6 @@ const ChampionsTab: React.FC = () => {
   const renderLoading = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading champions...
-      </Text>
     </View>
   );
 

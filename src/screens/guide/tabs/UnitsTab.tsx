@@ -3,7 +3,6 @@ import {
   FlatList,
   View,
   ActivityIndicator,
-  TextInput,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
@@ -18,6 +17,7 @@ import type {ITftUnitsFilters} from '@services/models/tft-unit';
 import {SCREENS} from '@shared-constants';
 import UnitCost from '@shared-components/unit-cost/UnitCost';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
 const UnitsTab: React.FC = () => {
@@ -25,9 +25,6 @@ const UnitsTab: React.FC = () => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  
   // Applied filters (used for API calls)
   const [appliedCost, setAppliedCost] = useState<number | undefined>(undefined);
   const [appliedTrait, setAppliedTrait] = useState<string | undefined>(undefined);
@@ -39,15 +36,6 @@ const UnitsTab: React.FC = () => {
   const [tempRole, setTempRole] = useState<string | undefined>(undefined);
   
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
-  // Debounce search query to avoid too many API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   // Initialize temp filters when opening modal
   useEffect(() => {
@@ -72,7 +60,6 @@ const UnitsTab: React.FC = () => {
   };
 
   const handleClearAppliedFilters = () => {
-    setSearchQuery('');
     setAppliedCost(undefined);
     setAppliedTrait(undefined);
     setAppliedRole(undefined);
@@ -82,9 +69,6 @@ const UnitsTab: React.FC = () => {
   const filters = useMemo<ITftUnitsFilters | undefined>(() => {
     const filterObj: ITftUnitsFilters = {};
     
-    if (debouncedSearchQuery.trim()) {
-      filterObj.name = debouncedSearchQuery.trim();
-    }
     if (appliedCost !== undefined) {
       filterObj.cost = appliedCost;
     }
@@ -101,7 +85,7 @@ const UnitsTab: React.FC = () => {
     }
 
     return filterObj;
-  }, [debouncedSearchQuery, appliedCost, appliedTrait, appliedRole]);
+  }, [appliedCost, appliedTrait, appliedRole]);
 
   // Use pagination hook with filters
   const {
@@ -111,6 +95,7 @@ const UnitsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
   } = useTftUnitsWithPagination(20, filters); // Limit 20 per page
 
@@ -121,34 +106,31 @@ const UnitsTab: React.FC = () => {
   const renderLoading = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading units...
-      </Text>
     </View>
   );
 
   const renderError = () => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
-        Error loading units
+        {translations.errorLoadingUnitsTab}
       </Text>
       <Text color={colors.placeholder} style={styles.centerText}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
   );
 
 
-  const hasActiveFilters = appliedCost !== undefined || appliedTrait || appliedRole || searchQuery.trim();
+  const hasActiveFilters = appliedCost !== undefined || appliedTrait || appliedRole;
   const hasTempFilters = !!(tempCost !== undefined || tempTrait || tempRole);
 
   // Filter sections for modal
   const filterSections = useMemo(() => [
     {
-      title: 'Cost',
+      title: translations.cost,
       type: 'single' as const,
       compact: true, // Enable compact layout for short content
-      options: [1, 2, 3, 4, 5].map(cost => ({label: `Cost ${cost}`, value: cost})),
+      options: [1, 2, 3, 4, 5].map(cost => ({label: `${translations.cost} ${cost}`, value: cost})),
       selected: tempCost,
       onSelect: (value: string | number | boolean) => {
         setTempCost(tempCost === value ? undefined : (value as number));
@@ -169,62 +151,34 @@ const UnitsTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <Icon
-          name="search"
-          type={IconType.Ionicons}
-          color={colors.placeholder}
-          size={20}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search units by name..."
-          placeholderTextColor={colors.placeholder}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
+      {/* Filter Button and Active Filters */}
+      <View style={styles.activeFiltersContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.activeFiltersContent}>
           <TouchableOpacity
-            onPress={() => setSearchQuery('')}
-            style={styles.clearButton}>
+            onPress={() => setIsFilterModalVisible(true)}
+            style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
             <Icon
-              name="close-circle"
+              name="filter"
               type={IconType.Ionicons}
-              color={colors.placeholder}
+              color={hasActiveFilters ? colors.primary : colors.placeholder}
               size={20}
             />
+            {hasActiveFilters && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>
+                  {[appliedCost, appliedTrait, appliedRole].filter(Boolean).length}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
-        )}
-        <TouchableOpacity
-          onPress={() => setIsFilterModalVisible(true)}
-          style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
-          <Icon
-            name="filter"
-            type={IconType.Ionicons}
-            color={hasActiveFilters ? colors.primary : colors.placeholder}
-            size={20}
-          />
-          {hasActiveFilters && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>
-                {[appliedCost, appliedTrait, appliedRole].filter(Boolean).length}
-              </Text>
-            </View>
+          {!hasActiveFilters && (
+            <Text style={styles.allText}>{translations.all}</Text>
           )}
-        </TouchableOpacity>
-      </View>
-
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <View style={styles.activeFiltersContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.activeFiltersContent}>
+          {hasActiveFilters && (
+            <>
             {appliedCost !== undefined && (
               <View style={styles.activeFilterChip}>
                 <UnitCost cost={appliedCost} size={14} active={true} />
@@ -242,7 +196,7 @@ const UnitsTab: React.FC = () => {
             )}
             {appliedTrait && (
               <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Trait: {appliedTrait}</Text>
+                <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
                 <TouchableOpacity
                   onPress={() => setAppliedTrait(undefined)}
                   style={styles.activeFilterClose}>
@@ -257,7 +211,7 @@ const UnitsTab: React.FC = () => {
             )}
             {appliedRole && (
               <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Role: {appliedRole}</Text>
+                <Text style={styles.activeFilterText}>{translations.role}: {appliedRole}</Text>
                 <TouchableOpacity
                   onPress={() => setAppliedRole(undefined)}
                   style={styles.activeFilterClose}>
@@ -273,11 +227,12 @@ const UnitsTab: React.FC = () => {
             <TouchableOpacity
               onPress={handleClearAppliedFilters}
               style={styles.clearAllButton}>
-              <Text style={styles.clearAllText}>Clear All</Text>
+              <Text style={styles.clearAllText}>{translations.clearAll}</Text>
             </TouchableOpacity>
-          </ScrollView>
-        </View>
-      )}
+            </>
+          )}
+        </ScrollView>
+      </View>
 
       {/* Filter Modal */}
       <FilterModal
@@ -290,9 +245,9 @@ const UnitsTab: React.FC = () => {
       />
 
       {/* Units List */}
-      {unitsList.length === 0 && !isLoading ? (
+      {isNoData ? (
         <EmptyList
-          message={filters ? 'No units found matching your filters' : 'No units found'}
+          message={filters ? translations.noUnitsFoundWithFilters : translations.noUnitsFoundTab}
         />
       ) : (
     <FlatList
@@ -316,7 +271,7 @@ const UnitsTab: React.FC = () => {
             ) : !hasMore && unitsList.length > 0 ? (
           <View style={styles.footerLoader}>
             <Text color={colors.placeholder} style={styles.footerText}>
-              No more units to load
+              {translations.noMoreUnitsToLoad}
             </Text>
           </View>
         ) : null

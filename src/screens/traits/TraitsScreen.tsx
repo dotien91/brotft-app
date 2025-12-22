@@ -21,6 +21,7 @@ import {useListData} from '../../hooks/useListData';
 import {getTraitsForList} from '@services/api/traitsForList';
 import type {ITrait} from '@services/models/trait';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../shared/localization';
 
 const profileURI =
   // eslint-disable-next-line max-len
@@ -83,7 +84,7 @@ const TraitsList: React.FC<TraitsListProps> = ({
   if (noData && listData.length === 0 && !isLoading) {
     return (
       <EmptyList
-        message="No traits found"
+        message={translations.noTraitsFound}
         iconName="inbox"
         iconType={IconType.Ionicons}
         style={styles.emptyContainer}

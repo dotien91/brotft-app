@@ -11,6 +11,7 @@ import GuideItemItem from './components/GuideItemItem';
 import {useTftItemsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
 interface ItemsTabProps {
@@ -69,7 +70,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({enabled = true}) => {
       return (
         <View style={styles.footerLoader}>
           <Text color={colors.placeholder} style={styles.footerText}>
-            No more items to load
+            {translations.noMoreItemsToLoad}
           </Text>
         </View>
       );
@@ -86,13 +87,13 @@ const ItemsTab: React.FC<ItemsTabProps> = ({enabled = true}) => {
   const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
-        Error loading items
+        {translations.errorLoadingItems}
       </Text>
       <Text color={colors.placeholder} style={styles.centerText}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error]);
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingItems, translations.somethingWentWrong]);
 
   if (isLoading && itemsList.length === 0) {
     return renderLoading();
@@ -103,7 +104,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({enabled = true}) => {
   }
 
   if (isNoData) {
-    return <EmptyList message="No items found" />;
+    return <EmptyList message={translations.noItemsFound} />;
   }
 
   return (

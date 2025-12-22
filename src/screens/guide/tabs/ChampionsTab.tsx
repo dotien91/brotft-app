@@ -11,6 +11,7 @@ import GuideChampionItem from './components/GuideChampionItem';
 import {useChampionsWithPagination} from '@services/api/hooks/listQueryHooks';
 import {SCREENS} from '@shared-constants';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
 const ChampionsTab: React.FC = () => {
@@ -65,7 +66,7 @@ const ChampionsTab: React.FC = () => {
       return (
         <View style={styles.footerLoader}>
           <Text color={colors.placeholder} style={styles.footerText}>
-            No more champions to load
+            {translations.noMoreChampionsToLoad}
           </Text>
         </View>
       );
@@ -82,13 +83,13 @@ const ChampionsTab: React.FC = () => {
   const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
-        Error loading champions
+        {translations.errorLoadingChampions}
       </Text>
       <Text color={colors.placeholder} style={styles.centerText}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error]);
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingChampions, translations.somethingWentWrong]);
 
   if (isLoading && championsList.length === 0) {
     return renderLoading();
@@ -99,7 +100,7 @@ const ChampionsTab: React.FC = () => {
   }
 
   if (isNoData) {
-    return <EmptyList message="No champions found" />;
+    return <EmptyList message={translations.noChampionsFound} />;
   }
 
   return (

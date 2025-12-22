@@ -352,7 +352,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         const parts: string[] = [];
 
         if (levelRequired != null) {
-          parts.push(`Level ${levelRequired}`);
+          parts.push(`${translations.level} ${levelRequired}`);
         }
 
         if (manual_conditions) {

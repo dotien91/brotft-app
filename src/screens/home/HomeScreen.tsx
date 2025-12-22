@@ -54,7 +54,7 @@ const HomeScreen: React.FC = () => {
           resizeMode="cover"
         />
         <View style={styles.headerOverlay}>
-          <Text style={styles.welcomeText}>Welcome to TFTBuddy</Text>
+          <Text style={styles.welcomeText}>{translations.welcomeToTftBuddy}</Text>
         </View>
       </View>
       <View style={styles.sectionTitleContainer}>
@@ -90,9 +90,9 @@ const HomeScreen: React.FC = () => {
       <SafeAreaView style={styles.container}>
         {ListHeader}
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20}}>
-          <Text h4 color={colors.danger}>Error loading compositions</Text>
+          <Text h4 color={colors.danger}>{translations.errorLoadingCompositions}</Text>
           <Text color={colors.placeholder} style={{marginTop: 8, marginBottom: 16}}>
-            {error?.message || 'Something went wrong'}
+            {error?.message || translations.somethingWentWrong}
           </Text>
           <RNBounceable
             onPress={refresh}
@@ -102,7 +102,7 @@ const HomeScreen: React.FC = () => {
               backgroundColor: colors.primary,
               borderRadius: 8,
             }}>
-            <Text color="#fff" style={{fontWeight: '600'}}>Retry</Text>
+            <Text color="#fff" style={{fontWeight: '600'}}>{translations.retry}</Text>
           </RNBounceable>
         </View>
       </SafeAreaView>

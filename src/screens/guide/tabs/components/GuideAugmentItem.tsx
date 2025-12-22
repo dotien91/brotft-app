@@ -6,6 +6,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideItemItem.style';
 import {getAugmentIconUrlFromPath} from '../../../../utils/metatft';
 import {parseAugmentDescription} from '../../../../shared/utils/parseAugmentDescription';
+import {translations} from '../../../../shared/localization';
 
 interface GuideAugmentItemProps {
   data: ITftAugment;
@@ -151,7 +152,7 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
               {unique && (
                 <View style={[styles.componentBadge, uniqueBadgeStyle]}>
                   <Text style={[styles.componentText, traitTextStyle]}>
-                    Unique
+                    {translations.unique}
                   </Text>
                 </View>
               )}

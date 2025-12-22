@@ -12,6 +12,7 @@ import {SCREENS, API_BASE_URL} from '@shared-constants';
 import type {ITrait} from '@services/models/trait';
 import Hexagon from '@screens/detail/components/Hexagon';
 import BackButton from '@shared-components/back-button/BackButton';
+import {translations} from '../../shared/localization';
 
 interface ChampionDetailScreenProps {
   route?: {
@@ -58,14 +59,14 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
         size={48}
       />
       <Text h4 color={colors.danger} style={styles.errorText}>
-        Error loading champion
+        {translations.errorLoadingChampion}
       </Text>
       <Text color={colors.placeholder} style={styles.errorDescription}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
       <RNBounceable style={styles.retryButton} onPress={() => refetch()}>
         <Text color={colors.white} bold>
-          Retry
+          {translations.retry}
         </Text>
       </RNBounceable>
     </View>

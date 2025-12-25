@@ -1,9 +1,8 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import {
   FlatList,
   View,
   ActivityIndicator,
-  TextInput,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
@@ -16,50 +15,34 @@ import AugmentTier from '@shared-components/augment-tier/AugmentTier';
 import {useTftAugmentsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftAugmentsFilters, ITftAugmentsSort} from '@services/models/tft-augment';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
-const AugmentsTab: React.FC = () => {
+interface AugmentsTabProps {
+  enabled?: boolean;
+}
+
+const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  
   // Applied filters (used for API calls)
   const [appliedStage, setAppliedStage] = useState<string | undefined>(undefined);
   const [appliedTrait, setAppliedTrait] = useState<string | undefined>(undefined);
   const [appliedTier, setAppliedTier] = useState<number | undefined>(undefined);
-  const [appliedUnique, setAppliedUnique] = useState<boolean | undefined>(undefined);
-  const [appliedSortBy, setAppliedSortBy] = useState<'name' | 'createdAt'>('name');
-  const [appliedSortOrder, setAppliedSortOrder] = useState<'asc' | 'desc'>('asc');
   
   // Temp filters (for modal, before applying)
   const [tempStage, setTempStage] = useState<string | undefined>(undefined);
   const [tempTrait, setTempTrait] = useState<string | undefined>(undefined);
   const [tempTier, setTempTier] = useState<number | undefined>(undefined);
-  const [tempUnique, setTempUnique] = useState<boolean | undefined>(undefined);
-  const [tempSortBy, setTempSortBy] = useState<'name' | 'createdAt'>('name');
-  const [tempSortOrder, setTempSortOrder] = useState<'asc' | 'desc'>('asc');
   
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
-  // Debounce search query to avoid too many API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   // Build filters object from applied filters
   const filters = useMemo<ITftAugmentsFilters | undefined>(() => {
     const filterObj: ITftAugmentsFilters = {};
     
-    if (debouncedSearchQuery.trim()) {
-      filterObj.name = debouncedSearchQuery.trim();
-    }
     if (appliedStage) {
       filterObj.stage = appliedStage;
     }
@@ -69,9 +52,6 @@ const AugmentsTab: React.FC = () => {
     if (appliedTier !== undefined) {
       filterObj.tier = appliedTier;
     }
-    if (appliedUnique !== undefined) {
-      filterObj.unique = appliedUnique;
-    }
 
     // Return undefined if no filters to avoid unnecessary API calls
     if (Object.keys(filterObj).length === 0) {
@@ -79,18 +59,17 @@ const AugmentsTab: React.FC = () => {
     }
 
     return filterObj;
-  }, [debouncedSearchQuery, appliedStage, appliedTrait, appliedTier, appliedUnique]);
+  }, [appliedStage, appliedTrait, appliedTier]);
 
-  // Build sort object from applied sort
+  // Default sort (always by name, ascending)
   const sort = useMemo<ITftAugmentsSort[] | undefined>(() => {
-    if (!appliedSortBy) return undefined;
     return [
       {
-        orderBy: appliedSortBy,
-        order: appliedSortOrder,
+        orderBy: 'name',
+        order: 'asc',
       },
     ];
-  }, [appliedSortBy, appliedSortOrder]);
+  }, []);
 
   // Use pagination hook with filters and sort
   const {
@@ -100,36 +79,71 @@ const AugmentsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
-  } = useTftAugmentsWithPagination(20, filters, sort); // Limit 20 per page
+  } = useTftAugmentsWithPagination(20, filters, sort, enabled); // Limit 20 per page
 
   // Use augments directly from API (already sorted)
   const augmentsList = augments || [];
 
-  const handleItemPress = () => {
+  const handleItemPress = useCallback(() => {
     // TODO: Navigate to augment detail screen when available
-  };
+  }, []);
 
-  const renderLoading = () => (
+  const renderItem = useCallback(
+    ({item}: {item: typeof augmentsList[0]}) => (
+      <GuideAugmentItem
+        data={item}
+        onPress={handleItemPress}
+      />
+    ),
+    [handleItemPress],
+  );
+
+  const keyExtractor = useCallback((item: typeof augmentsList[0]) => String(item.id), []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  const ListFooter = useCallback(() => {
+    if (isLoadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      );
+    }
+    if (!hasMore && augmentsList.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text color={colors.placeholder} style={styles.footerText}>
+            {translations.noMoreAugmentsToLoad}
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, hasMore, augmentsList.length, styles.footerLoader, styles.footerText, colors.primary, colors.placeholder, translations.noMoreAugmentsToLoad]);
+
+  const renderLoading = useCallback(() => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading augments...
-      </Text>
     </View>
-  );
+  ), [styles.centerContainer, colors.primary]);
 
-  const renderError = () => (
+  const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
-        Error loading augments
+        {translations.errorLoadingAugments}
       </Text>
       <Text color={colors.placeholder} style={styles.centerText}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  );
-
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingAugments, translations.somethingWentWrong]);
 
   // Initialize temp filters when opening modal
   useEffect(() => {
@@ -137,53 +151,57 @@ const AugmentsTab: React.FC = () => {
       setTempStage(appliedStage);
       setTempTrait(appliedTrait);
       setTempTier(appliedTier);
-      setTempUnique(appliedUnique);
-      setTempSortBy(appliedSortBy);
-      setTempSortOrder(appliedSortOrder);
     }
-  }, [isFilterModalVisible, appliedStage, appliedTrait, appliedTier, appliedUnique, appliedSortBy, appliedSortOrder]);
+  }, [isFilterModalVisible, appliedStage, appliedTrait, appliedTier]);
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = useCallback(() => {
     setAppliedStage(tempStage);
     setAppliedTrait(tempTrait);
     setAppliedTier(tempTier);
-    setAppliedUnique(tempUnique);
-    setAppliedSortBy(tempSortBy);
-    setAppliedSortOrder(tempSortOrder);
     setIsFilterModalVisible(false);
-  };
+  }, [tempStage, tempTrait, tempTier]);
 
-  const handleClearAllFilters = () => {
+  const handleClearAllFilters = useCallback(() => {
     setTempStage(undefined);
     setTempTrait(undefined);
     setTempTier(undefined);
-    setTempUnique(undefined);
-    setTempSortBy('name');
-    setTempSortOrder('asc');
-  };
+  }, []);
 
-  const handleClearAppliedFilters = () => {
-    setSearchQuery('');
+  const handleClearAppliedFilters = useCallback(() => {
     setAppliedStage(undefined);
     setAppliedTrait(undefined);
     setAppliedTier(undefined);
-    setAppliedUnique(undefined);
-    setAppliedSortBy('name');
-    setAppliedSortOrder('asc');
-  };
+  }, []);
 
-  const hasActiveFilters = appliedStage || appliedTrait || appliedTier !== undefined || appliedUnique !== undefined || searchQuery.trim();
-  const hasTempFilters = !!(tempStage || tempTrait || tempTier !== undefined || tempUnique !== undefined);
+  const handleFilterModalOpen = useCallback(() => setIsFilterModalVisible(true), []);
+  const handleFilterModalClose = useCallback(() => setIsFilterModalVisible(false), []);
+
+  const handleRemoveStageFilter = useCallback(() => setAppliedStage(undefined), []);
+  const handleRemoveTraitFilter = useCallback(() => setAppliedTrait(undefined), []);
+  const handleRemoveTierFilter = useCallback(() => setAppliedTier(undefined), []);
+
+  const hasActiveFilters = useMemo(() => appliedStage || appliedTrait || appliedTier !== undefined, [appliedStage, appliedTrait, appliedTier]);
+  const hasTempFilters = useMemo(() => !!(tempStage || tempTrait || tempTier !== undefined), [tempStage, tempTrait, tempTier]);
+
+  const activeFiltersCount = useMemo(() => [appliedStage, appliedTrait, appliedTier].filter(Boolean).length, [appliedStage, appliedTrait, appliedTier]);
 
   // Common stages
-  const stages = ['2-1', '2-2', '3-1', '3-2', '4-1', '4-2'];
+  const stages = useMemo(() => ['2-1', '2-2', '3-1', '3-2', '4-1', '4-2'], []);
+
+  const handleTierSelect = useCallback((value: string | number | boolean) => {
+    setTempTier(tempTier === value ? undefined : (value as number));
+  }, [tempTier]);
+
+  const handleStageSelect = useCallback((value: string | number | boolean) => {
+    setTempStage(tempStage === value ? undefined : (value as string));
+  }, [tempStage]);
 
   // Filter sections for modal
   const filterSections = useMemo(() => [
     {
-      title: 'Tier',
+      title: translations.tier,
       type: 'single' as const,
-      compact: true, // Enable compact layout for short content
+      compact: true,
       options: [
         {
           label: 'Silver I',
@@ -202,54 +220,17 @@ const AugmentsTab: React.FC = () => {
         },
       ],
       selected: tempTier,
-      onSelect: (value: string | number | boolean) => {
-        setTempTier(tempTier === value ? undefined : (value as number));
-      },
+      onSelect: handleTierSelect,
     },
     {
-      title: 'Stage',
+      title: translations.stage,
       type: 'single' as const,
-      compact: true, // Enable compact layout for short content
+      compact: true,
       options: stages.map(stage => ({label: stage, value: stage})),
       selected: tempStage,
-      onSelect: (value: string | number | boolean) => {
-        setTempStage(tempStage === value ? undefined : (value as string));
-      },
+      onSelect: handleStageSelect,
     },
-    {
-      title: 'Unique',
-      type: 'toggle' as const,
-      options: [{label: 'Unique Only', value: true}],
-      selected: tempUnique === true,
-      onSelect: () => {
-        setTempUnique(tempUnique === true ? undefined : true);
-      },
-    },
-    {
-      title: 'Sort By',
-      type: 'single' as const,
-      options: [
-        {label: 'Name', value: 'name'},
-        {label: 'Date', value: 'createdAt'},
-      ],
-      selected: tempSortBy,
-      onSelect: (value: string | number | boolean) => {
-        setTempSortBy(value as 'name' | 'createdAt');
-      },
-    },
-    {
-      title: 'Sort Order',
-      type: 'single' as const,
-      options: [
-        {label: 'Ascending', value: 'asc'},
-        {label: 'Descending', value: 'desc'},
-      ],
-      selected: tempSortOrder,
-      onSelect: (value: string | number | boolean) => {
-        setTempSortOrder(value as 'asc' | 'desc');
-      },
-    },
-  ], [tempStage, tempTier, tempUnique, tempSortBy, tempSortOrder, stages]);
+  ], [tempStage, tempTier, stages, handleTierSelect, handleStageSelect, translations.tier, translations.stage]);
 
   if (isLoading && augmentsList.length === 0) {
     return renderLoading();
@@ -261,67 +242,39 @@ const AugmentsTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <Icon
-          name="search"
-          type={IconType.Ionicons}
-          color={colors.placeholder}
-          size={20}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search augments by name..."
-          placeholderTextColor={colors.placeholder}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
+      {/* Filter Button and Active Filters */}
+      <View style={styles.activeFiltersContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.activeFiltersContent}>
           <TouchableOpacity
-            onPress={() => setSearchQuery('')}
-            style={styles.clearButton}>
+            onPress={handleFilterModalOpen}
+            style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
             <Icon
-              name="close-circle"
+              name="filter"
               type={IconType.Ionicons}
-              color={colors.placeholder}
+              color={hasActiveFilters ? colors.primary : colors.placeholder}
               size={20}
             />
+            {hasActiveFilters && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>
+                  {activeFiltersCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
-        )}
-        <TouchableOpacity
-          onPress={() => setIsFilterModalVisible(true)}
-          style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
-          <Icon
-            name="filter"
-            type={IconType.Ionicons}
-            color={hasActiveFilters ? colors.primary : colors.placeholder}
-            size={20}
-          />
-          {hasActiveFilters && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>
-                {[appliedStage, appliedTrait, appliedTier, appliedUnique !== undefined ? 'Unique' : null].filter(Boolean).length}
-              </Text>
-            </View>
+          {!hasActiveFilters && (
+            <Text style={styles.allText}>{translations.all}</Text>
           )}
-        </TouchableOpacity>
-      </View>
-
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <View style={styles.activeFiltersContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.activeFiltersContent}>
-            {appliedStage && (
+          {hasActiveFilters && (
+            <>
+            {appliedTier !== undefined && (
               <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Stage: {appliedStage}</Text>
+                <AugmentTier tier={appliedTier} size={20} active={false} showLabel={true} noBackground={true} />
                 <TouchableOpacity
-                  onPress={() => setAppliedStage(undefined)}
+                  onPress={handleRemoveTierFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -332,11 +285,11 @@ const AugmentsTab: React.FC = () => {
                 </TouchableOpacity>
               </View>
             )}
-            {appliedTier !== undefined && (
+            {appliedStage && (
               <View style={styles.activeFilterChip}>
-                <AugmentTier tier={appliedTier} size={20} active={false} showLabel={true} noBackground={true} />
+                <Text style={styles.activeFilterText}>{translations.stage}: {appliedStage}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedTier(undefined)}
+                  onPress={handleRemoveStageFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -349,24 +302,9 @@ const AugmentsTab: React.FC = () => {
             )}
             {appliedTrait && (
               <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Trait: {appliedTrait}</Text>
+                <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedTrait(undefined)}
-                  style={styles.activeFilterClose}>
-                  <Icon
-                    name="close-circle"
-                    type={IconType.Ionicons}
-                    color={colors.placeholder}
-                    size={16}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-            {appliedUnique !== undefined && (
-              <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Unique</Text>
-                <TouchableOpacity
-                  onPress={() => setAppliedUnique(undefined)}
+                  onPress={handleRemoveTraitFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -380,16 +318,17 @@ const AugmentsTab: React.FC = () => {
             <TouchableOpacity
               onPress={handleClearAppliedFilters}
               style={styles.clearAllButton}>
-              <Text style={styles.clearAllText}>Clear All</Text>
+              <Text style={styles.clearAllText}>{translations.clearAll}</Text>
             </TouchableOpacity>
-          </ScrollView>
-        </View>
-      )}
+            </>
+          )}
+        </ScrollView>
+      </View>
 
       {/* Filter Modal */}
       <FilterModal
         visible={isFilterModalVisible}
-        onClose={() => setIsFilterModalVisible(false)}
+        onClose={handleFilterModalClose}
         onApply={handleApplyFilters}
         sections={filterSections}
         hasActiveFilters={hasTempFilters}
@@ -397,37 +336,26 @@ const AugmentsTab: React.FC = () => {
       />
 
       {/* Augments List */}
-      {augmentsList.length === 0 && !isLoading ? (
+      {isNoData ? (
         <EmptyList
-          message={filters ? 'No augments found matching your filters' : 'No augments found'}
+          message={filters ? translations.noAugmentsFoundWithFilters : translations.noAugmentsFound}
         />
       ) : (
         <FlatList
           data={augmentsList}
-          renderItem={({item}) => (
-            <GuideAugmentItem
-              data={item}
-              onPress={handleItemPress}
-            />
-          )}
-          keyExtractor={item => String(item.id)}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          onEndReached={loadMore}
+          onEndReached={handleLoadMore}
           onEndReachedThreshold={0.3}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color={colors.primary} />
-              </View>
-            ) : !hasMore && augmentsList.length > 0 ? (
-              <View style={styles.footerLoader}>
-                <Text color={colors.placeholder} style={styles.footerText}>
-                  No more augments to load
-                </Text>
-              </View>
-            ) : null
-          }
+          ListFooterComponent={ListFooter}
+          // Performance optimizations
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
         />
       )}
     </View>

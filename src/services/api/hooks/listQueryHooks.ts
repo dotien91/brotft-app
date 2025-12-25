@@ -57,6 +57,7 @@ import type {
 } from '@services/models/tft-unit';
 import type {
   ITftTraitsQueryParams,
+  ITftTraitsFilters,
   ITftTrait,
 } from '@services/models/tft-trait';
 import type {
@@ -174,11 +175,12 @@ export const useChampions = (
 };
 
 // Hook with pagination handling built-in
-export const useChampionsWithPagination = (limit: number = 10) => {
+export const useChampionsWithPagination = (limit: number = 10, enabled: boolean = true) => {
   const [page, setPage] = useState(1);
   const [allChampions, setAllChampions] = useState<IChampion[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   const {
     data: championsData,
@@ -187,7 +189,7 @@ export const useChampionsWithPagination = (limit: number = 10) => {
     error,
     refetch,
     isRefetching,
-  } = useChampions({page, limit});
+  } = useChampions({page, limit}, {enabled});
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -195,6 +197,7 @@ export const useChampionsWithPagination = (limit: number = 10) => {
       if (page === 1) {
         // Reset on first load or refresh
         setAllChampions(championsData.data);
+        setIsNoData(championsData.data.length === 0);
       } else {
         // Append new data when loading more
         setAllChampions(prev => [...prev, ...championsData.data]);
@@ -209,6 +212,15 @@ export const useChampionsWithPagination = (limit: number = 10) => {
       }
     }
   }, [championsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allChampions.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allChampions.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -227,6 +239,7 @@ export const useChampionsWithPagination = (limit: number = 10) => {
     setPage(1);
     setAllChampions([]);
     setHasMore(true);
+    setIsNoData(false);
     refetch();
   };
 
@@ -237,6 +250,7 @@ export const useChampionsWithPagination = (limit: number = 10) => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -361,11 +375,13 @@ export const useTftUnits = (
 export const useTftUnitsWithPagination = (
   limit: number = 10,
   filters?: ITftUnitsFilters,
+  enabled: boolean = true,
 ) => {
   const [page, setPage] = useState(1);
   const [allTftUnits, setAllTftUnits] = useState<ITftUnit[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   // Create params object - ensure filters object identity changes when filters change
   const queryParams = useMemo(() => {
@@ -397,6 +413,7 @@ export const useTftUnitsWithPagination = (
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to refetch on filter change
+    enabled,
   });
 
   // Track refresh state
@@ -408,6 +425,7 @@ export const useTftUnitsWithPagination = (
     setAllTftUnits([]);
     setHasMore(true);
     setIsLoadingMore(false);
+    setIsNoData(false);
   }, [filters]);
 
   // Refetch when page is set to 1 during refresh
@@ -424,6 +442,7 @@ export const useTftUnitsWithPagination = (
       if (page === 1) {
         // Reset on first load or refresh
         setAllTftUnits(tftUnitsData.data);
+        setIsNoData(tftUnitsData.data.length === 0);
       } else {
         // Append new data when loading more
         setAllTftUnits(prev => [...prev, ...tftUnitsData.data]);
@@ -438,6 +457,15 @@ export const useTftUnitsWithPagination = (
       }
     }
   }, [tftUnitsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allTftUnits.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allTftUnits.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -456,6 +484,7 @@ export const useTftUnitsWithPagination = (
     setAllTftUnits([]);
     setHasMore(true);
     setIsLoadingMore(false);
+    setIsNoData(false);
     setIsRefreshing(true);
     setPage(1);
   };
@@ -467,6 +496,7 @@ export const useTftUnitsWithPagination = (
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -568,11 +598,32 @@ export const useTftTraits = (
 };
 
 // Hook with pagination handling built-in for TFT traits
-export const useTftTraitsWithPagination = (limit: number = 20) => {
+export const useTftTraitsWithPagination = (
+  limit: number = 20,
+  filters?: ITftTraitsFilters,
+  enabled: boolean = true,
+) => {
   const [page, setPage] = useState(1);
   const [allTftTraits, setAllTftTraits] = useState<ITftTrait[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
+
+  // Create params object - ensure filters object identity changes when filters change
+  const queryParams = useMemo(() => {
+    const params: ITftTraitsQueryParams = {
+      page,
+      limit,
+      filters: filters
+        ? {
+            name: filters.name || undefined,
+            apiName: filters.apiName || undefined,
+            type: filters.type || undefined,
+          }
+        : undefined,
+    };
+    return params;
+  }, [page, limit, filters]);
 
   const {
     data: tftTraitsData,
@@ -581,7 +632,22 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
     error,
     refetch,
     isRefetching,
-  } = useTftTraits({page, limit});
+  } = useTftTraits(queryParams, {
+    // Ensure query refetches when filters change
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to refetch on filter change
+    enabled,
+  });
+
+  // Reset when filters change - must run before data effect
+  useEffect(() => {
+    setPage(1);
+    setAllTftTraits([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+    setIsNoData(false);
+  }, [filters]);
 
   // Handle data accumulation and hasMore state
   useEffect(() => {
@@ -589,6 +655,7 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
       if (page === 1) {
         // Reset on first load or refresh
         setAllTftTraits(tftTraitsData.data);
+        setIsNoData(tftTraitsData.data.length === 0);
       } else {
         // Append new data when loading more
         setAllTftTraits(prev => [...prev, ...tftTraitsData.data]);
@@ -603,6 +670,15 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
       }
     }
   }, [tftTraitsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allTftTraits.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allTftTraits.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -622,7 +698,8 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
     setAllTftTraits([]);
     setHasMore(true);
     setIsLoadingMore(false);
-    // Don't call refetch() here - let React Query refetch automatically when page changes
+    setIsNoData(false);
+    refetch();
   };
 
   return {
@@ -632,6 +709,7 @@ export const useTftTraitsWithPagination = (limit: number = 20) => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -714,12 +792,13 @@ export const useTftItems = (
 };
 
 // Hook with pagination handling built-in for TFT items
-export const useTftItemsWithPagination = (limit: number = 20) => {
+export const useTftItemsWithPagination = (limit: number = 20, enabled: boolean = true) => {
   const [page, setPage] = useState(1);
   const [allTftItems, setAllTftItems] = useState<ITftItem[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   const {
     data: tftItemsData,
@@ -728,7 +807,7 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
     error,
     refetch,
     isRefetching,
-  } = useTftItems({page, limit});
+  } = useTftItems({page, limit}, {enabled});
 
   // Refetch when page is set to 1 during refresh
   useEffect(() => {
@@ -744,6 +823,7 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
       if (page === 1) {
         // Reset on first load or refresh
         setAllTftItems(tftItemsData.data);
+        setIsNoData(tftItemsData.data.length === 0);
       } else {
         // Append new data when loading more
         setAllTftItems(prev => [...prev, ...tftItemsData.data]);
@@ -758,6 +838,15 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
       }
     }
   }, [tftItemsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allTftItems.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allTftItems.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -776,6 +865,7 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
     setAllTftItems([]);
     setHasMore(true);
     setIsLoadingMore(false);
+    setIsNoData(false);
     setIsRefreshing(true);
     setPage(1);
   };
@@ -787,6 +877,7 @@ export const useTftItemsWithPagination = (limit: number = 20) => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -873,11 +964,13 @@ export const useTftAugmentsWithPagination = (
   limit: number = 20,
   filters?: ITftAugmentsFilters,
   sort?: ITftAugmentsSort[],
+  enabled: boolean = true,
 ) => {
   const [page, setPage] = useState(1);
   const [allTftAugments, setAllTftAugments] = useState<ITftAugment[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   // Create params object - ensure filters object identity changes when filters change
   const queryParams = useMemo(() => {
@@ -910,6 +1003,7 @@ export const useTftAugmentsWithPagination = (
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to refetch on filter change
+    enabled,
   });
 
   // Reset when filters or sort change - must run before data effect
@@ -918,6 +1012,7 @@ export const useTftAugmentsWithPagination = (
     setAllTftAugments([]);
     setHasMore(true);
     setIsLoadingMore(false);
+    setIsNoData(false);
   }, [filters, sort]);
 
   // Handle data accumulation and hasMore state
@@ -927,6 +1022,7 @@ export const useTftAugmentsWithPagination = (
       if (page === 1) {
         // Reset on first load or refresh
         setAllTftAugments(tftAugmentsData.data || []);
+        setIsNoData((tftAugmentsData.data || []).length === 0);
       } else {
         // Append new data when loading more
         setAllTftAugments(prev => [...prev, ...(tftAugmentsData.data || [])]);
@@ -941,6 +1037,15 @@ export const useTftAugmentsWithPagination = (
       }
     }
   }, [tftAugmentsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allTftAugments.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allTftAugments.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -959,6 +1064,7 @@ export const useTftAugmentsWithPagination = (
     setPage(1);
     setAllTftAugments([]);
     setHasMore(true);
+    setIsNoData(false);
     refetch();
   };
 
@@ -969,6 +1075,7 @@ export const useTftAugmentsWithPagination = (
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -1074,6 +1181,7 @@ export const useTraitsWithPagination = (
   const [allTraits, setAllTraits] = useState<ITrait[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   // Create params object - ensure filters object identity changes when filters change
   const queryParams = useMemo(() => {
@@ -1112,6 +1220,7 @@ export const useTraitsWithPagination = (
     setAllTraits([]);
     setHasMore(true);
     setIsLoadingMore(false);
+    setIsNoData(false);
   }, [filters]);
 
   // Handle data accumulation and hasMore state
@@ -1121,6 +1230,7 @@ export const useTraitsWithPagination = (
       if (page === 1) {
         // Reset on first load or refresh
         setAllTraits(traitsData.data || []);
+        setIsNoData((traitsData.data || []).length === 0);
       } else {
         // Append new data when loading more
         setAllTraits(prev => [...prev, ...(traitsData.data || [])]);
@@ -1135,6 +1245,15 @@ export const useTraitsWithPagination = (
       }
     }
   }, [traitsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allTraits.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allTraits.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -1153,6 +1272,7 @@ export const useTraitsWithPagination = (
     setPage(1);
     setAllTraits([]);
     setHasMore(true);
+    setIsNoData(false);
     refetch();
   };
 
@@ -1163,6 +1283,7 @@ export const useTraitsWithPagination = (
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -1230,6 +1351,7 @@ export const useItemsWithPagination = (limit: number = 20) => {
   const [allItems, setAllItems] = useState<IItem[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   const {
     data: itemsData,
@@ -1246,6 +1368,7 @@ export const useItemsWithPagination = (limit: number = 20) => {
       if (page === 1) {
         // Reset on first load or refresh
         setAllItems(itemsData.data);
+        setIsNoData(itemsData.data.length === 0);
       } else {
         // Append new data when loading more
         setAllItems(prev => [...prev, ...itemsData.data]);
@@ -1260,6 +1383,15 @@ export const useItemsWithPagination = (limit: number = 20) => {
       }
     }
   }, [itemsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allItems.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allItems.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -1278,6 +1410,7 @@ export const useItemsWithPagination = (limit: number = 20) => {
     setPage(1);
     setAllItems([]);
     setHasMore(true);
+    setIsNoData(false);
     refetch();
   };
 
@@ -1288,6 +1421,7 @@ export const useItemsWithPagination = (limit: number = 20) => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
@@ -1368,6 +1502,7 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
   const [allCompositions, setAllCompositions] = useState<IComposition[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isNoData, setIsNoData] = useState(false);
 
   const {
     data: compositionsData,
@@ -1387,6 +1522,7 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
       if (page === 1) {
         // Reset on first load or refresh
         setAllCompositions(compositionsData.data);
+        setIsNoData(compositionsData.data.length === 0);
       } else {
         // Append new data when loading more
         setAllCompositions(prev => [...prev, ...compositionsData.data]);
@@ -1401,6 +1537,15 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
       }
     }
   }, [compositionsData, page]);
+
+  // Update isNoData when data changes
+  useEffect(() => {
+    if (!isLoading && allCompositions.length === 0 && !isError) {
+      setIsNoData(true);
+    } else {
+      setIsNoData(false);
+    }
+  }, [isLoading, allCompositions.length, isError]);
 
   const loadMore = () => {
     // Only load more if not currently loading and there's more data available
@@ -1419,6 +1564,7 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
     setPage(1);
     setAllCompositions([]);
     setHasMore(true);
+    setIsNoData(false);
     refetch();
   };
 
@@ -1429,6 +1575,7 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,

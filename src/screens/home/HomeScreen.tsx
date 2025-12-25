@@ -19,11 +19,14 @@ import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
 import {translations} from '../../shared/localization';
 import {getUnitAvatarUrl} from '../../utils/metatft';
 
+const ITEM_HEIGHT = 120; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
+
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+<<<<<<< HEAD
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
@@ -85,6 +88,21 @@ const HomeScreen: React.FC = () => {
     }
   }, [searchDto, selectedUnits, searchCompositions, isLoadingSearch, isErrorSearch, errorSearch]);
   
+=======
+  const {
+    data: compositions,
+    isLoading,
+    isError,
+    error,
+    refresh,
+    isRefetching,
+    isLoadingMore,
+    hasMore,
+    isNoData,
+    loadMore,
+  } = useCompositionsWithPagination(10);
+
+>>>>>>> 94ecb53bb1589180d228e7715c6fb3d3fe258ce9
   const handleTeamPress = useCallback((comp: IComposition) => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
   }, []);
@@ -153,76 +171,19 @@ const HomeScreen: React.FC = () => {
     [handleTeamPress],
   );
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <Image
-        source={require('@assets/images/home-cover.jpg')}
-        style={styles.headerImage}
-        resizeMode="cover"
-      />
-      <View style={styles.headerOverlay}>
-        <Text style={styles.welcomeText}>Welcome to TFTBuddy</Text>
-      </View>
-    </View>
-  );
-
-  const renderLoading = () => (
-    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center', flex: 1}]}>
-      <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={{marginTop: 12}}>
-        Loading compositions...
-      </Text>
-    </View>
-  );
-
-  const renderError = () => (
-    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center', flex: 1}]}>
-      <Text h4 color={colors.danger}>
-        Error loading compositions
-      </Text>
-      <Text color={colors.placeholder} style={{marginTop: 8, marginBottom: 16}}>
-        {error?.message || 'Something went wrong'}
-      </Text>
-      <RNBounceable
-        onPress={() => refresh()}
-        style={{
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          backgroundColor: colors.primary,
-          borderRadius: 8,
-        }}>
-        <Text color="#fff" style={{fontWeight: '600'}}>
-          Retry
-        </Text>
-      </RNBounceable>
-    </View>
-  );
-
-  if (isLoading && (!compositions || compositions.length === 0)) {
-    return (
-      <View style={styles.container}>
-        <SafeAreaView style={styles.safeContent} edges={[]}>
-          {renderHeader()}
-          {renderLoading()}
-        </SafeAreaView>
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <View style={styles.container}>
-        <SafeAreaView style={styles.safeContent} edges={[]}>
-          {renderHeader()}
-          {renderError()}
-        </SafeAreaView>
-      </View>
-    );
-  }
-
-  const renderListHeader = () => (
+  // Memoize Header để tránh re-render không cần thiết
+  const ListHeader = useMemo(() => (
     <View>
-      {renderHeader()}
+      <View style={styles.headerContainer}>
+        <Image
+          source={require('@assets/images/home-cover.jpg')}
+          style={styles.headerImage}
+          resizeMode="cover"
+        />
+        <View style={styles.headerOverlay}>
+          <Text style={styles.welcomeText}>{translations.welcomeToTftBuddy}</Text>
+        </View>
+      </View>
       <View style={styles.sectionTitleContainer}>
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitle}>Đội hình</Text>
@@ -258,21 +219,87 @@ const HomeScreen: React.FC = () => {
         {renderSelectedUnits()}
       </View>
     </View>
+  ), [styles]);
+
+  const ListFooter = useCallback(() => {
+    if (!isLoadingMore) return null;
+    return (
+      <View style={{paddingVertical: 20, alignItems: 'center'}}>
+        <ActivityIndicator size="small" color={colors.primary} />
+      </View>
+    );
+  }, [isLoadingMore, colors.primary]);
+
+  const ListEmpty = useCallback(() => {
+    if (isLoading) return <ActivityIndicator size="large" color={colors.primary} style={{marginTop: 50}} />;
+    if (isNoData) return <EmptyList message={translations.noCompositionsFound} />;
+    return null;
+  }, [isLoading, isNoData, colors.primary]);
+
+  // Handler load more tối ưu
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  if (isError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {ListHeader}
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20}}>
+          <Text h4 color={colors.danger}>{translations.errorLoadingCompositions}</Text>
+          <Text color={colors.placeholder} style={{marginTop: 8, marginBottom: 16}}>
+            {error?.message || translations.somethingWentWrong}
+          </Text>
+          <RNBounceable
+            onPress={refresh}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+              backgroundColor: colors.primary,
+              borderRadius: 8,
+            }}>
+            <Text color="#fff" style={{fontWeight: '600'}}>{translations.retry}</Text>
+          </RNBounceable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const getItemLayout = useCallback(
+    (_data: any, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
+      index,
+    }),
+    [],
   );
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeContent} edges={[]}>
+      <SafeAreaView style={styles.safeContent} edges={['top']}>
         <FlatList
           data={compositions}
           renderItem={renderTeamCard}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
+          // Performance props
+          initialNumToRender={7}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true} // Giải phóng bộ nhớ cho item ngoài màn hình
+          // Components
+          ListHeaderComponent={ListHeader}
+          ListFooterComponent={ListFooter}
+          ListEmptyComponent={ListEmpty}
+          // Actions
           refreshing={isRefetching}
           onRefresh={refresh}
-          ListHeaderComponent={renderListHeader}
-          ListEmptyComponent={<EmptyList message={translations.noCompositionsFound} />}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          showsVerticalScrollIndicator={false}
+          getItemLayout={getItemLayout}
         />
         <UnitFilterModal
           visible={isFilterModalVisible}

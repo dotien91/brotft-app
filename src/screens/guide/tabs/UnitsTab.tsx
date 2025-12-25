@@ -1,9 +1,8 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import {
   FlatList,
   View,
   ActivityIndicator,
-  TextInput,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
@@ -18,16 +17,18 @@ import type {ITftUnitsFilters} from '@services/models/tft-unit';
 import {SCREENS} from '@shared-constants';
 import UnitCost from '@shared-components/unit-cost/UnitCost';
 import EmptyList from '@shared-components/empty-list/EmptyList';
+import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 
-const UnitsTab: React.FC = () => {
+interface UnitsTabProps {
+  enabled?: boolean;
+}
+
+const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  
   // Applied filters (used for API calls)
   const [appliedCost, setAppliedCost] = useState<number | undefined>(undefined);
   const [appliedTrait, setAppliedTrait] = useState<string | undefined>(undefined);
@@ -39,15 +40,6 @@ const UnitsTab: React.FC = () => {
   const [tempRole, setTempRole] = useState<string | undefined>(undefined);
   
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
-  // Debounce search query to avoid too many API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   // Initialize temp filters when opening modal
   useEffect(() => {
@@ -72,7 +64,6 @@ const UnitsTab: React.FC = () => {
   };
 
   const handleClearAppliedFilters = () => {
-    setSearchQuery('');
     setAppliedCost(undefined);
     setAppliedTrait(undefined);
     setAppliedRole(undefined);
@@ -82,9 +73,6 @@ const UnitsTab: React.FC = () => {
   const filters = useMemo<ITftUnitsFilters | undefined>(() => {
     const filterObj: ITftUnitsFilters = {};
     
-    if (debouncedSearchQuery.trim()) {
-      filterObj.name = debouncedSearchQuery.trim();
-    }
     if (appliedCost !== undefined) {
       filterObj.cost = appliedCost;
     }
@@ -101,7 +89,7 @@ const UnitsTab: React.FC = () => {
     }
 
     return filterObj;
-  }, [debouncedSearchQuery, appliedCost, appliedTrait, appliedRole]);
+  }, [appliedCost, appliedTrait, appliedRole]);
 
   // Use pagination hook with filters
   const {
@@ -111,53 +99,99 @@ const UnitsTab: React.FC = () => {
     error,
     isLoadingMore,
     hasMore,
+    isNoData,
     loadMore,
-  } = useTftUnitsWithPagination(20, filters); // Limit 20 per page
+  } = useTftUnitsWithPagination(20, filters, enabled); // Limit 20 per page
 
-  const handleItemPress = (unitId?: string | number) => {
+  // Ensure units is always an array
+  const unitsList = units || [];
+
+  const handleItemPress = useCallback((unitId?: string | number) => {
     NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unitId)});
-  };
+  }, []);
 
-  const renderLoading = () => (
+  const renderItem = useCallback(
+    ({item}: {item: typeof unitsList[0]}) => (
+      <GuideUnitItem
+        data={item}
+        onPress={() => handleItemPress(item.id)}
+      />
+    ),
+    [handleItemPress],
+  );
+
+  const keyExtractor = useCallback((item: typeof unitsList[0]) => String(item.id), []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore && !isLoading) {
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMore]);
+
+  const ListFooter = useCallback(() => {
+    if (isLoadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      );
+    }
+    if (!hasMore && unitsList.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text color={colors.placeholder} style={styles.footerText}>
+            {translations.noMoreUnitsToLoad}
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, hasMore, unitsList.length, styles.footerLoader, styles.footerText, colors.primary, colors.placeholder, translations.noMoreUnitsToLoad]);
+
+  const renderLoading = useCallback(() => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text color={colors.placeholder} style={styles.centerText}>
-        Loading units...
-      </Text>
     </View>
-  );
+  ), [styles.centerContainer, colors.primary]);
 
-  const renderError = () => (
+  const renderError = useCallback(() => (
     <View style={styles.centerContainer}>
       <Text h4 color={colors.danger}>
-        Error loading units
+        {translations.errorLoadingUnitsTab}
       </Text>
       <Text color={colors.placeholder} style={styles.centerText}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
     </View>
-  );
+  ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingUnitsTab, translations.somethingWentWrong]);
 
+  const hasActiveFilters = useMemo(() => appliedCost !== undefined || appliedTrait || appliedRole, [appliedCost, appliedTrait, appliedRole]);
+  const hasTempFilters = useMemo(() => !!(tempCost !== undefined || tempTrait || tempRole), [tempCost, tempTrait, tempRole]);
 
-  const hasActiveFilters = appliedCost !== undefined || appliedTrait || appliedRole || searchQuery.trim();
-  const hasTempFilters = !!(tempCost !== undefined || tempTrait || tempRole);
+  const activeFiltersCount = useMemo(() => [appliedCost, appliedTrait, appliedRole].filter(Boolean).length, [appliedCost, appliedTrait, appliedRole]);
+
+  const handleFilterModalOpen = useCallback(() => setIsFilterModalVisible(true), []);
+  const handleFilterModalClose = useCallback(() => setIsFilterModalVisible(false), []);
+
+  const handleRemoveCostFilter = useCallback(() => setAppliedCost(undefined), []);
+  const handleRemoveTraitFilter = useCallback(() => setAppliedTrait(undefined), []);
+  const handleRemoveRoleFilter = useCallback(() => setAppliedRole(undefined), []);
+
+  const handleCostSelect = useCallback((value: string | number | boolean) => {
+    setTempCost(tempCost === value ? undefined : (value as number));
+  }, [tempCost]);
 
   // Filter sections for modal
   const filterSections = useMemo(() => [
     {
-      title: 'Cost',
+      title: translations.cost,
       type: 'single' as const,
       compact: true, // Enable compact layout for short content
-      options: [1, 2, 3, 4, 5].map(cost => ({label: `Cost ${cost}`, value: cost})),
+      options: [1, 2, 3, 4, 5].map(cost => ({label: `${translations.cost} ${cost}`, value: cost})),
       selected: tempCost,
-      onSelect: (value: string | number | boolean) => {
-        setTempCost(tempCost === value ? undefined : (value as number));
-      },
+      onSelect: handleCostSelect,
     },
-  ], [tempCost]);
-
-  // Ensure units is always an array
-  const unitsList = units || [];
+  ], [tempCost, translations.cost, handleCostSelect]);
 
   if (isLoading && unitsList.length === 0) {
     return renderLoading();
@@ -169,67 +203,39 @@ const UnitsTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <Icon
-          name="search"
-          type={IconType.Ionicons}
-          color={colors.placeholder}
-          size={20}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search units by name..."
-          placeholderTextColor={colors.placeholder}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
+      {/* Filter Button and Active Filters */}
+      <View style={styles.activeFiltersContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.activeFiltersContent}>
           <TouchableOpacity
-            onPress={() => setSearchQuery('')}
-            style={styles.clearButton}>
+            onPress={handleFilterModalOpen}
+            style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
             <Icon
-              name="close-circle"
+              name="filter"
               type={IconType.Ionicons}
-              color={colors.placeholder}
+              color={hasActiveFilters ? colors.primary : colors.placeholder}
               size={20}
             />
+            {hasActiveFilters && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>
+                  {activeFiltersCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
-        )}
-        <TouchableOpacity
-          onPress={() => setIsFilterModalVisible(true)}
-          style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
-          <Icon
-            name="filter"
-            type={IconType.Ionicons}
-            color={hasActiveFilters ? colors.primary : colors.placeholder}
-            size={20}
-          />
-          {hasActiveFilters && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>
-                {[appliedCost, appliedTrait, appliedRole].filter(Boolean).length}
-              </Text>
-            </View>
+          {!hasActiveFilters && (
+            <Text style={styles.allText}>{translations.all}</Text>
           )}
-        </TouchableOpacity>
-      </View>
-
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <View style={styles.activeFiltersContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.activeFiltersContent}>
+          {hasActiveFilters && (
+            <>
             {appliedCost !== undefined && (
               <View style={styles.activeFilterChip}>
                 <UnitCost cost={appliedCost} size={14} active={true} />
                 <TouchableOpacity
-                  onPress={() => setAppliedCost(undefined)}
+                  onPress={handleRemoveCostFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -242,9 +248,9 @@ const UnitsTab: React.FC = () => {
             )}
             {appliedTrait && (
               <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Trait: {appliedTrait}</Text>
+                <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedTrait(undefined)}
+                  onPress={handleRemoveTraitFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -257,9 +263,9 @@ const UnitsTab: React.FC = () => {
             )}
             {appliedRole && (
               <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>Role: {appliedRole}</Text>
+                <Text style={styles.activeFilterText}>{translations.role}: {appliedRole}</Text>
                 <TouchableOpacity
-                  onPress={() => setAppliedRole(undefined)}
+                  onPress={handleRemoveRoleFilter}
                   style={styles.activeFilterClose}>
                   <Icon
                     name="close-circle"
@@ -273,16 +279,17 @@ const UnitsTab: React.FC = () => {
             <TouchableOpacity
               onPress={handleClearAppliedFilters}
               style={styles.clearAllButton}>
-              <Text style={styles.clearAllText}>Clear All</Text>
+              <Text style={styles.clearAllText}>{translations.clearAll}</Text>
             </TouchableOpacity>
-          </ScrollView>
-        </View>
-      )}
+            </>
+          )}
+        </ScrollView>
+      </View>
 
       {/* Filter Modal */}
       <FilterModal
         visible={isFilterModalVisible}
-        onClose={() => setIsFilterModalVisible(false)}
+        onClose={handleFilterModalClose}
         onApply={handleApplyFilters}
         sections={filterSections}
         hasActiveFilters={hasTempFilters}
@@ -290,38 +297,27 @@ const UnitsTab: React.FC = () => {
       />
 
       {/* Units List */}
-      {unitsList.length === 0 && !isLoading ? (
+      {isNoData ? (
         <EmptyList
-          message={filters ? 'No units found matching your filters' : 'No units found'}
+          message={filters ? translations.noUnitsFoundWithFilters : translations.noUnitsFoundTab}
         />
       ) : (
-    <FlatList
+        <FlatList
           data={unitsList}
-      renderItem={({item}) => (
-        <GuideUnitItem
-          data={item}
-          onPress={() => handleItemPress(item.id)}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={ListFooter}
+          // Performance optimizations
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
         />
-      )}
-      keyExtractor={item => String(item.id)}
-      contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.3}
-      ListFooterComponent={
-            isLoadingMore ? (
-          <View style={styles.footerLoader}>
-            <ActivityIndicator size="small" color={colors.primary} />
-          </View>
-            ) : !hasMore && unitsList.length > 0 ? (
-          <View style={styles.footerLoader}>
-            <Text color={colors.placeholder} style={styles.footerText}>
-              No more units to load
-            </Text>
-          </View>
-        ) : null
-      }
-    />
       )}
     </View>
   );

@@ -1,8 +1,8 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {useWindowDimensions} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
-import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
+import {TabView, TabBar, Route} from 'react-native-tab-view';
 import createStyles from './GuideScreen.style';
 import UnitsTab from './tabs/UnitsTab';
 import TraitsTab from './tabs/TraitsTab';
@@ -12,13 +12,6 @@ import {translations} from '../../shared/localization';
 import useStore from '@services/zustand/store';
 import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
 
-const renderScene = SceneMap({
-  units: UnitsTab,
-  traits: TraitsTab,
-  items: ItemsTab,
-  upgrades: AugmentsTab,
-});
-
 const GuideScreen: React.FC = () => {
   const theme = useTheme();
   const {colors} = theme;
@@ -27,26 +20,54 @@ const GuideScreen: React.FC = () => {
   const language = useStore((state) => state.language);
 
   const [index, setIndex] = useState(0);
+  const [visitedTabs, setVisitedTabs] = useState<Set<number>>(new Set([0, 1])); // Preload tab 0 and 1
+  
   const routes = useMemo(() => [
     {key: 'units', title: translations.units},
-    {key: 'traits', title: translations.traits},
     {key: 'items', title: translations.items},
+    {key: 'traits', title: translations.traits},
     {key: 'upgrades', title: translations.upgrades},
   ], [language]);
 
-  const renderTabBar = (props: any) => (
-    <TabBar
-      {...props}
-      scrollEnabled
-      indicatorStyle={styles.tabIndicator}
-      style={styles.tabBar}
-      tabStyle={styles.tab}
-      labelStyle={styles.tabLabel}
-      activeColor={colors.primary}
-      inactiveColor={colors.placeholder}
-      pressColor={colors.primary + '20'}
-    />
-  );
+  const handleIndexChange = useCallback((newIndex: number) => {
+    setIndex(newIndex);
+    setVisitedTabs(prev => new Set([...prev, newIndex]));
+  }, []);
+
+  const renderScene = useCallback(({route}: {route: Route}) => {
+    const routeIndex = routes.findIndex(r => r.key === route.key);
+    const isEnabled = visitedTabs.has(routeIndex);
+
+    switch (route.key) {
+      case 'units':
+        return <UnitsTab enabled={isEnabled} />;
+      case 'items':
+        return <ItemsTab enabled={isEnabled} />;
+      case 'traits':
+        return <TraitsTab enabled={isEnabled} />;
+      case 'upgrades':
+        return <AugmentsTab enabled={isEnabled} />;
+      default:
+        return null;
+    }
+  }, [routes, visitedTabs]);
+
+  const renderTabBar = useCallback((props: any) => {
+    const tabWidth = layout.width / routes.length;
+    return (
+      <TabBar
+        {...props}
+        scrollEnabled={false}
+        indicatorStyle={styles.tabIndicator}
+        style={styles.tabBar}
+        tabStyle={[styles.tab, {width: tabWidth}]}
+        labelStyle={styles.tabLabel}
+        activeColor={colors.primary}
+        inactiveColor={colors.placeholder}
+        pressColor={colors.primary + '20'}
+      />
+    );
+  }, [layout.width, routes.length, styles.tabIndicator, styles.tabBar, styles.tab, styles.tabLabel, colors.primary, colors.placeholder]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -56,8 +77,10 @@ const GuideScreen: React.FC = () => {
         navigationState={{index, routes}}
         renderScene={renderScene}
         renderTabBar={renderTabBar}
-        onIndexChange={setIndex}
+        onIndexChange={handleIndexChange}
         initialLayout={{width: layout.width}}
+        lazy={true}
+        lazyPreloadDistance={1}
       />
     </SafeAreaView>
   );

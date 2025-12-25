@@ -40,8 +40,7 @@ export default (theme: ExtendedTheme) => {
       borderBottomColor: colors.border,
     },
     tab: {
-      width: 'auto',
-      paddingHorizontal: 16,
+      paddingHorizontal: 0,
     },
     tabLabel: {
       fontSize: 14,

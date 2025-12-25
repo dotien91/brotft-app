@@ -130,5 +130,8 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
   );
 };
 
-export default GuideItemItem;
+export default React.memo(GuideItemItem, (prevProps, nextProps) => {
+  // Only re-render if data.id changes, ignore onPress changes
+  return prevProps.data?.id === nextProps.data?.id;
+});
 

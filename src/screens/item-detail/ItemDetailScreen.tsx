@@ -12,6 +12,7 @@ import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import BackButton from '@shared-components/back-button/BackButton';
 import {getItemImageUrlWithCDN} from '../../utils/metatft';
+import {translations} from '../../shared/localization';
 
 interface ItemDetailScreenProps {
   route?: {
@@ -188,14 +189,14 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         size={48}
       />
       <Text h4 color={colors.danger} style={styles.errorText}>
-        Error loading item
+        {translations.errorLoadingItem}
       </Text>
       <Text color={colors.placeholder} style={styles.errorDescription}>
-        {error?.message || 'Something went wrong'}
+        {error?.message || translations.somethingWentWrong}
       </Text>
       <RNBounceable style={styles.retryButton} onPress={() => refetch()}>
         <Text color={colors.white} style={styles.retryButtonText}>
-          Retry
+          {translations.retry}
         </Text>
       </RNBounceable>
     </View>

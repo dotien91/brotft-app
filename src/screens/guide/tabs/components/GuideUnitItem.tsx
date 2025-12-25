@@ -363,5 +363,8 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
   );
 };
 
-export default GuideUnitItem;
+export default React.memo(GuideUnitItem, (prevProps, nextProps) => {
+  // Only re-render if data.id or compact changes, ignore onPress changes
+  return prevProps.data?.id === nextProps.data?.id && prevProps.compact === nextProps.compact;
+});
 

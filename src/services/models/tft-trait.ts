@@ -39,6 +39,7 @@ export interface ITftTrait {
 export interface ITftTraitsFilters {
   name?: string;
   apiName?: string;
+  type?: 'origin' | 'class';
 }
 
 export interface ITftTraitsSort {

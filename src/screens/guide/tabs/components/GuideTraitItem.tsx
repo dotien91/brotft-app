@@ -144,5 +144,8 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
   );
 };
 
-export default GuideTraitItem;
+export default React.memo(GuideTraitItem, (prevProps, nextProps) => {
+  // Only re-render if data.id changes, ignore onPress changes
+  return prevProps.data?.id === nextProps.data?.id;
+});
 

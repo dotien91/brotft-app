@@ -34,6 +34,7 @@ import {
   getCompositions,
   getCompositionById,
   getCompositionByCompId,
+  searchCompositionsByUnits,
 } from '../compositions';
 import type {
   IChampionsQueryParams,
@@ -71,6 +72,7 @@ import type {
 import type {
   ICompositionsQueryParams,
   IComposition,
+  ISearchByUnitsDto,
 } from '@services/models/composition';
 
 // Query keys
@@ -1471,5 +1473,109 @@ export const useCompositionByCompId = (
     enabled: !!compId,
     ...queryOptions,
   });
+};
+
+// Search compositions by units with pagination
+export const useSearchCompositionsByUnits = (
+  dto: ISearchByUnitsDto | null,
+  limit: number = 10,
+) => {
+  const [page, setPage] = useState(1);
+  const [allCompositions, setAllCompositions] = useState<IComposition[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const isEnabled = !!dto && dto.units.length > 0;
+  
+  console.log('🔧 useSearchCompositionsByUnits hook:', {
+    dto,
+    limit,
+    page,
+    isEnabled,
+    unitsCount: dto?.units?.length || 0,
+  });
+
+  const {
+    data: compositionsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: [...compositionKeys.all, 'search-by-units', dto, {page, limit}],
+    queryFn: () => {
+      console.log('🚀 useQuery queryFn called:', {dto, page, limit});
+      if (!dto || dto.units.length === 0) {
+        console.log('⚠️ DTO is empty, returning empty result');
+        return Promise.resolve({data: [], hasNextPage: false});
+      }
+      console.log('📞 Calling searchCompositionsByUnits API...');
+      return searchCompositionsByUnits(dto, {page, limit});
+    },
+    enabled: isEnabled,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  // Handle data accumulation and hasMore state
+  useEffect(() => {
+    if (compositionsData?.data) {
+      if (page === 1) {
+        // Reset on first load or refresh
+        setAllCompositions(compositionsData.data);
+      } else {
+        // Append new data when loading more
+        setAllCompositions(prev => [...prev, ...compositionsData.data]);
+        setIsLoadingMore(false);
+      }
+      // Update hasMore based on hasNextPage from API
+      if (compositionsData.hasNextPage !== undefined) {
+        setHasMore(compositionsData.hasNextPage);
+      } else {
+        // Default to false if hasNextPage is not provided
+        setHasMore(false);
+      }
+    }
+  }, [compositionsData, page]);
+
+  const loadMore = () => {
+    // Only load more if not currently loading and there's more data available
+    const canLoadMore =
+      compositionsData?.hasNextPage !== undefined
+        ? compositionsData.hasNextPage
+        : hasMore;
+
+    if (!isLoadingMore && canLoadMore && compositionsData?.data) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const refresh = () => {
+    setPage(1);
+    setAllCompositions([]);
+    setHasMore(true);
+    refetch();
+  };
+
+  // Reset when dto changes
+  useEffect(() => {
+    setPage(1);
+    setAllCompositions([]);
+    setHasMore(true);
+  }, [dto]);
+
+  return {
+    data: allCompositions,
+    isLoading,
+    isError,
+    error,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    refresh,
+    isRefetching: isRefetching && page === 1,
+  };
 };
 

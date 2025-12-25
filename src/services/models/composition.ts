@@ -55,10 +55,18 @@ export interface IComposition {
 export interface ICompositionsQueryParams {
   page?: number;
   limit?: number;
+  tier?: string; // S, A, B, C, D
+  units?: string; // Comma-separated units: "garen,jarvaniv"
+  searchInAllArrays?: boolean;
 }
 
 export interface ICompositionsResponse {
   data: IComposition[];
   hasNextPage: boolean;
+}
+
+export interface ISearchByUnitsDto {
+  units: string[];
+  searchInAllArrays?: boolean;
 }
 

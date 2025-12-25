@@ -11,7 +11,20 @@ interface Style {
   headerOverlay: ViewStyle;
   welcomeText: TextStyle;
   sectionTitleContainer: ViewStyle;
+  sectionTitleRow: ViewStyle;
   sectionTitle: TextStyle;
+  filterContainer: ViewStyle;
+  filterButton: ViewStyle;
+  filterButtonActive: ViewStyle;
+  clearFilterButton: ViewStyle;
+  filterCountText: TextStyle;
+  selectedUnitsContainer: ViewStyle;
+  selectedUnitsScroll: ViewStyle;
+  selectedUnitChip: ViewStyle;
+  selectedUnitAvatar: ImageStyle;
+  selectedUnitAvatarPlaceholder: ViewStyle;
+  selectedUnitName: TextStyle;
+  selectedUnitRemoveIcon: ViewStyle;
   listContent: ViewStyle;
   teamCard: ViewStyle;
   teamHeader: ViewStyle;
@@ -73,11 +86,89 @@ export default (theme: ExtendedTheme) => {
       paddingTop: 24,
       paddingBottom: 16,
     },
+    sectionTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
     sectionTitle: {
       fontSize: 18,
       fontWeight: '700',
       color: colors.text,
       letterSpacing: -0.2,
+      flex: 1,
+    },
+    filterContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    filterButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    filterButtonActive: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary + '15',
+    },
+    clearFilterButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 16,
+      backgroundColor: colors.primary + '15',
+      borderWidth: 1,
+      borderColor: colors.primary,
+      gap: 6,
+    },
+    filterCountText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    selectedUnitsContainer: {
+      marginTop: 12,
+      maxHeight: 60,
+    },
+    selectedUnitsScroll: {
+      paddingRight: 12,
+      gap: 8,
+    },
+    selectedUnitChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 20,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 6,
+      marginRight: 8,
+    },
+    selectedUnitAvatar: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+    },
+    selectedUnitAvatarPlaceholder: {
+      backgroundColor: colors.border,
+    },
+    selectedUnitName: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.text,
+      maxWidth: 80,
+    },
+    selectedUnitRemoveIcon: {
+      marginLeft: 2,
     },
     listContent: {
       paddingHorizontal: 12,

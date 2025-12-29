@@ -4,12 +4,17 @@ import {ExtendedTheme} from '@react-navigation/native';
 interface Style {
   container: ViewStyle;
   avatarContainer: ViewStyle;
+  hexagonWrapper: ViewStyle;
+  hexagonBorder: ViewStyle;
+  hexagonInner: ViewStyle;
   infoContainer: ViewStyle;
   nameRow: ViewStyle;
   unitName: TextStyle;
   unlockIcon: ImageStyle;
   costContainer: ViewStyle;
   costText: TextStyle;
+  tierBadge: ViewStyle;
+  tierBadgeText: TextStyle;
   traitsContainer: ViewStyle;
   traitItem: ViewStyle;
   traitIcon: ImageStyle;
@@ -41,6 +46,19 @@ export default (theme: ExtendedTheme) => {
     },
     avatarContainer: {
       marginRight: 12,
+    },
+    hexagonWrapper: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    hexagonBorder: {
+      position: 'absolute',
+      zIndex: 1,
+    },
+    hexagonInner: {
+      position: 'relative',
+      zIndex: 2,
     },
     infoContainer: {
       flex: 1,
@@ -78,6 +96,18 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '700',
       color: colors.primary,
       letterSpacing: 0.2,
+    },
+    tierBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      marginLeft: 6,
+    },
+    tierBadgeText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: '#000000',
+      letterSpacing: 0.5,
     },
     traitsContainer: {
       flex: 1.5,

@@ -227,6 +227,24 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
     ? localizedTraits 
     : (traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)}));
 
+  // Get tier color
+  const getTierColor = (tier: string): string => {
+    switch (tier.toUpperCase()) {
+      case 'S':
+        return '#ff7e83';
+      case 'A':
+        return '#ffbf7f';
+      case 'B':
+        return '#ffdf80';
+      case 'C':
+        return '#feff7f';
+      case 'D':
+        return '#bffe7f';
+      default:
+        return colors.primary;
+    }
+  };
+
   // Get unit border color based on cost
   const getUnitCostBorderColor = (cost?: number): string => {
     if (!cost) return colors.border;
@@ -308,17 +326,33 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
   }
 
   // Full mode: horizontal layout with traits
+  const borderColor = getUnitCostBorderColor(cost);
+  
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       {/* Hexagon Avatar */}
       <View style={styles.avatarContainer}>
-        <Hexagon 
-          size={56} 
-          backgroundColor="#252836" 
-          borderColor="#3a3d4a" 
-          borderWidth={2}
-          imageUri={imageUri}
-        />
+        <View style={styles.hexagonWrapper}>
+          {/* Border hexagon */}
+          <View style={styles.hexagonBorder}>
+            <Hexagon
+              size={60}
+              backgroundColor="transparent"
+              borderColor={borderColor}
+              borderWidth={1}
+            />
+          </View>
+          {/* Main hexagon with image */}
+          <View style={styles.hexagonInner}>
+            <Hexagon 
+              size={56} 
+              backgroundColor={colors.card}
+              borderColor={borderColor}
+              borderWidth={2}
+              imageUri={imageUri}
+            />
+          </View>
+        </View>
       </View>
 
       {/* Unit Info */}
@@ -340,7 +374,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
         )}
       </View>
 
-      {/* Traits - hide in compact mode */}
+      {/* Traits and Tier - hide in compact mode */}
       {!compact && (
         <View style={styles.traitsContainer}>
           {displayTraits.slice(0, 3).map((trait, index) => (
@@ -356,6 +390,11 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
           ))}
           {displayTraits.length > 3 && (
             <Text style={styles.traitMoreText}>+{displayTraits.length - 3}</Text>
+          )}
+          {false && data.tier && (
+            <View style={[styles.tierBadge, {backgroundColor: getTierColor(data.tier)}]}>
+              <Text style={styles.tierBadgeText}>{data.tier}</Text>
+            </View>
           )}
         </View>
       )}

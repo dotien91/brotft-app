@@ -3,20 +3,18 @@ import {
   Modal,
   View,
   TouchableOpacity,
-  ScrollView,
   TextInput,
-  FlatList,
-  Image,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import RNBounceable from '@freakycoder/react-native-bounceable';
-import {StyleSheet, ViewStyle, TextStyle, ImageStyle} from 'react-native';
+import {StyleSheet, ViewStyle, TextStyle} from 'react-native';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnit} from '@services/models/tft-unit';
-import {getUnitAvatarUrl} from '../../../../utils/metatft';
-import UnitCost from '@shared-components/unit-cost/UnitCost';
+import UnitAvatar from '@shared-components/unit-avatar';
 
 interface UnitFilterModalProps {
   visible: boolean;
@@ -37,6 +35,19 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
   const [selectedUnits, setSelectedUnits] = useState<string[]>(initialSelectedUnits);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  // Calculate hexSize based on screen width to show 5 units per row
+  // Formula: (screenWidth - paddingHorizontal - gap * 4) / 5
+  // With 5 items, there are 4 gaps between them
+  // Note: gap in flexWrap handles spacing, so we don't need to account for marginRight separately
+  const screenWidth = Dimensions.get('window').width;
+  const paddingHorizontal = 16 * 2; // padding left + right from sectionContent
+  const gap = 8; // gap between items in sectionContent
+  const hexSize = useMemo(() => {
+    // screenWidth = paddingHorizontal + (5 * hexSize) + (4 * gap)
+    // hexSize = (screenWidth - paddingHorizontal - 4 * gap) / 5
+    return Math.floor((screenWidth - paddingHorizontal - gap * 6) / 5);
+  }, [screenWidth]);
+
   // Reset selected units when modal opens/closes
   useEffect(() => {
     if (visible) {
@@ -52,6 +63,45 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
   }, [searchQuery]);
 
   const {data: units, isLoading} = useTftUnitsWithPagination(100, filters);
+
+  // Group units by tier
+  const unitsByTier = useMemo(() => {
+    if (!units || units.length === 0) return [];
+    
+    // Group by tier
+    const grouped: {[key: string]: ITftUnit[]} = {};
+    units.forEach(unit => {
+      const tier = unit.tier || 'No Tier';
+      if (!grouped[tier]) {
+        grouped[tier] = [];
+      }
+      grouped[tier].push(unit);
+    });
+
+    // Tier order: S, A, B, C, D, then others
+    const tierOrder: {[key: string]: number} = {
+      'S': 1,
+      'A': 2,
+      'B': 3,
+      'C': 4,
+      'D': 5,
+    };
+
+    // Convert to sections array, sorted by tier order
+    const sections = Object.keys(grouped)
+      .sort((a, b) => {
+        const orderA = tierOrder[a.toUpperCase()] || 999;
+        const orderB = tierOrder[b.toUpperCase()] || 999;
+        return orderA - orderB;
+      })
+      .map(tier => ({
+        title: `Tier ${tier}`,
+        data: grouped[tier],
+        tier,
+      }));
+
+    return sections;
+  }, [units]);
 
   // Normalize apiName to championKey format (lowercase, remove prefixes)
   const normalizeToChampionKey = (apiName: string): string => {
@@ -79,55 +129,6 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
 
   const handleClear = () => {
     setSelectedUnits([]);
-  };
-
-  const renderUnitItem = ({item}: {item: ITftUnit}) => {
-    const championKey = normalizeToChampionKey(item.apiName);
-    const isSelected = selectedUnits.includes(championKey);
-    const avatarUrl = getUnitAvatarUrl(item.apiName, 64) || item.icon || '';
-
-    return (
-      <RNBounceable
-        onPress={() => toggleUnit(item.apiName)}
-        style={[
-          styles.unitItem,
-          isSelected && styles.unitItemSelected,
-        ]}>
-        <View style={styles.unitItemContent}>
-          <View style={styles.unitAvatarContainer}>
-            {avatarUrl ? (
-              <Image
-                source={{uri: avatarUrl}}
-                style={styles.unitAvatar}
-              />
-            ) : (
-              <View style={[styles.unitAvatar, styles.unitAvatarPlaceholder]} />
-            )}
-            {item.cost && (
-              <View style={styles.costBadge}>
-                <UnitCost cost={item.cost} size={16} />
-              </View>
-            )}
-          </View>
-          <Text
-            style={[
-              styles.unitName,
-              isSelected && styles.unitNameSelected,
-            ]}
-            numberOfLines={1}>
-            {item.name}
-          </Text>
-        </View>
-        {isSelected && (
-          <Icon
-            name="checkmark-circle"
-            type={IconType.Ionicons}
-            color={colors.primary}
-            size={24}
-          />
-        )}
-      </RNBounceable>
-    );
   };
 
   return (
@@ -199,21 +200,76 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
               <Text color={colors.placeholder}>Loading units...</Text>
             </View>
           ) : (
-            <FlatList
-              data={units || []}
-              renderItem={renderUnitItem}
-              keyExtractor={item => String(item.id)}
+            <ScrollView
               contentContainerStyle={styles.unitsList}
-              numColumns={2}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
+              showsVerticalScrollIndicator={false}>
+              {unitsByTier.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text color={colors.placeholder}>
                     {searchQuery ? 'No units found' : 'No units available'}
                   </Text>
                 </View>
-              }
-            />
+              ) : (
+                unitsByTier.map((section, index) => {
+                  const getTierColor = (tier: string): string => {
+                    switch (tier.toUpperCase()) {
+                      case 'S':
+                        return '#ff7e83';
+                      case 'A':
+                        return '#ffbf7f';
+                      case 'B':
+                        return '#ffdf80';
+                      case 'C':
+                        return '#feff7f';
+                      case 'D':
+                        return '#bffe7f';
+                      default:
+                        return colors.primary;
+                    }
+                  };
+
+                  return (
+                    <View key={section.tier || index} style={styles.sectionContainer}>
+                      <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionHeaderTitle}>Tier</Text>
+                        {section.tier && (
+                          <View style={[styles.tierBadge, {backgroundColor: getTierColor(section.tier)}]}>
+                            <Text style={styles.tierBadgeText}>{section.tier}</Text>
+                          </View>
+                        )}
+                      </View>
+                    <View style={styles.sectionContent}>
+                      {section.data.map((item) => {
+                        const championKey = normalizeToChampionKey(item.apiName);
+                        const isSelected = selectedUnits.includes(championKey);
+
+                        return (
+                          <RNBounceable
+                            key={String(item.id)}
+                            onPress={() => toggleUnit(item.apiName)}
+                            style={styles.unitItemHorizontal}>
+                            <View style={styles.unitAvatarContainer}>
+                              <UnitAvatar apiName={item.apiName} hexSize={hexSize} />
+                              {isSelected && (
+                                <View style={styles.selectedCheckmark}>
+                                  <Icon
+                                    name="checkmark-circle"
+                                    type={IconType.Ionicons}
+                                    color={colors.primary}
+                                    size={24}
+                                  />
+                                </View>
+                              )}
+                            </View>
+                          </RNBounceable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                  );
+                })
+              )}
+            </ScrollView>
           )}
 
           {/* Footer buttons */}
@@ -261,15 +317,18 @@ const createStyles = (colors: any) =>
     selectedCountText: TextStyle;
     clearText: TextStyle;
     unitsList: ViewStyle;
+    sectionContainer: ViewStyle;
+    sectionHeader: ViewStyle;
+    sectionHeaderTitle: TextStyle;
+    sectionHeaderText: TextStyle;
+    tierBadge: ViewStyle;
+    tierBadgeText: TextStyle;
+    sectionContent: ViewStyle;
     unitItem: ViewStyle;
     unitItemSelected: ViewStyle;
-    unitItemContent: ViewStyle;
+    unitItemHorizontal: ViewStyle;
     unitAvatarContainer: ViewStyle;
-    unitAvatar: ImageStyle;
-    unitAvatarPlaceholder: ViewStyle;
-    costBadge: ViewStyle;
-    unitName: TextStyle;
-    unitNameSelected: TextStyle;
+    selectedCheckmark: ViewStyle;
     loadingContainer: ViewStyle;
     emptyContainer: ViewStyle;
     footer: ViewStyle;
@@ -352,55 +411,81 @@ const createStyles = (colors: any) =>
       fontWeight: '600',
     },
     unitsList: {
-      paddingHorizontal: 12,
-      paddingTop: 8,
+      paddingTop: 0,
+      paddingBottom: 16,
+    },
+    sectionContainer: {
+      marginBottom: 16,
+    },
+    sectionHeader: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.background,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    sectionHeaderTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.text,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    sectionHeaderText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.primary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    tierBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      alignSelf: 'flex-start',
+    },
+    tierBadgeText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: '#000000',
+      letterSpacing: 0.5,
+    },
+    sectionContent: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
     },
     unitItem: {
-      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 12,
-      margin: 4,
-      borderRadius: 12,
-      backgroundColor: colors.background,
-      borderWidth: 2,
-      borderColor: colors.border,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
     unitItemSelected: {
-      borderColor: colors.primary,
       backgroundColor: colors.primary + '15',
+      borderBottomColor: colors.primary,
     },
-    unitItemContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
+    unitItemHorizontal: {
+      // No margin - gap in sectionContent handles spacing
     },
     unitAvatarContainer: {
       position: 'relative',
-      marginRight: 12,
     },
-    unitAvatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 8,
-    },
-    unitAvatarPlaceholder: {
-      backgroundColor: colors.border,
-    },
-    costBadge: {
+    selectedCheckmark: {
       position: 'absolute',
-      bottom: -4,
-      right: -4,
-    },
-    unitName: {
-      flex: 1,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    unitNameSelected: {
-      color: colors.primary,
+      top: -8,
+      right: -8,
+      zIndex: 10,
+      backgroundColor: colors.card,
+      borderRadius: 12,
     },
     loadingContainer: {
       padding: 32,

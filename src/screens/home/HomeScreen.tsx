@@ -1,5 +1,5 @@
 import React, {useMemo, useCallback, useState} from 'react';
-import {FlatList, Image, View, ActivityIndicator, ScrollView} from 'react-native';
+import {FlatList, View, ActivityIndicator, ScrollView, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './HomeScreen.style';
@@ -11,13 +11,14 @@ import {SCREENS} from '@shared-constants';
 import {
   useCompositionsWithPagination,
   useSearchCompositionsByUnits,
+  useTftUnitsWithPagination,
 } from '@services/api/hooks/listQueryHooks';
 import type {IComposition} from '@services/models/composition';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import TeamCard from './components/team-card/TeamCard';
 import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
 import {translations} from '../../shared/localization';
-import {getUnitAvatarUrl} from '../../utils/metatft';
+import UnitAvatar from '@shared-components/unit-avatar';
 
 const ITEM_HEIGHT = 120; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
 
@@ -26,9 +27,11 @@ const HomeScreen: React.FC = () => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-<<<<<<< HEAD
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+  // Fetch all units to get unit details (name, cost) for selected units
+  const {data: allUnits} = useTftUnitsWithPagination(1000);
 
   // Build search DTO
   const searchDto = useMemo(() => {
@@ -56,6 +59,10 @@ const HomeScreen: React.FC = () => {
     error: errorAll,
     refresh: refreshAll,
     isRefetching: isRefetchingAll,
+    isLoadingMore,
+    hasMore,
+    isNoData,
+    loadMore,
   } = useCompositionsWithPagination(10);
 
   const {
@@ -88,21 +95,6 @@ const HomeScreen: React.FC = () => {
     }
   }, [searchDto, selectedUnits, searchCompositions, isLoadingSearch, isErrorSearch, errorSearch]);
   
-=======
-  const {
-    data: compositions,
-    isLoading,
-    isError,
-    error,
-    refresh,
-    isRefetching,
-    isLoadingMore,
-    hasMore,
-    isNoData,
-    loadMore,
-  } = useCompositionsWithPagination(10);
-
->>>>>>> 94ecb53bb1589180d228e7715c6fb3d3fe258ce9
   const handleTeamPress = useCallback((comp: IComposition) => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
   }, []);
@@ -119,6 +111,13 @@ const HomeScreen: React.FC = () => {
     setSelectedUnits(prev => prev.filter(u => u !== unitKey));
   }, []);
 
+  // Normalize apiName to championKey format (same as in modal)
+  const normalizeToChampionKey = useCallback((apiName: string): string => {
+    let normalized = apiName.replace(/^TFT\d*_?/i, '');
+    normalized = normalized.toLowerCase();
+    return normalized;
+  }, []);
+
   const renderSelectedUnits = () => {
     if (selectedUnits.length === 0) return null;
 
@@ -129,33 +128,30 @@ const HomeScreen: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.selectedUnitsScroll}>
           {selectedUnits.map((unitKey, index) => {
-            const avatarUrl = getUnitAvatarUrl(unitKey, 48);
-            // Capitalize first letter for display
-            const displayName = unitKey.charAt(0).toUpperCase() + unitKey.slice(1);
+            // Find unit by matching championKey
+            const unit = allUnits?.find(u => {
+              const championKey = normalizeToChampionKey(u.apiName);
+              return championKey === unitKey;
+            });
+
+            const apiName = unit?.apiName || unitKey;
 
             return (
               <RNBounceable
                 key={`${unitKey}-${index}`}
                 onPress={() => handleRemoveUnit(unitKey)}
                 style={styles.selectedUnitChip}>
-                {avatarUrl ? (
-                  <Image
-                    source={{uri: avatarUrl}}
-                    style={styles.selectedUnitAvatar}
-                  />
-                ) : (
-                  <View style={[styles.selectedUnitAvatar, styles.selectedUnitAvatarPlaceholder]} />
-                )}
-                <Text style={styles.selectedUnitName} numberOfLines={1}>
-                  {displayName}
-                </Text>
-                <Icon
-                  name="close-circle"
-                  type={IconType.Ionicons}
-                  color={colors.placeholder}
-                  size={16}
-                  style={styles.selectedUnitRemoveIcon}
-                />
+                <View style={styles.selectedUnitAvatarContainer}>
+                  <UnitAvatar apiName={apiName} hexSize={46} />
+                  <View style={styles.selectedUnitRemoveIcon}>
+                    <Icon
+                      name="close-circle"
+                      type={IconType.Ionicons}
+                      color={colors.placeholder}
+                      size={20}
+                    />
+                  </View>
+                </View>
               </RNBounceable>
             );
           })}
@@ -213,13 +209,19 @@ const HomeScreen: React.FC = () => {
                 color={selectedUnits.length > 0 ? colors.primary : colors.text}
                 size={20}
               />
+              <Text style={[
+                styles.filterButtonText,
+                selectedUnits.length > 0 && styles.filterButtonTextActive,
+              ]}>
+                {translations.filterByUnits}
+              </Text>
             </RNBounceable>
           </View>
         </View>
         {renderSelectedUnits()}
       </View>
     </View>
-  ), [styles]);
+  ), [styles, selectedUnits, allUnits, colors.primary, colors.text, colors.placeholder, colors.background, handleClearFilter, handleRemoveUnit, normalizeToChampionKey]);
 
   const ListFooter = useCallback(() => {
     if (!isLoadingMore) return null;

@@ -16,14 +16,14 @@ interface Style {
   filterContainer: ViewStyle;
   filterButton: ViewStyle;
   filterButtonActive: ViewStyle;
+  filterButtonText: TextStyle;
+  filterButtonTextActive: TextStyle;
   clearFilterButton: ViewStyle;
   filterCountText: TextStyle;
   selectedUnitsContainer: ViewStyle;
   selectedUnitsScroll: ViewStyle;
   selectedUnitChip: ViewStyle;
-  selectedUnitAvatar: ImageStyle;
-  selectedUnitAvatarPlaceholder: ViewStyle;
-  selectedUnitName: TextStyle;
+  selectedUnitAvatarContainer: ViewStyle;
   selectedUnitRemoveIcon: ViewStyle;
   listContent: ViewStyle;
   teamCard: ViewStyle;
@@ -85,6 +85,7 @@ export default (theme: ExtendedTheme) => {
       paddingHorizontal: 12,
       paddingTop: 24,
       paddingBottom: 16,
+      overflow: 'visible',
     },
     sectionTitleRow: {
       flexDirection: 'row',
@@ -104,18 +105,27 @@ export default (theme: ExtendedTheme) => {
       gap: 8,
     },
     filterButton: {
-      width: 40,
-      height: 40,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
       borderRadius: 20,
       backgroundColor: colors.background,
       borderWidth: 1,
       borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
+      gap: 6,
     },
     filterButtonActive: {
       borderColor: colors.primary,
       backgroundColor: colors.primary + '15',
+    },
+    filterButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    filterButtonTextActive: {
+      color: colors.primary,
     },
     clearFilterButton: {
       flexDirection: 'row',
@@ -127,6 +137,7 @@ export default (theme: ExtendedTheme) => {
       borderWidth: 1,
       borderColor: colors.primary,
       gap: 6,
+      overflow: 'visible',
     },
     filterCountText: {
       fontSize: 14,
@@ -135,40 +146,32 @@ export default (theme: ExtendedTheme) => {
     },
     selectedUnitsContainer: {
       marginTop: 12,
-      maxHeight: 60,
+      maxHeight: 80,
+      overflow: 'visible',
     },
     selectedUnitsScroll: {
+      paddingHorizontal: 12,
       paddingRight: 12,
+      paddingTop: 8,
+      paddingBottom: 8,
       gap: 8,
     },
     selectedUnitChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: 20,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: 6,
       marginRight: 8,
+      overflow: 'visible',
     },
-    selectedUnitAvatar: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-    },
-    selectedUnitAvatarPlaceholder: {
-      backgroundColor: colors.border,
-    },
-    selectedUnitName: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.text,
-      maxWidth: 80,
+    selectedUnitAvatarContainer: {
+      position: 'relative',
+      overflow: 'visible',
     },
     selectedUnitRemoveIcon: {
-      marginLeft: 2,
+      position: 'absolute',
+      top: -6,
+      right: -6,
+      zIndex: 10,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 2,
     },
     listContent: {
       paddingHorizontal: 12,

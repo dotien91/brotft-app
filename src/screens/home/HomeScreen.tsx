@@ -275,8 +275,7 @@ const HomeScreen: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.safeContent} edges={['top']}>
+      <SafeAreaView style={styles.safeContent} edges={['bottom', 'left', 'right']}>
         <FlatList
           data={compositions}
           renderItem={renderTeamCard}
@@ -306,7 +305,6 @@ const HomeScreen: React.FC = () => {
           selectedUnits={selectedUnits}
         />
       </SafeAreaView>
-    </View>
   );
 };
 

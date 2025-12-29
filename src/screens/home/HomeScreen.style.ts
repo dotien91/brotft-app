@@ -1,7 +1,5 @@
-import {ImageStyle, StyleSheet, TextStyle, ViewStyle, Dimensions} from 'react-native';
+import {ImageStyle, StyleSheet, TextStyle, ViewStyle} from 'react-native';
 import {ExtendedTheme} from '@react-navigation/native';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Style {
   container: ViewStyle;
@@ -57,11 +55,12 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
     },
     headerContainer: {
-      width: SCREEN_WIDTH,
-      height: 200,
+      width: '100%',
+      height: 240,
       position: 'relative',
-      marginLeft: -12,
-      marginRight: -12,
+      overflow: 'hidden',
+      marginTop: -50, // Tràn qua Dynamic Island
+      paddingTop: 50, // Đảm bảo content không bị che
     },
     headerImage: {
       width: '100%',
@@ -74,8 +73,9 @@ export default (theme: ExtendedTheme) => {
       right: 0,
       bottom: 0,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
+      justifyContent: 'flex-end',
       alignItems: 'center',
+      paddingBottom: 40,
     },
     welcomeText: {
       fontSize: 24,
@@ -188,8 +188,6 @@ export default (theme: ExtendedTheme) => {
       padding: 2,
     },
     listContent: {
-      paddingHorizontal: 12,
-      paddingBottom: 16,
     },
     teamCard: {
       backgroundColor: colors.card,

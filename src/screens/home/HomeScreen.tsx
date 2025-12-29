@@ -127,6 +127,21 @@ const HomeScreen: React.FC = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.selectedUnitsScroll}>
+          <RNBounceable
+            onPress={handleClearFilter}
+            style={styles.clearFilterButton}>
+            <View style={styles.clearFilterButtonContent}>
+              <Icon
+                name="close-circle"
+                type={IconType.Ionicons}
+                color={colors.primary}
+                size={20}
+              />
+              <Text style={styles.clearFilterButtonText} numberOfLines={1}>
+                {translations.clearAll}
+              </Text>
+            </View>
+          </RNBounceable>
           {selectedUnits.map((unitKey, index) => {
             // Find unit by matching championKey
             const unit = allUnits?.find(u => {
@@ -184,34 +199,16 @@ const HomeScreen: React.FC = () => {
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitle}>Đội hình</Text>
           <View style={styles.filterContainer}>
-            {selectedUnits.length > 0 && (
-              <RNBounceable
-                onPress={handleClearFilter}
-                style={styles.clearFilterButton}>
-                <Icon
-                  name="close-circle"
-                  type={IconType.Ionicons}
-                  color={colors.primary}
-                  size={18}
-                />
-              </RNBounceable>
-            )}
             <RNBounceable
               onPress={() => setIsFilterModalVisible(true)}
-              style={[
-                styles.filterButton,
-                selectedUnits.length > 0 && styles.filterButtonActive,
-              ]}>
+              style={styles.filterButton}>
               <Icon
                 name="filter"
                 type={IconType.Ionicons}
-                color={selectedUnits.length > 0 ? colors.primary : colors.text}
+                color={colors.text}
                 size={20}
               />
-              <Text style={[
-                styles.filterButtonText,
-                selectedUnits.length > 0 && styles.filterButtonTextActive,
-              ]}>
+              <Text style={styles.filterButtonText}>
                 {translations.filterByUnits}
               </Text>
             </RNBounceable>

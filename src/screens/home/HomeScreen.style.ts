@@ -19,6 +19,8 @@ interface Style {
   filterButtonText: TextStyle;
   filterButtonTextActive: TextStyle;
   clearFilterButton: ViewStyle;
+  clearFilterButtonContent: ViewStyle;
+  clearFilterButtonText: TextStyle;
   filterCountText: TextStyle;
   selectedUnitsContainer: ViewStyle;
   selectedUnitsScroll: ViewStyle;
@@ -128,15 +130,28 @@ export default (theme: ExtendedTheme) => {
       color: colors.primary,
     },
     clearFilterButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+      marginRight: 8,
+      minWidth: 46,
+      height: 46,
+      borderRadius: 8,
       backgroundColor: colors.primary + '15',
       borderWidth: 1,
       borderColor: colors.primary,
+      overflow: 'visible',
+    },
+    clearFilterButtonContent: {
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      overflow: 'visible',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      gap: 4,
+      height: '100%',
+    },
+    clearFilterButtonText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.primary,
     },
     filterCountText: {
       fontSize: 14,

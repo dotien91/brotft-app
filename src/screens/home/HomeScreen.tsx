@@ -192,9 +192,8 @@ const HomeScreen: React.FC = () => {
                   name="close-circle"
                   type={IconType.Ionicons}
                   color={colors.primary}
-                  size={20}
+                  size={18}
                 />
-                <Text style={styles.filterCountText}>{selectedUnits.length}</Text>
               </RNBounceable>
             )}
             <RNBounceable

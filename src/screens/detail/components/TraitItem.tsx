@@ -166,45 +166,38 @@ const TraitItem: React.FC<TraitItemProps> = ({
       onPress={handleTraitPress}
       disabled={!hasId}>
       {/* Left: Icon */}
-      <View style={styles.traitCardIconContainer}>
         <Image
           source={{uri: traitIconUrl}}
           style={[styles.traitCardIconNew, {tintColor: tierColor}]}
           resizeMode="contain"
         />
-      </View>
-      {/* Right: Name and Breakpoints */}
+      {/* Right: Breakpoints only */}
       <View style={styles.traitCardInfoContainer}>
-        <View style={styles.traitCardNameRow}>
-          <Text style={[styles.traitCardNameNew, {color: colors.text}]} numberOfLines={1}>
-            {traitName}
-          </Text>
-        </View>
-        {traitBreakpoints && traitBreakpoints.length > 0 && (
-          <View style={styles.traitBreakpointsRow}>
-            {traitBreakpoints.map((bp, bpIndex) => {
-              const isActive = (traitCount || 0) >= bp;
-              return (
-                <View key={bpIndex} style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Text style={[
-                    styles.traitBreakpoint,
-                    {color: isActive ? colors.primary : colors.text}
-                  ]}>
-                    {bp}
-                  </Text>
-                  {bpIndex < traitBreakpoints.length - 1 && (
+        {traitBreakpoints && traitBreakpoints.length > 0 && (() => {
+          const count = traitCount || 0;
+          const achievedBreakpoints = traitBreakpoints.filter((bp) => count >= bp);
+          
+          if (achievedBreakpoints.length === 0) {
+            return null;
+          }
+          
+          return (
+            <View style={styles.traitBreakpointsRow}>
+              {achievedBreakpoints.map((bp, bpIndex) => {
+                return (
+                  <View key={`${bp}-${bpIndex}`} style={{alignItems: 'center', justifyContent: 'center'}}>
                     <Text style={[
-                      styles.traitBreakpointSeparator,
-                      {color: isActive ? colors.primary : colors.placeholder}
+                      styles.traitBreakpoint,
+                      {color: colors.primary}
                     ]}>
-                      ►
+                      {bp}
                     </Text>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        )}
+                  </View>
+                );
+              })}
+            </View>
+          );
+        })()}
       </View>
     </RNBounceable>
   );

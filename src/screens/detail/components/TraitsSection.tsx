@@ -117,8 +117,6 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
 
         // If not found by name, try to find by matching with units data to get apiName
         if (!traitDetail && unitsData) {
-          // Try to find a unit that has this trait to get the trait's apiName
-          let foundTraitApiName: string | null = null;
           if (Array.isArray(unitsData)) {
             const unitWithTrait = unitsData.find((unit: any) => 
               unit.traits && Array.isArray(unit.traits) && unit.traits.includes(traitName)
@@ -160,7 +158,34 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
           apiName: traitDetail?.apiName || traitName,
           breakpoints: breakpoints,
         };
-      }).sort((a, b) => b.count - a.count); // Sort by count descending
+      })
+      .filter((trait) => {
+        // Chỉ hiển thị trait nếu có ít nhất 1 breakpoint đạt được
+        if (!trait.breakpoints || trait.breakpoints.length === 0) {
+          return false;
+        }
+        const count = trait.count || 0;
+        const achievedBreakpoints = trait.breakpoints.filter((bp) => count >= bp);
+        return achievedBreakpoints.length > 0;
+      })
+      .sort((a, b) => {
+        // Ưu tiên sắp xếp theo breakpoint cao nhất đạt được
+        const aCount = a.count || 0;
+        const bCount = b.count || 0;
+        
+        const aMaxBreakpoint = a.breakpoints
+          ? Math.max(...a.breakpoints.filter((bp) => aCount >= bp), 0)
+          : 0;
+        const bMaxBreakpoint = b.breakpoints
+          ? Math.max(...b.breakpoints.filter((bp) => bCount >= bp), 0)
+          : 0;
+        
+        // Sort theo breakpoint cao nhất trước, nếu bằng nhau thì sort theo count
+        if (bMaxBreakpoint !== aMaxBreakpoint) {
+          return bMaxBreakpoint - aMaxBreakpoint;
+        }
+        return bCount - aCount;
+      });
     } catch (error) {
       console.error('Error getting traits from units:', error);
       return [];
@@ -169,29 +194,15 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
 
   if (!traits || traits.length === 0) return null;
 
-  // Split traits into 2 columns
-  const midPoint = Math.ceil(traits.length / 2);
-  const leftColumn = traits.slice(0, midPoint);
-  const rightColumn = traits.slice(midPoint);
-
   return (
     <View style={styles.traitsSection}>
       <Text style={styles.traitsSectionTitle}>{translations.traitsSection}</Text>
-      <View style={styles.traitsColumnsContainer}>
         {/* Left Column */}
         <View style={styles.traitsColumn}>
-          {leftColumn.map((trait, index) => (
+          {traits.map((trait, index) => (
             <TraitItem key={trait.name || index} trait={trait} index={index} />
           ))}
         </View>
-        
-        {/* Right Column */}
-        <View style={styles.traitsColumn}>
-          {rightColumn.map((trait, index) => (
-            <TraitItem key={trait.name || index + midPoint} trait={trait} index={index + midPoint} />
-          ))}
-        </View>
-      </View>
     </View>
   );
 };

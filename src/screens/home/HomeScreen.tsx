@@ -241,6 +241,15 @@ const HomeScreen: React.FC = () => {
     }
   }, [hasMore, isLoadingMore, isLoading, loadMore]);
 
+  const getItemLayout = useCallback(
+    (_data: any, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
+      index,
+    }),
+    [],
+  );
+
   if (isError) {
     return (
       <SafeAreaView style={styles.container}>
@@ -264,15 +273,6 @@ const HomeScreen: React.FC = () => {
       </SafeAreaView>
     );
   }
-
-  const getItemLayout = useCallback(
-    (_data: any, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: ITEM_HEIGHT * index,
-      index,
-    }),
-    [],
-  );
 
   return (
       <SafeAreaView style={styles.safeContent} edges={['bottom', 'left', 'right']}>

@@ -408,28 +408,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   );
 
 
-  const renderUnit = (unit: TeamUnit) => {
-    const costBadgeSize = hexSize * 0.35;
-    const itemIconSize = hexSize * 0.28;
-    
-    return (
-      <>
-        {unit.carry ? (
-          <View style={[
-            styles.carryBadge,
-            {
-              width: costBadgeSize,
-              height: costBadgeSize,
-              borderRadius: costBadgeSize / 2,
-              top: -hexSize * 0.12,
-              right: -hexSize * 0.12,
-            }
-          ]}>
-            <Text style={[styles.carryText, {fontSize: hexSize * 0.18}]}>C</Text>
-          </View>
-        ) : null}
-      </>
-    );
+  const renderUnit = (_unit: TeamUnit) => {
+    return null;
   };
 
   const renderBoard = () => (

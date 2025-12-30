@@ -74,42 +74,9 @@ export const searchCompositionsByUnits = async (
   }
 
   const url = `/compositions?${queryParams.toString()}`;
-  const fullUrl = `${axiosInstance.defaults.baseURL}${url}`;
-
-  console.log('🔍 ========== SEARCH COMPOSITIONS BY UNITS ==========');
-  console.log('📤 Full URL:', fullUrl);
-  console.log('📤 Relative URL:', url);
-  console.log('📤 Method: GET');
-  console.log('📤 Query Params:', {
-    units: dto.units?.join(','),
-    searchInAllArrays: dto.searchInAllArrays,
-    page: params?.page,
-    limit: params?.limit,
-    tier: params?.tier,
-    queryString: queryParams.toString(),
-  });
-  console.log('📤 Units array:', dto.units);
-  console.log('📤 Units count:', dto.units?.length || 0);
 
   try {
-    console.log('📡 Sending GET request...');
     const response = await axiosInstance.get<ICompositionsResponse>(url);
-    
-    console.log('✅ ========== SEARCH RESULT ==========');
-    console.log('📥 Status:', response.status);
-    console.log('📥 Response data:', {
-      count: response.data?.data?.length || 0,
-      hasNextPage: response.data?.hasNextPage,
-      compositions: response.data?.data?.map(c => ({
-        id: c.id,
-        compId: c.compId,
-        name: c.name,
-        unitsCount: c.units?.length || 0,
-        units: c.units?.map(u => u.championKey || u.championId),
-      })),
-    });
-    console.log('✅ ===========================================');
-    
     return response.data;
   } catch (error: any) {
     console.error('❌ ========== SEARCH ERROR ==========');

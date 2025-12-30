@@ -109,7 +109,6 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
     let normalized = apiName.replace(/^TFT\d*_?/i, '');
     // Convert to lowercase
     normalized = normalized.toLowerCase();
-    console.log('🔄 Normalize:', {apiName, normalized});
     return normalized;
   };
 

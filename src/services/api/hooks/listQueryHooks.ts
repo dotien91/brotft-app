@@ -1633,14 +1633,6 @@ export const useSearchCompositionsByUnits = (
   const [hasMore, setHasMore] = useState(true);
 
   const isEnabled = !!dto && dto.units.length > 0;
-  
-  console.log('🔧 useSearchCompositionsByUnits hook:', {
-    dto,
-    limit,
-    page,
-    isEnabled,
-    unitsCount: dto?.units?.length || 0,
-  });
 
   const {
     data: compositionsData,
@@ -1652,12 +1644,9 @@ export const useSearchCompositionsByUnits = (
   } = useQuery({
     queryKey: [...compositionKeys.all, 'search-by-units', dto, {page, limit}],
     queryFn: () => {
-      console.log('🚀 useQuery queryFn called:', {dto, page, limit});
       if (!dto || dto.units.length === 0) {
-        console.log('⚠️ DTO is empty, returning empty result');
         return Promise.resolve({data: [], hasNextPage: false});
       }
-      console.log('📞 Calling searchCompositionsByUnits API...');
       return searchCompositionsByUnits(dto, {page, limit});
     },
     enabled: isEnabled,

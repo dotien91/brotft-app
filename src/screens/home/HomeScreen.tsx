@@ -35,19 +35,13 @@ const HomeScreen: React.FC = () => {
 
   // Build search DTO
   const searchDto = useMemo(() => {
-    console.log('🏠 HomeScreen - Building search DTO:', {
-      selectedUnits,
-      selectedUnitsLength: selectedUnits.length,
-    });
     if (selectedUnits.length === 0) {
-      console.log('🏠 HomeScreen - No units selected, returning null');
       return null;
     }
     const dto = {
       units: selectedUnits,
       searchInAllArrays: true,
     };
-    console.log('🏠 HomeScreen - Search DTO created:', JSON.stringify(dto, null, 2));
     return dto;
   }, [selectedUnits]);
 
@@ -82,18 +76,6 @@ const HomeScreen: React.FC = () => {
   const refresh = searchDto ? refreshSearch : refreshAll;
   const isRefetching = searchDto ? isRefetchingSearch : isRefetchingAll;
 
-  // Debug logging
-  React.useEffect(() => {
-    if (searchDto) {
-      console.log('🏠 HomeScreen - Filter active:', {
-        selectedUnits,
-        searchCompositionsCount: searchCompositions?.length || 0,
-        isLoadingSearch,
-        isErrorSearch,
-        errorSearch: errorSearch?.message,
-      });
-    }
-  }, [searchDto, selectedUnits, searchCompositions, isLoadingSearch, isErrorSearch, errorSearch]);
   
   const handleTeamPress = useCallback((comp: IComposition) => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});

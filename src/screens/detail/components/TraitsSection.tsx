@@ -141,11 +141,20 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
         // Get breakpoints from effects
         let breakpoints: number[] = [];
         if (traitDetail?.effects && Array.isArray(traitDetail.effects)) {
-          breakpoints = traitDetail.effects
-            .map((effect: any) => effect.minUnits || effect.maxUnits)
-            .filter((bp: any) => bp !== undefined && bp !== null)
+          const allBreakpoints: number[] = [];
+          traitDetail.effects.forEach((effect: any) => {
+            // Collect both minUnits and maxUnits
+            if (effect.minUnits !== undefined && effect.minUnits !== null) {
+              allBreakpoints.push(effect.minUnits);
+            }
+            if (effect.maxUnits !== undefined && effect.maxUnits !== null) {
+              allBreakpoints.push(effect.maxUnits);
+            }
+          });
+          // Sort and remove duplicates
+          breakpoints = allBreakpoints
             .sort((a: number, b: number) => a - b)
-            .filter((value: number, index: number, self: number[]) => self.indexOf(value) === index); // Remove duplicates
+            .filter((value: number, index: number, self: number[]) => self.indexOf(value) === index);
         }
 
         // Use localized name from traitDetail if available, otherwise use traitName from units

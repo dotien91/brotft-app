@@ -749,7 +749,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
               NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: unit.id});
             }
           };
-          
+
           return (
             <RNBounceable 
               key={unit.id} 
@@ -781,7 +781,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                   </View>
                 </View>
                 {/* Cost badge */}
-                {unit.cost && <UnitCostBadge cost={unit.cost} />}
+                {!!unit.cost && <UnitCostBadge cost={unit.cost} />}
               </View>
               
               {/* Right: Traits and items */}

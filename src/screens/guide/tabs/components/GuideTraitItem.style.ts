@@ -26,7 +26,6 @@ export default (theme: ExtendedTheme) => {
     container: {
       paddingVertical: 14,
       paddingHorizontal: 16,
-      backgroundColor: colors.card,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },

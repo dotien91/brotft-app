@@ -40,7 +40,6 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       paddingVertical: 14,
       paddingHorizontal: 16,
-      backgroundColor: colors.card,
       borderBottomColor: colors.border,
       borderBottomWidth: 1,
     },

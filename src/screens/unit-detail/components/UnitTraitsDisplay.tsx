@@ -103,17 +103,13 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
           {data.map((item, idx) => (
             <TouchableOpacity
               key={`${item.apiName}-${idx}`}
-              style={[styles.unitTraitItem, {flexDirection: 'row', alignItems: 'center', marginBottom: 2}]}
+              style={[styles.unitTraitItem, {flexDirection: 'row', alignItems: 'center', marginRight: 8, marginBottom: 2}]}
               onPress={() => handleTraitPress(item.id)}>
               <Image
                 source={{uri: getTraitIconUrl(item.apiName)}}
                 style={[styles.unitTraitIcon, {width: 24, height: 24, tintColor: '#ffffff'}]}
                 resizeMode="contain"
               />
-              {/* Tên của Tộc/Hệ cạnh Icon */}
-              <Text style={{color: '#ffffff', marginLeft: 6, fontSize: 13}}>
-                {item.name}
-              </Text>
             </TouchableOpacity>
           ))}
           </>

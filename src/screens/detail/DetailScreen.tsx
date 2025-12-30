@@ -862,25 +862,22 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.topHeader}>
         <BackButton />
+        <Text h2 bold style={styles.compositionName}>
+          {team.name}
+        </Text>
+        {team.tier && (
+          <View style={[styles.tierBadge, {backgroundColor: getRankColor(team.tier)}]}>
+            <Text style={[styles.tierBadgeText, {color: getContrastTextColor()}]}>
+              {team.tier}
+            </Text>
+          </View>
+        )}
       </View>
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        {/* Tier and Name */}
-        <View style={styles.compositionHeader}>
-          {team.tier && (
-            <View style={[styles.tierBadge, {backgroundColor: getRankColor(team.tier)}]}>
-              <Text style={[styles.tierBadgeText, {color: getContrastTextColor()}]}>
-                {team.tier}
-              </Text>
-            </View>
-          )}
-          <Text h2 bold style={styles.compositionName}>
-            {team.name}
-          </Text>
-        </View>
         <TraitsSection units={currentPhaseUnits} />
 
         {/* Augments Section */}

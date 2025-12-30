@@ -6,6 +6,7 @@ interface Style {
   scrollView: ViewStyle;
   scrollContent: ViewStyle;
   topHeader: ViewStyle;
+  headerContent: ViewStyle;
   compositionHeader: ViewStyle;
   compositionName: TextStyle;
   backButton: ViewStyle;
@@ -155,10 +156,18 @@ export default (theme: ExtendedTheme) => {
     topHeader: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       paddingHorizontal: 12,
       paddingTop: 12,
       paddingBottom: 16,
       backgroundColor: colors.background,
+      gap: 12,
+    },
+    headerContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      gap: 12,
     },
     compositionHeader: {
       flexDirection: 'row',
@@ -168,7 +177,7 @@ export default (theme: ExtendedTheme) => {
       paddingHorizontal: 12,
     },
     compositionName: {
-      fontSize: 24,
+      fontSize: 18,
       fontWeight: '800',
       letterSpacing: -0.5,
       flex: 1,
@@ -905,44 +914,46 @@ export default (theme: ExtendedTheme) => {
       paddingHorizontal: 16,
     },
     sectionTitle: {
-      fontSize: 14,
+      fontSize: 18,
       fontWeight: '800',
       color: colors.text,
       marginBottom: 8,
+      textAlign: 'left',
     },
     augmentsColumnsContainer: {
       flexDirection: 'row',
       gap: 6,
     },
     augmentsColumn: {
-      flex: 1,
       gap: 6,
+      marginRight: 6,
     },
     augmentsColumnTitle: {
       fontSize: 12,
       fontWeight: '700',
       color: colors.text,
       marginBottom: 6,
-      textAlign: 'center',
+      textAlign: 'left',
     },
     augmentItem: {
-      flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: colors.card,
       borderRadius: 8,
       padding: 6,
       borderWidth: 1,
       borderColor: colors.borderColor,
-      gap: 6,
+      width: 38,
+      height: 38,
     },
     augmentIcon: {
-      width: 28,
-      height: 28,
+      width: 38,
+      height: 38,
       borderRadius: 6,
     },
     augmentIconPlaceholder: {
-      width: 28,
-      height: 28,
+      width: 38,
+      height: 38,
       borderRadius: 6,
       backgroundColor: colors.background,
       alignItems: 'center',

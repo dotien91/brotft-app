@@ -100,7 +100,7 @@ const TraitsSection: React.FC<{units: any[]}> = ({units}) => {
 
   return (
     <View style={styles.traitsSection}>
-      <Text style={styles.traitsSectionTitle}>{translations.traitsSection}</Text>
+      <Text style={styles.sectionTitle}>{translations.traitsSection}</Text>
       <View style={styles.traitsColumn}>
         {traits.map((trait, index) => (
           <TraitItem key={`${trait.apiName}-${index}`} trait={trait} index={index} />

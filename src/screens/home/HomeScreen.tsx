@@ -1,5 +1,5 @@
 import React, {useMemo, useCallback, useState} from 'react';
-import {FlatList, View, ActivityIndicator, ScrollView, Image} from 'react-native';
+import {FlatList, View, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './HomeScreen.style';
@@ -17,8 +17,9 @@ import type {IComposition} from '@services/models/composition';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import TeamCard from './components/team-card/TeamCard';
 import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
+import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
+import SelectedUnitsFilter from './components/selected-units-filter/SelectedUnitsFilter';
 import {translations} from '../../shared/localization';
-import UnitAvatar from '@shared-components/unit-avatar';
 
 const ITEM_HEIGHT = 120; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
 
@@ -100,63 +101,6 @@ const HomeScreen: React.FC = () => {
     return normalized;
   }, []);
 
-  const renderSelectedUnits = () => {
-    if (selectedUnits.length === 0) return null;
-
-    return (
-      <View style={styles.selectedUnitsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.selectedUnitsScroll}>
-          <RNBounceable
-            onPress={handleClearFilter}
-            style={styles.clearFilterButton}>
-            <View style={styles.clearFilterButtonContent}>
-              <Icon
-                name="close-circle"
-                type={IconType.Ionicons}
-                color={colors.primary}
-                size={20}
-              />
-              <Text style={styles.clearFilterButtonText} numberOfLines={1}>
-                {translations.clearAll}
-              </Text>
-            </View>
-          </RNBounceable>
-          {selectedUnits.map((unitKey, index) => {
-            // Find unit by matching championKey
-            const unit = allUnits?.find(u => {
-              const championKey = normalizeToChampionKey(u.apiName);
-              return championKey === unitKey;
-            });
-
-            const apiName = unit?.apiName || unitKey;
-
-            return (
-              <RNBounceable
-                key={`${unitKey}-${index}`}
-                onPress={() => handleRemoveUnit(unitKey)}
-                style={styles.selectedUnitChip}>
-                <View style={styles.selectedUnitAvatarContainer}>
-                  <UnitAvatar apiName={apiName} hexSize={46} />
-                  <View style={styles.selectedUnitRemoveIcon}>
-                    <Icon
-                      name="close-circle"
-                      type={IconType.Ionicons}
-                      color={colors.placeholder}
-                      size={20}
-                    />
-                  </View>
-                </View>
-              </RNBounceable>
-            );
-          })}
-        </ScrollView>
-      </View>
-    );
-  };
-
   const renderTeamCard = useCallback(
     ({item}: {item: IComposition}) => (
       <TeamCard composition={item} onPress={handleTeamPress} />
@@ -165,18 +109,10 @@ const HomeScreen: React.FC = () => {
   );
 
   // Memoize Header để tránh re-render không cần thiết
+  // Tách phần cover (tĩnh) và filter section (dynamic)
   const ListHeader = useMemo(() => (
     <View>
-      <View style={styles.headerContainer}>
-        <Image
-          source={require('@assets/images/home-cover.jpg')}
-          style={styles.headerImage}
-          resizeMode="cover"
-        />
-        <View style={styles.headerOverlay}>
-          <Text style={styles.welcomeText}>{translations.welcomeToTftBuddy}</Text>
-        </View>
-      </View>
+      <HomeHeaderCover />
       <View style={styles.sectionTitleContainer}>
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitle}>{translations.compositionsSection}</Text>
@@ -196,10 +132,16 @@ const HomeScreen: React.FC = () => {
             </RNBounceable>
           </View>
         </View>
-        {renderSelectedUnits()}
+        <SelectedUnitsFilter
+          selectedUnits={selectedUnits}
+          allUnits={allUnits}
+          onRemoveUnit={handleRemoveUnit}
+          onClearAll={handleClearFilter}
+          normalizeToChampionKey={normalizeToChampionKey}
+        />
       </View>
     </View>
-  ), [styles, selectedUnits, allUnits, colors.primary, colors.text, colors.placeholder, colors.background, handleClearFilter, handleRemoveUnit, normalizeToChampionKey]);
+  ), [styles, selectedUnits, allUnits, colors.text, handleClearFilter, handleRemoveUnit, normalizeToChampionKey]);
 
   const ListFooter = useCallback(() => {
     if (!isLoadingMore) return null;

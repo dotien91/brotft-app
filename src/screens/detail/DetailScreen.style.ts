@@ -138,6 +138,8 @@ interface Style {
   augmentInfo: ViewStyle;
   augmentName: TextStyle;
   sectionTitle: TextStyle;
+  descriptionSection: ViewStyle;
+  descriptionText: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -852,6 +854,17 @@ export default (theme: ExtendedTheme) => {
     phaseTabTextActive: {
       color: colors.white,
       fontWeight: '700',
+    },
+    descriptionSection: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      marginBottom: 16,
+    },
+    descriptionText: {
+      fontSize: 14,
+      lineHeight: 20,
+      color: colors.text,
+      opacity: 0.8,
     },
     traitsSection: {
       marginBottom: 20,

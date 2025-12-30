@@ -878,6 +878,12 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
+        {/* Description Section */}
+        {team.metaDescription && (
+          <View style={styles.descriptionSection}>
+            <Text style={styles.descriptionText}>{team.metaDescription}</Text>
+          </View>
+        )}
         <TraitsSection units={currentPhaseUnits} />
 
         {/* Augments Section */}

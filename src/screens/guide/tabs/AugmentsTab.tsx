@@ -204,17 +204,17 @@ const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
       compact: true,
       options: [
         {
-          label: 'Silver I',
+          label: translations.silverI || 'Silver I',
           value: 1,
           icon: <AugmentTier tier={1} size={32} showLabel={false} />,
         },
         {
-          label: 'Gold II',
+          label: translations.goldII || 'Gold II',
           value: 2,
           icon: <AugmentTier tier={2} size={32} showLabel={false} />,
         },
         {
-          label: 'Prismatic III',
+          label: translations.prismaticIII || 'Prismatic III',
           value: 3,
           icon: <AugmentTier tier={3} size={32} showLabel={false} />,
         },

@@ -176,9 +176,9 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
     <View style={styles.augmentsSection}>
       <Text style={styles.sectionTitle}>{translations.augments || 'Augments'}</Text>
       <View style={styles.augmentsColumnsContainer}>
-        {renderTierColumn(1, 'Tier 1')}
-        {renderTierColumn(2, 'Tier 2')}
-        {renderTierColumn(3, 'Tier 3')}
+        {renderTierColumn(1, translations.tier1 || 'Tier 1')}
+        {renderTierColumn(2, translations.tier2 || 'Tier 2')}
+        {renderTierColumn(3, translations.tier3 || 'Tier 3')}
       </View>
     </View>
   );

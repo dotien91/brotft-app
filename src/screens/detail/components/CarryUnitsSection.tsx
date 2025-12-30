@@ -298,7 +298,7 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
 
         const unitName = 'name' in unit 
           ? (unit as TeamUnit).name 
-          : ('championName' in unit ? (unit as TeamCarry).championName : 'Unknown');
+          : ('championName' in unit ? (unit as TeamCarry).championName : translations.unknown || 'Unknown');
         const unitCost = 'cost' in unit ? (unit as TeamUnit).cost : 0;
 
         return (

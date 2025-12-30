@@ -15,6 +15,7 @@ import {StyleSheet, ViewStyle, TextStyle} from 'react-native';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnit} from '@services/models/tft-unit';
 import UnitAvatar from '@shared-components/unit-avatar';
+import {translations} from '../../../../shared/localization';
 
 interface UnitFilterModalProps {
   visible: boolean;
@@ -71,7 +72,7 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
     // Group by tier
     const grouped: {[key: string]: ITftUnit[]} = {};
     units.forEach(unit => {
-      const tier = unit.tier || 'No Tier';
+      const tier = unit.tier || translations.noTier || 'No Tier';
       if (!grouped[tier]) {
         grouped[tier] = [];
       }
@@ -162,7 +163,7 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
             />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search units..."
+              placeholder={translations.searchUnitsPlaceholder || "Search units..."}
               placeholderTextColor={colors.placeholder}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -185,10 +186,10 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
           {selectedUnits.length > 0 && (
             <View style={styles.selectedCountContainer}>
               <Text style={styles.selectedCountText}>
-                {selectedUnits.length} unit{selectedUnits.length > 1 ? 's' : ''} selected
+                {selectedUnits.length} {translations.unitsSelected || 'units selected'}
               </Text>
               <TouchableOpacity onPress={handleClear}>
-                <Text style={styles.clearText}>Clear</Text>
+                <Text style={styles.clearText}>{translations.clear || 'Clear'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -196,7 +197,7 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
           {/* Units list */}
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <Text color={colors.placeholder}>Loading units...</Text>
+              <Text color={colors.placeholder}>{translations.loadingUnits || 'Loading units...'}</Text>
             </View>
           ) : (
             <ScrollView
@@ -205,7 +206,7 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
               {unitsByTier.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text color={colors.placeholder}>
-                    {searchQuery ? 'No units found' : 'No units available'}
+                    {searchQuery ? (translations.noUnitsFoundWithFilters || 'No units found') : (translations.noUnitsAvailable || 'No units available')}
                   </Text>
                 </View>
               ) : (

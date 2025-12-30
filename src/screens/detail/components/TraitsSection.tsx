@@ -20,6 +20,7 @@ export interface TraitData {
 interface TeamUnit {
   championKey?: string;
   name?: string;
+  traits?: string[]; 
 }
 
 interface TraitsSectionProps {
@@ -31,190 +32,130 @@ const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore(state => state.language);
 
-  // Get traits from units
   const traits = useMemo<TraitData[]>(() => {
-    if (!units || units.length === 0 || !language) return [];
-    
+    // 1. Kiểm tra đầu vào cơ bản
+    if (!units?.length || !language) return [];
+
     try {
       const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
+      const unitsDataRaw = LocalStorage.getString(`data_units_${locale}`);
+      const traitsDataRaw = LocalStorage.getString(`data_traits_${locale}`);
       
-      if (!unitsDataString) return [];
-      
-      const unitsData = JSON.parse(unitsDataString);
+      if (!unitsDataRaw || !traitsDataRaw) return [];
+
+      const unitsData = JSON.parse(unitsDataRaw);
+      const traitsData = JSON.parse(traitsDataRaw);
+
+      // 2. Tạo Map từ LocalStorage để truy xuất nhanh O(1)
+      const unitsMapFromStorage = new Map();
+      const rawUnitsList = Array.isArray(unitsData) ? unitsData : Object.values(unitsData);
+      rawUnitsList.forEach((u: any) => {
+        if (u.apiName) unitsMapFromStorage.set(u.apiName, u);
+      });
+
+      const traitsMapFromStorage = new Map();
+      const rawTraitsList = Array.isArray(traitsData) ? traitsData : Object.values(traitsData);
+      rawTraitsList.forEach((t: any) => {
+        if (t.apiName) traitsMapFromStorage.set(t.apiName, t);
+      });
+
+      // 3. Tính toán count
       const traitCountMap: Record<string, number> = {};
+      const processedChampionKeys = new Set<string>();
 
-      // Get all traits from units
       units.forEach(unit => {
-        if (!unit.championKey) return;
-        
-        let localizedUnit: any = null;
+        const key = unit.championKey;
+        if (!key || processedChampionKeys.has(key)) return;
 
-        // Handle both array and object formats
-        if (Array.isArray(unitsData)) {
-          localizedUnit = unitsData.find((localUnit: any) => {
-            if (unit.championKey && localUnit.apiName === unit.championKey) {
-              return true;
+        // Quan trọng: Lấy traits từ Storage vì traits trong props bị rỗng
+        const storageUnit = unitsMapFromStorage.get(key);
+        
+        if (storageUnit && Array.isArray(storageUnit.traits)) {
+          processedChampionKeys.add(key);
+          storageUnit.traits.forEach((tName: string) => {
+            // Chuẩn hóa tên trait qua apiName để tránh lệch tên
+            // Tìm trait object tương ứng trong storage
+            let finalTraitKey = tName;
+            
+            // Nếu tName là nickname, cố gắng tìm apiName chuẩn
+            for (const [apiName, detail] of traitsMapFromStorage) {
+              if (detail.apiName === tName || detail.name === tName) {
+                finalTraitKey = apiName;
+                break;
+              }
             }
-            if (unit.name && localUnit.name) {
-              return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+            
+            if (finalTraitKey) {
+              traitCountMap[finalTraitKey] = (traitCountMap[finalTraitKey] || 0) + 1;
             }
-            return false;
           });
-        } else if (typeof unitsData === 'object' && unitsData !== null) {
-          if (unit.championKey && unitsData[unit.championKey]) {
-            localizedUnit = unitsData[unit.championKey];
-          } else {
-            const unitsArray = Object.values(unitsData) as any[];
-            localizedUnit = unitsArray.find((localUnit: any) => {
-              if (unit.championKey && localUnit.apiName === unit.championKey) {
-                return true;
+        }
+      });
+
+      // 4. Chuyển đổi sang format TraitData và lấy Breakpoints
+      return Object.entries(traitCountMap)
+        .map(([apiName, count]) => {
+          const detail = traitsMapFromStorage.get(apiName);
+          
+          let breakpoints: number[] = [];
+          if (detail?.effects && Array.isArray(detail.effects)) {
+            const bpSet = new Set<number>();
+            detail.effects.forEach((eff: any) => {
+              if (eff.minUnits !== undefined && eff.minUnits !== null) {
+                bpSet.add(Number(eff.minUnits));
               }
-              if (unit.name && localUnit.name) {
-                return unit.name.toLowerCase() === localUnit.name.toLowerCase();
-              }
-              return false;
             });
+            breakpoints = Array.from(bpSet).sort((a, b) => a - b);
           }
-        }
 
-        if (localizedUnit && localizedUnit.traits) {
-          const traits = Array.isArray(localizedUnit.traits) ? localizedUnit.traits : [];
-          traits.forEach((trait: string) => {
-            if (trait) {
-              traitCountMap[trait] = (traitCountMap[trait] || 0) + 1;
-            }
-          });
-        }
-      });
+          return {
+            name: detail?.name || apiName,
+            count: count,
+            id: detail?.id,
+            apiName: apiName,
+            breakpoints: breakpoints,
+          };
+        })
+        // 5. Lọc: Chỉ hiện những hệ tộc đã kích hoạt ít nhất mốc 1
+        .filter(trait => {
+          if (trait.breakpoints.length === 0) return false;
+          const minBreakpoint = Math.min(...trait.breakpoints);
+          return trait.count >= minBreakpoint;
+        })
+        // 6. Sắp xếp: Ưu tiên mốc cao nhất -> số lượng tướng
+        .sort((a, b) => {
+          const aMaxBP = Math.max(...a.breakpoints.filter(bp => a.count >= bp), 0);
+          const bMaxBP = Math.max(...b.breakpoints.filter(bp => b.count >= bp), 0);
 
-      // Convert to array and get trait details from local storage
-      const traitsKey = `data_traits_${locale}`;
-      const traitsDataString = LocalStorage.getString(traitsKey);
-      let traitsData: any = null;
-      if (traitsDataString) {
-        traitsData = JSON.parse(traitsDataString);
-      }
+          if (bMaxBP !== aMaxBP) return bMaxBP - aMaxBP;
+          return b.count - a.count;
+        });
 
-      return Object.entries(traitCountMap).map(([traitName, count]) => {
-        let traitDetail: any = null;
-        
-        // Find trait detail from local storage
-        // First try to match by name (localized name from units)
-        // Then try to match by apiName if available
-        if (traitsData) {
-          if (Array.isArray(traitsData)) {
-            traitDetail = traitsData.find((trait: any) => 
-              trait.name === traitName || trait.apiName === traitName
-            );
-          } else if (typeof traitsData === 'object' && traitsData !== null) {
-            traitDetail = Object.values(traitsData).find((trait: any) => 
-              trait.name === traitName || trait.apiName === traitName
-            );
-          }
-        }
-
-        // If not found by name, try to find by matching with units data to get apiName
-        if (!traitDetail && unitsData) {
-          if (Array.isArray(unitsData)) {
-            const unitWithTrait = unitsData.find((unit: any) => 
-              unit.traits && Array.isArray(unit.traits) && unit.traits.includes(traitName)
-            );
-            if (unitWithTrait) {
-              // Now find the trait detail using the trait name from unit
-              if (traitsData) {
-                if (Array.isArray(traitsData)) {
-                  traitDetail = traitsData.find((trait: any) => 
-                    trait.name === traitName || trait.apiName === traitName
-                  );
-                } else if (typeof traitsData === 'object' && traitsData !== null) {
-                  traitDetail = Object.values(traitsData).find((trait: any) => 
-                    trait.name === traitName || trait.apiName === traitName
-                  );
-                }
-              }
-            }
-          }
-        }
-
-        // Get breakpoints from effects
-        let breakpoints: number[] = [];
-        if (traitDetail?.effects && Array.isArray(traitDetail.effects)) {
-          const allBreakpoints: number[] = [];
-          traitDetail.effects.forEach((effect: any) => {
-            // Collect both minUnits and maxUnits
-            if (effect.minUnits !== undefined && effect.minUnits !== null) {
-              allBreakpoints.push(effect.minUnits);
-            }
-            if (effect.maxUnits !== undefined && effect.maxUnits !== null) {
-              allBreakpoints.push(effect.maxUnits);
-            }
-          });
-          // Sort and remove duplicates
-          breakpoints = allBreakpoints
-            .sort((a: number, b: number) => a - b)
-            .filter((value: number, index: number, self: number[]) => self.indexOf(value) === index);
-        }
-
-        // Use localized name from traitDetail if available, otherwise use traitName from units
-        const localizedName = traitDetail?.name || traitName;
-
-        return {
-          name: localizedName, // Use localized name from traits data
-          count: count,
-          id: traitDetail?.id,
-          apiName: traitDetail?.apiName || traitName,
-          breakpoints: breakpoints,
-        };
-      })
-      .filter((trait) => {
-        // Chỉ hiển thị trait nếu có ít nhất 1 breakpoint đạt được
-        if (!trait.breakpoints || trait.breakpoints.length === 0) {
-          return false;
-        }
-        const count = trait.count || 0;
-        const achievedBreakpoints = trait.breakpoints.filter((bp) => count >= bp);
-        return achievedBreakpoints.length > 0;
-      })
-      .sort((a, b) => {
-        // Ưu tiên sắp xếp theo breakpoint cao nhất đạt được
-        const aCount = a.count || 0;
-        const bCount = b.count || 0;
-        
-        const aMaxBreakpoint = a.breakpoints
-          ? Math.max(...a.breakpoints.filter((bp) => aCount >= bp), 0)
-          : 0;
-        const bMaxBreakpoint = b.breakpoints
-          ? Math.max(...b.breakpoints.filter((bp) => bCount >= bp), 0)
-          : 0;
-        
-        // Sort theo breakpoint cao nhất trước, nếu bằng nhau thì sort theo count
-        if (bMaxBreakpoint !== aMaxBreakpoint) {
-          return bMaxBreakpoint - aMaxBreakpoint;
-        }
-        return bCount - aCount;
-      });
     } catch (error) {
-      console.error('Error getting traits from units:', error);
+      console.error('[TraitsSection] Error processing data:', error);
       return [];
     }
   }, [units, language]);
 
-  if (!traits || traits.length === 0) return null;
-
+  // Không hiển thị gì nếu không có trait nào đạt mốc
+  if (traits.length === 0) return null;
+console.log('traits=====222', traits?.[0]);
   return (
     <View style={styles.traitsSection}>
-      <Text style={styles.traitsSectionTitle}>{translations.traitsSection}</Text>
-        {/* Left Column */}
-        <View style={styles.traitsColumn}>
-          {traits.map((trait, index) => (
-            <TraitItem key={trait.name || index} trait={trait} index={index} />
-          ))}
-        </View>
+      <Text style={styles.traitsSectionTitle}>
+        {translations.traitsSection || 'Active Traits'}
+      </Text>
+      <View style={styles.traitsColumn}>
+        {traits.map((trait, index) => (
+          <TraitItem 
+            key={`${trait.apiName}-${index}`} 
+            trait={trait} 
+            index={index} 
+          />
+        ))}
+      </View>
     </View>
   );
 };
 
 export default TraitsSection;
-

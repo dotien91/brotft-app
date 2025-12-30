@@ -181,20 +181,19 @@ const TraitItem: React.FC<TraitItemProps> = ({
             return null;
           }
           
+          // Chỉ lấy mốc cao nhất đạt được
+          const highestBreakpoint = Math.max(...achievedBreakpoints);
+          
           return (
             <View style={styles.traitBreakpointsRow}>
-              {achievedBreakpoints.map((bp, bpIndex) => {
-                return (
-                  <View key={`${bp}-${bpIndex}`} style={{alignItems: 'center', justifyContent: 'center'}}>
-                    <Text style={[
-                      styles.traitBreakpoint,
-                      {color: colors.primary}
-                    ]}>
-                      {bp}
-                    </Text>
-                  </View>
-                );
-              })}
+              <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                <Text style={[
+                  styles.traitBreakpoint,
+                  {color: colors.primary}
+                ]}>
+                  {highestBreakpoint}
+                </Text>
+              </View>
             </View>
           );
         })()}

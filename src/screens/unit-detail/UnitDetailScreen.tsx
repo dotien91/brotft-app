@@ -16,9 +16,9 @@ import AbilityDescription from '../../shared/components/ability-description/Abil
 import TooltipElements from '../../shared/components/tooltip-elements/TooltipElements';
 import {parseTextWithVariables} from '../../shared/utils/parseTextWithVariables';
 import {translations} from '../../shared/localization';
-import TraitItem from '@screens/detail/components/TraitItem';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import BackButton from '@shared-components/back-button/BackButton';
+import UnitTraitsDisplay from './components/UnitTraitsDisplay';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -42,7 +42,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const [localizedTooltipElements, setLocalizedTooltipElements] = useState<any[] | null>(null);
   // Có thể là string hoặc object (chứa levelRequired, conditions,...)
   const [localizedUnlockText, setLocalizedUnlockText] = useState<any | null>(null);
-  const [localizedTraits, setLocalizedTraits] = useState<Array<{name: string; apiName?: string; id?: string}>>([]);
 
   // Update translations when language changes
   useEffect(() => {
@@ -213,105 +212,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     }
   }, [unit, language]);
 
-  // Get localized traits from storage - use same approach as GuideUnitItem
-  useEffect(() => {
-    if (!unit || !language) {
-      setLocalizedTraits([]);
-      return;
-    }
-
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
-      
-      if (!unitsDataString) {
-        setLocalizedTraits((unit.traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
-        return;
-      }
-
-      const unitsData = JSON.parse(unitsDataString);
-      let localizedUnit: any = null;
-
-      // Find localized unit data first
-      if (Array.isArray(unitsData)) {
-        localizedUnit = unitsData.find((localUnit: any) => {
-          if (unit.apiName && localUnit.apiName === unit.apiName) {
-            return true;
-          }
-          if (unit.name && localUnit.name) {
-            return unit.name.toLowerCase() === localUnit.name.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof unitsData === 'object' && unitsData !== null) {
-        if (unit.apiName && unitsData[unit.apiName]) {
-          localizedUnit = unitsData[unit.apiName];
-        } else {
-          const unitsArray = Object.values(unitsData) as any[];
-          localizedUnit = unitsArray.find((localUnit: any) => {
-            if (unit.apiName && localUnit.apiName === unit.apiName) {
-              return true;
-            }
-            if (unit.name && localUnit.name) {
-              return unit.name.toLowerCase() === localUnit.name.toLowerCase();
-            }
-            return false;
-          });
-        }
-      }
-
-      // Get traits from localized unit data
-      const unitTraits = localizedUnit?.traits || unit.traits || [];
-      const traitsArray = Array.isArray(unitTraits) ? unitTraits : [];
-
-      if (traitsArray.length === 0) {
-        setLocalizedTraits([]);
-        return;
-      }
-
-      // Get trait details from local storage
-      const traitsKey = `data_traits_${locale}`;
-      const traitsDataString = LocalStorage.getString(traitsKey);
-      
-      if (!traitsDataString) {
-        setLocalizedTraits(traitsArray.map(t => ({name: typeof t === 'string' ? t : String(t)})));
-        return;
-      }
-
-      const traitsData = JSON.parse(traitsDataString);
-      const localized: Array<{name: string; apiName?: string; id?: string}> = [];
-
-      traitsArray.forEach((traitName: string) => {
-        const traitNameStr = typeof traitName === 'string' ? traitName : String(traitName);
-        let traitDetail: any = null;
-
-        // Find trait detail from local storage
-        if (traitsData) {
-          if (Array.isArray(traitsData)) {
-            traitDetail = traitsData.find((trait: any) => 
-              trait.name === traitNameStr || trait.apiName === traitNameStr
-            );
-          } else if (typeof traitsData === 'object' && traitsData !== null) {
-            traitDetail = Object.values(traitsData).find((trait: any) => 
-              trait.name === traitNameStr || trait.apiName === traitNameStr
-            );
-          }
-        }
-
-        localized.push({
-          name: traitDetail?.name || traitNameStr,
-          apiName: traitDetail?.apiName || traitNameStr,
-          id: traitDetail?.id,
-        });
-      });
-
-      setLocalizedTraits(localized);
-    } catch (error) {
-      console.error('Error loading localized traits:', error);
-      setLocalizedTraits((unit.traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
-    }
-  }, [unit, language]);
 
   // Unlock info ưu tiên lấy từ data local theo ngôn ngữ,
   // fallback nhẹ sang field từ API nếu local không có.
@@ -438,26 +338,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     </View>
   );
 
-  const renderTraits = () => {
-    // Use localized traits if available, otherwise fallback to original traits
-    const displayTraits = localizedTraits.length > 0 
-      ? localizedTraits 
-      : (unit?.traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)}));
-    
-    if (!displayTraits || displayTraits.length === 0) return null;
-
-    return displayTraits.map((trait, index) => (
-      <TraitItem
-        key={index}
-        trait={trait}
-        index={index}
-        variant="badge"
-        badgeStyle={styles.traitBadge}
-        badgeIconStyle={styles.traitIcon}
-        badgeTextStyle={styles.traitText}
-      />
-    ));
-  };
 
   const renderContent = () => {
     if (isLoading && !unit) {
@@ -500,6 +380,8 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
       return parseTextWithVariables(desc, unit.ability.variables, unit);
     };
 
+    console.log('unit111', unit.traits);
+
     return (
       <ScrollView
         style={styles.scrollView}
@@ -541,9 +423,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     />
                   )}
                 </View>
-                <View style={styles.traitsRow}>
-                  {renderTraits()}
-                </View>
+                <UnitTraitsDisplay unit={unit} />
                 {unit.cost !== null && unit.cost !== undefined && (
                   <UnitCostBadge cost={unit.cost} />
                 )}

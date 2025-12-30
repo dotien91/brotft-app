@@ -64,6 +64,11 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       marginRight: 12,
     },
+    traitsContainer: {
+      alignItems: 'flex-end',
+      justifyContent: 'center',
+      minWidth: 100,
+    },
     nameRow: {
       flexDirection: 'row',
       alignItems: 'center',

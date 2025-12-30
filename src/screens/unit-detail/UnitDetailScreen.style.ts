@@ -68,6 +68,10 @@ interface Style {
   errorText: TextStyle;
   errorDescription: TextStyle;
   retryButton: ViewStyle;
+  unitTraitsContainer: ViewStyle;
+  unitTraitsGroup: ViewStyle;
+  unitTraitItem: ViewStyle;
+  unitTraitIcon: ImageStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -469,6 +473,24 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.primary,
+    },
+    unitTraitsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginBottom: 6,
+    },
+    unitTraitsGroup: {
+      flexDirection: 'row',
+      gap: 6,
+    },
+    unitTraitItem: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    unitTraitIcon: {
+      width: 24,
+      height: 24,
     },
   });
 };

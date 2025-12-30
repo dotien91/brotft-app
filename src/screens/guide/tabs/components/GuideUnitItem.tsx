@@ -11,6 +11,7 @@ import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
+import UnitTraitsDisplay from '@screens/unit-detail/components/UnitTraitsDisplay';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -246,6 +247,11 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
         {cost !== null && cost !== undefined && (
           <UnitCostBadge cost={cost as number} />
         )}
+      </View>
+
+      {/* Traits on the right */}
+      <View style={styles.traitsContainer}>
+        <UnitTraitsDisplay unit={data} />
       </View>
 
     </TouchableOpacity>

@@ -477,8 +477,9 @@ export default (theme: ExtendedTheme) => {
     unitTraitsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 8,
-      marginBottom: 6,
+      gap: 4,
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
     },
     unitTraitsGroup: {
       flexDirection: 'row',

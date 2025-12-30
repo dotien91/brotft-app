@@ -61,6 +61,10 @@ export interface IComposition {
   bench?: ICompositionUnit[];
   carryItems?: ICompositionCarryItem[];
   coreChampion?: ICompositionUnit;
+  augments?: Array<{
+    name: string;
+    tier: number;
+  }>;
   notes: string[];
   createdAt?: string;
   updatedAt?: string;

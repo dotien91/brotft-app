@@ -9,7 +9,7 @@ interface UnitCostBadgeProps {
   cost: number;
 }
 
-const UnitCostBadge: React.FC<UnitCostBadgeProps> = ({cost}) => {
+const UnitCostBadge: React.FC<UnitCostBadgeProps> = ({cost, fromDetailScreen = false}) => {
   const theme = useTheme();
   const styles = createStyles(theme);
   const colors = theme.colors as any;
@@ -36,6 +36,7 @@ const UnitCostBadge: React.FC<UnitCostBadgeProps> = ({cost}) => {
   };
 
   const costColor = getUnitCostBorderColor(cost);
+  const textColor = '#ffffff'; // White text for all costs
 
   return (
     <View
@@ -48,9 +49,10 @@ const UnitCostBadge: React.FC<UnitCostBadgeProps> = ({cost}) => {
           alignItems: 'center',
           justifyContent: 'center',
         },
+ 
       ]}>
-      <CostIcon size={12} color="#000000" />
-      <Text style={[styles.carryCostText, {color: '#000000'}]}>{cost}</Text>
+      <CostIcon size={12} color={textColor} />
+      <Text style={[styles.carryCostText, {color: textColor}]}>{cost}</Text>
     </View>
   );
 };

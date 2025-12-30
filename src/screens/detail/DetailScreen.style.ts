@@ -127,6 +127,16 @@ interface Style {
   traitCardInfoContainer: ViewStyle;
   traitBreakpointsRow: ViewStyle;
   traitBreakpoint: TextStyle;
+  augmentsSection: ViewStyle;
+  augmentsColumnsContainer: ViewStyle;
+  augmentsColumn: ViewStyle;
+  augmentsColumnTitle: TextStyle;
+  augmentItem: ViewStyle;
+  augmentIcon: ImageStyle;
+  augmentIconPlaceholder: ViewStyle;
+  augmentInfo: ViewStyle;
+  augmentName: TextStyle;
+  sectionTitle: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -889,6 +899,63 @@ export default (theme: ExtendedTheme) => {
     traitBreakpoint: {
       fontSize: 14,
       fontWeight: '700',
+    },
+    augmentsSection: {
+      marginBottom: 16,
+      paddingHorizontal: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    augmentsColumnsContainer: {
+      flexDirection: 'row',
+      gap: 6,
+    },
+    augmentsColumn: {
+      flex: 1,
+      gap: 6,
+    },
+    augmentsColumnTitle: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 6,
+      textAlign: 'center',
+    },
+    augmentItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      padding: 6,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+      gap: 6,
+    },
+    augmentIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: 6,
+    },
+    augmentIconPlaceholder: {
+      width: 28,
+      height: 28,
+      borderRadius: 6,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    augmentInfo: {
+      flex: 1,
+      gap: 2,
+    },
+    augmentName: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: colors.text,
     },
   });
 };

@@ -41,8 +41,8 @@ export default (theme: ExtendedTheme) => {
       paddingVertical: 14,
       paddingHorizontal: 16,
       backgroundColor: colors.card,
-      borderBottomWidth: 1,
       borderBottomColor: colors.border,
+      borderBottomWidth: 1,
     },
     avatarContainer: {
       marginRight: 12,
@@ -155,6 +155,8 @@ export default (theme: ExtendedTheme) => {
       paddingVertical: 8,
       paddingHorizontal: 4,
       width: 70,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.white,
     },
     compactHexagonWrapper: {
       alignItems: 'center',

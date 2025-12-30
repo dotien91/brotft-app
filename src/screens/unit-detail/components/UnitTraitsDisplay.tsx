@@ -24,7 +24,7 @@ interface UnitTraitsDisplayProps {
   };
 }
 
-const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit}) => {
+const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailScreen = false}) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore((state) => state.language);
@@ -99,12 +99,11 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit}) => {
   const renderTraitGroup = (title: string, data: TraitInfo[]) => {
     if (data.length === 0) return null;
 
-    return (
-        <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+    return <>
           {data.map((item, idx) => (
             <TouchableOpacity
               key={`${item.apiName}-${idx}`}
-              style={[styles.unitTraitItem, {flexDirection: 'row', alignItems: 'center', marginRight: 15, marginBottom: 2}]}
+              style={[styles.unitTraitItem, {flexDirection: 'row', alignItems: 'center', marginBottom: 2}]}
               onPress={() => handleTraitPress(item.id)}>
               <Image
                 source={{uri: getTraitIconUrl(item.apiName)}}
@@ -117,14 +116,13 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit}) => {
               </Text>
             </TouchableOpacity>
           ))}
-        </View>
-    );
+          </>
   };
 
   if (origins.length === 0 && classes.length === 0) return null;
 
   return (
-    <View style={[styles.unitTraitsContainer]}>
+    <View style={[styles.unitTraitsContainer, fromDetailScreen && {justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap'}]}>
       {renderTraitGroup('Tộc', origins)}
       {renderTraitGroup('Hệ', classes)}
     </View>

@@ -10,6 +10,7 @@ import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
 import TraitsSection from './components/TraitsSection';
 import UnitCostBadge from './components/UnitCostBadge';
+import AugmentsSection from './components/AugmentsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
 import {getUnitAvatarUrl, getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
@@ -95,6 +96,10 @@ type TeamComposition = {
   midGame?: TeamUnit[];
   bench: TeamUnit[];
   carryItems: TeamCarry[];
+  augments?: Array<{
+    name: string;
+    tier: number;
+  }>;
   notes: string[];
 };
 
@@ -298,6 +303,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         midGame: compositionData.midGame && compositionData.midGame.length > 0 ? mapUnitsWithItems(compositionData.midGame, itemsData) : undefined,
         bench: compositionData.bench && compositionData.bench.length > 0 ? mapUnitsWithItems(compositionData.bench, itemsData) : [],
         carryItems: mapCarryItems(compositionData.carryItems || [], itemsData),
+        augments: compositionData.augments || [],
         notes: compositionData.notes || [],
       };
     }
@@ -876,6 +882,9 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           </Text>
         </View>
         <TraitsSection units={currentPhaseUnits} />
+
+        {/* Augments Section */}
+        <AugmentsSection augments={team.augments || []} />
 
         {/* Game Phase Tabs */}
         {team?.earlyGame && (

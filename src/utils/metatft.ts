@@ -189,6 +189,24 @@ export const getAugmentIconUrlFromPath = (
 };
 
 /**
+ * Get augment icon URL from augment name
+ * Example: "bestfriends1" -> "https://cdn.metatft.com/file/metatft/augments/bestfriends1.png"
+ * @param augmentName - Augment name (e.g., "bestfriends1", "backup-bows")
+ * @returns Augment icon URL
+ */
+export const getAugmentIconUrlFromName = (
+  augmentName?: string | null,
+): string => {
+  if (!augmentName) return '';
+  
+  // Format name: "bestfriends1" -> "bestfriends1"
+  // "backup-bows" -> "backup-bows"
+  const formattedKey = augmentName.toLowerCase();
+  
+  return `https://cdn.metatft.com/file/metatft/augments/${formattedKey}.png`;
+};
+
+/**
  * Get item icon URL from MetaTFT CDN or Data Dragon based on icon path from API
  * Example: "ASSETS/Maps/TFT/Icons/Items/Hexcore/TFT_Item_BFSword.TFT_Set13.tex"
  * -> "https://cdn.metatft.com/file/metatft/items/tft_item_bfsword.png"

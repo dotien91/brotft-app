@@ -202,7 +202,6 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
 
   // Full mode: horizontal layout with traits
   const borderColor = getUnitCostBorderColor(cost);
-  
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       {/* Hexagon Avatar */}

@@ -374,6 +374,29 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     
     const splashUri = getSplashArtUrl();
 
+    // Get unit border color based on cost
+    const getUnitCostBorderColor = (cost?: number | null): string => {
+      if (!cost || cost === null) return colors.highlight;
+      switch (cost) {
+        case 1:
+          return '#c0c0c0'; // Xám/Trắng
+        case 2:
+          return '#4ade80'; // Xanh lá
+        case 3:
+          return '#60a5fa'; // Xanh dương
+        case 4:
+          return '#a78bfa'; // Tím
+        case 5:
+          return '#ffd700'; // Vàng (Huyền thoại)
+        case 6:
+          return '#ff6b35'; // Đỏ/Cam
+        default:
+          return colors.highlight;
+      }
+    };
+
+    const borderColor = getUnitCostBorderColor(unit.cost);
+
     // Parse variables in ability description
     const parseAbilityDescription = (desc?: string | null) => {
       if (!unit || !unit.ability) return parseTextWithVariables(desc, undefined, unit);
@@ -405,7 +428,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                 <Hexagon 
                   size={70} 
                   backgroundColor={colors.card} 
-                  borderColor={colors.highlight} 
+                  borderColor={borderColor} 
                   borderWidth={2}
                   imageUri={avatarUri}
                 />
@@ -423,7 +446,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     />
                   )}
                 </View>
-                <UnitTraitsDisplay unit={unit} />
+                <UnitTraitsDisplay  fromDetailScreen={true} unit={unit} />
                 {unit.cost !== null && unit.cost !== undefined && (
                   <UnitCostBadge cost={unit.cost} />
                 )}

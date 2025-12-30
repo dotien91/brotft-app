@@ -92,6 +92,7 @@ type TeamComposition = {
   synergies: TeamSynergy[];
   units: TeamUnit[];
   earlyGame?: TeamUnit[];
+  midGame?: TeamUnit[];
   bench: TeamUnit[];
   carryItems: TeamCarry[];
   notes: string[];
@@ -245,6 +246,25 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     };
   };
 
+  // Helper function to map carryItems
+  const mapCarryItems = (carryItems: any[], itemsData: any): TeamCarry[] => {
+    if (!carryItems || carryItems.length === 0) return [];
+    
+    return carryItems.map(carryItem => {
+      const mappedItems: TeamUnitItem[] = (carryItem.items || []).map((itemApiName: string) => {
+        return getLocalizedItem(itemApiName, itemsData);
+      });
+
+      return {
+        championId: carryItem.championId || carryItem.championKey,
+        championName: carryItem.championName || carryItem.name,
+        role: carryItem.role || 'Carry',
+        image: getUnitAvatarUrl(carryItem.championKey, 64) || carryItem.image || '',
+        items: mappedItems,
+      };
+    });
+  };
+
   // Map IComposition to TeamComposition format
   const team = useMemo<TeamComposition>(() => {
     if (compositionData) {
@@ -274,9 +294,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         boardSize: compositionData.boardSize,
         synergies: compositionData.synergies || [],
         units: mapUnitsWithItems(compositionData.units || [], itemsData),
-        earlyGame: compositionData.earlyGame ? mapUnitsWithItems(compositionData.earlyGame, itemsData) : undefined,
-        bench: [],
-        carryItems: [],
+        earlyGame: compositionData.earlyGame && compositionData.earlyGame.length > 0 ? mapUnitsWithItems(compositionData.earlyGame, itemsData) : undefined,
+        midGame: compositionData.midGame && compositionData.midGame.length > 0 ? mapUnitsWithItems(compositionData.midGame, itemsData) : undefined,
+        bench: compositionData.bench && compositionData.bench.length > 0 ? mapUnitsWithItems(compositionData.bench, itemsData) : [],
+        carryItems: mapCarryItems(compositionData.carryItems || [], itemsData),
         notes: compositionData.notes || [],
       };
     }
@@ -579,15 +600,58 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
   const renderCarryUnits = () => {
     if (!team) return null;
-    // Filter units that have items
-    const unitsWithItems = team.units.filter(unit => unit.items && unit.items.length > 0);
+    
+    // Use carryItems from API if available, otherwise fallback to filtering units with items
+    let unitsWithItems: (TeamUnit | TeamCarry)[] = [];
+    
+    if (team.carryItems && team.carryItems.length > 0) {
+      // Convert TeamCarry to TeamUnit format for rendering
+      unitsWithItems = team.carryItems.map(carryItem => {
+        // Find corresponding unit from team.units to get full unit data
+        const unit = team.units.find(u => 
+          u.championKey === carryItem.championId || 
+          u.championKey === carryItem.championName ||
+          u.id === carryItem.championId
+        );
+        
+        if (unit) {
+          // Use unit data but with items from carryItem
+          return {
+            ...unit,
+            items: carryItem.items,
+          };
+        }
+        
+        // Fallback: create a minimal unit from carryItem
+        return {
+          id: carryItem.championId,
+          name: carryItem.championName,
+          cost: 0,
+          star: 2,
+          carry: true,
+          need3Star: false,
+          needUnlock: false,
+          position: {row: 0, col: 0},
+          image: carryItem.image,
+          items: carryItem.items,
+          championKey: carryItem.championId,
+        };
+      });
+    } else {
+      // Fallback: filter units that have items
+      unitsWithItems = team.units.filter(unit => unit.items && unit.items.length > 0);
+    }
+    
     if (unitsWithItems.length === 0) {
       return null;
     }
 
     // Get traits for each unit from LocalStorage
-    const getUnitTraits = (unit: TeamUnit): Array<{name: string; apiName?: string}> => {
-      if (!unit.championKey || !language) {
+    const getUnitTraits = (unit: TeamUnit | TeamCarry): Array<{name: string; apiName?: string}> => {
+      const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
+      const unitName = 'name' in unit ? unit.name : ('championName' in unit ? unit.championName : null);
+      
+      if (!championKey || !language) {
         return [];
       }
 
@@ -606,25 +670,25 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         // Handle both array and object formats
         if (Array.isArray(unitsData)) {
           localizedUnit = unitsData.find((localUnit: any) => {
-            if (unit.championKey && localUnit.apiName === unit.championKey) {
+            if (championKey && localUnit.apiName === championKey) {
               return true;
             }
-            if (unit.name && localUnit.name) {
-              return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+            if (unitName && localUnit.name) {
+              return unitName.toLowerCase() === localUnit.name.toLowerCase();
             }
             return false;
           });
         } else if (typeof unitsData === 'object' && unitsData !== null) {
-          if (unit.championKey && unitsData[unit.championKey]) {
-            localizedUnit = unitsData[unit.championKey];
+          if (championKey && unitsData[championKey]) {
+            localizedUnit = unitsData[championKey];
           } else {
             const unitsArray = Object.values(unitsData) as any[];
             localizedUnit = unitsArray.find((localUnit: any) => {
-              if (unit.championKey && localUnit.apiName === unit.championKey) {
+              if (championKey && localUnit.apiName === championKey) {
                 return true;
               }
-              if (unit.name && localUnit.name) {
-                return unit.name.toLowerCase() === localUnit.name.toLowerCase();
+              if (unitName && localUnit.name) {
+                return unitName.toLowerCase() === localUnit.name.toLowerCase();
               }
               return false;
             });
@@ -678,9 +742,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           const isLast = unitIndex === unitsWithItems.length - 1;
           
           const handleUnitPress = () => {
-            if (unit.championKey) {
-              NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.championKey});
-            } else if (unit.id) {
+            const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
+            if (championKey) {
+              NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: championKey});
+            } else if ('id' in unit && unit.id) {
               NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: unit.id});
             }
           };

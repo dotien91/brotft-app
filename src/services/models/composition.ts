@@ -22,12 +22,23 @@ export interface ICompositionUnit {
   };
   image: string;
   items: string[]; // Array of item IDs
-  itemsDetails: ICompositionUnitItemDetail[];
+  itemsDetails?: ICompositionUnitItemDetail[];
+  traits?: string[];
+  tier?: string | null;
 }
 
 export interface ICompositionSynergy {
   name: string;
   count: number;
+}
+
+export interface ICompositionCarryItem {
+  championId: string;
+  championKey: string;
+  championName: string;
+  role: string;
+  image: string;
+  items: string[]; // Array of item IDs
 }
 
 export interface IComposition {
@@ -36,17 +47,20 @@ export interface IComposition {
   name: string;
   plan: string;
   difficulty: string;
-  tier?: string; // S, A, B, C, D
+  tier?: string; // S, A, B, C, D, OP
   metaDescription: string;
   isLateGame: boolean;
   boardSize: {
     rows: number;
     cols: number;
   };
-  synergies: ICompositionSynergy[];
+  synergies?: ICompositionSynergy[];
   units: ICompositionUnit[];
   earlyGame?: ICompositionUnit[];
   midGame?: ICompositionUnit[];
+  bench?: ICompositionUnit[];
+  carryItems?: ICompositionCarryItem[];
+  coreChampion?: ICompositionUnit;
   notes: string[];
   createdAt?: string;
   updatedAt?: string;

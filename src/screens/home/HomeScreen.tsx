@@ -197,7 +197,7 @@ const HomeScreen: React.FC = () => {
       </View>
       <View style={styles.sectionTitleContainer}>
         <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>Đội hình</Text>
+          <Text style={styles.sectionTitle}>{translations.compositionsSection}</Text>
           <View style={styles.filterContainer}>
             <RNBounceable
               onPress={() => setIsFilterModalVisible(true)}

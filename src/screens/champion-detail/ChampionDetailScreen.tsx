@@ -352,7 +352,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
         {/* Augments Section */}
         <View style={styles.augmentsSection}>
           <Text h3 bold color={colors.text} style={styles.sectionTitle}>
-            Đề xuất Trang bị
+            {translations.suggestedItems}
           </Text>
           
           <View style={styles.augmentCard}>

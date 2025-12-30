@@ -8871,6 +8871,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-fast-image@npm:^8.6.3":
+  version: 8.6.3
+  resolution: "react-native-fast-image@npm:8.6.3"
+  peerDependencies:
+    react: ^17 || ^18
+    react-native: ">=0.60.0"
+  checksum: 10c0/4ebeae53ffeadf1e7e5e133c1cfda81f9efe978f9ece10c732a0338149fe9104681bfdabc8427dad7c934b02bfcbd0e205bb6ca43e2844abc6054630ebe34454
+  languageName: node
+  linkType: hard
+
 "react-native-gesture-handler@npm:^2.19.0":
   version: 2.19.0
   resolution: "react-native-gesture-handler@npm:2.19.0"
@@ -9508,6 +9518,7 @@ __metadata:
     react-native: "npm:0.75.3"
     react-native-codegen: "npm:0.71.5"
     react-native-dynamic-vector-icons: "npm:2.0.0"
+    react-native-fast-image: "npm:^8.6.3"
     react-native-gesture-handler: "npm:^2.19.0"
     react-native-localization: "npm:^2.3.2"
     react-native-mmkv: "npm:^2.12.2"

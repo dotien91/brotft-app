@@ -1,5 +1,6 @@
 import React, {useMemo, useEffect, useState} from 'react';
 import {View, TouchableOpacity, Image} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';

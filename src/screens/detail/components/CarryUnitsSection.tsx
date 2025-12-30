@@ -1,5 +1,6 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {View, Image} from 'react-native';
+import {View} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import * as NavigationService from 'react-navigation-helpers';
@@ -112,21 +113,22 @@ const ItemsGrid: React.FC<{items: TeamUnitItem[]}> = ({items}) => {
         return (
           <View key={idx} style={styles.itemsGridColumn}>
             {/* Main item */}
-            <RNBounceable 
+              <RNBounceable 
               onPress={() => handleItemPress(item, itemDetail)}
               style={styles.itemsGridMainItem}>
-              <Image source={{uri: item.icon}} style={styles.itemsGridMainItemIcon} />
+              <FastImage source={{uri: item.icon}} style={styles.itemsGridMainItemIcon} resizeMode={FastImage.resizeMode.contain} />
             </RNBounceable>
             {/* Components below main item */}
             {components.length > 0 && (
               <View style={styles.itemsGridComponentsRow}>
                 {components.slice(0, 2).map((component: string, compIdx: number) => (
                   <View key={compIdx} style={styles.itemsGridComponentItem}>
-                    <Image
+                    <FastImage
                       source={{
                         uri: `https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/${component}.png`,
                       }}
                       style={styles.itemsGridComponentIcon}
+                      resizeMode={FastImage.resizeMode.contain}
                     />
                   </View>
                 ))}
@@ -345,10 +347,10 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
                     return (
                       <View key={idx} style={styles.traitBadge}>
                         {traitIconUrl ? (
-                          <Image
+                          <FastImage
                             source={{uri: traitIconUrl}}
                             style={styles.traitIcon}
-                            resizeMode="contain"
+                            resizeMode={FastImage.resizeMode.contain}
                           />
                         ) : null}
                         <Text style={styles.traitText}>{trait.name}</Text>

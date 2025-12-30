@@ -1,11 +1,11 @@
 import React, {useMemo, useState, useCallback} from 'react';
 import {
   FlatList,
-  Image,
   View,
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
@@ -172,8 +172,8 @@ const TraitsScreen: React.FC = () => {
     <View style={styles.headerContainer}>
       <View style={styles.header}>
         {renderMenuButton()}
-        <Image
-          resizeMode="cover"
+        <FastImage
+          resizeMode={FastImage.resizeMode.cover}
           source={{uri: profileURI}}
           style={styles.profilePicImageStyle}
         />

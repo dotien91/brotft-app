@@ -1,5 +1,6 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, Image, ScrollView, ActivityIndicator} from 'react-native';
+import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import createStyles from './UnitDetailScreen.style';
@@ -413,10 +414,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         
         {/* Hero Section with overlay */}
         <View style={styles.heroSection}>
-          <Image
-            source={{uri: splashUri}}
+          <FastImage
+            source={{uri: splashUri, priority: FastImage.priority.normal}}
             style={styles.heroImage}
-            resizeMode="cover"
+            resizeMode={FastImage.resizeMode.cover}
             defaultSource={require('@assets/splash/splash.png')}
           />
           <View style={styles.heroOverlay} />
@@ -553,11 +554,11 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                       const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
                       if (abilityIconUrl) {
                         return (
-                    <Image
+                    <FastImage
                             source={{uri: abilityIconUrl}}
                       style={styles.abilityIcon}
-                      resizeMode="cover"
-                            onError={() => {
+                      resizeMode={FastImage.resizeMode.cover}
+                      onError={() => {
                               // Failed to load ability icon
                             }}
                     />
@@ -568,10 +569,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     // Fallback to unit avatar
                     if (avatarUri) {
                       return (
-                    <Image
+                    <FastImage
                       source={{uri: avatarUri}}
                       style={styles.abilityIcon}
-                      resizeMode="cover"
+                      resizeMode={FastImage.resizeMode.cover}
                     />
                       );
                     }

@@ -1,5 +1,6 @@
 import React, {useMemo} from 'react';
-import {View, Image, ScrollView, ActivityIndicator} from 'react-native';
+import {View, ScrollView, ActivityIndicator} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import * as NavigationService from 'react-navigation-helpers';
@@ -171,10 +172,10 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
         
         {/* Hero Section with overlay */}
         <View style={styles.heroSection}>
-          <Image
-            source={{uri: splashUri}}
+          <FastImage
+            source={{uri: splashUri, priority: FastImage.priority.normal}}
             style={styles.heroImage}
-            resizeMode="cover"
+            resizeMode={FastImage.resizeMode.cover}
             defaultSource={require('@assets/splash/splash.png')}
           />
           <View style={styles.heroOverlay} />
@@ -320,10 +321,10 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
               <View style={styles.abilityHeader}>
                 <View style={styles.abilityIconContainer}>
                   {imageUri && (
-                    <Image
+                    <FastImage
                       source={{uri: imageUri}}
                       style={styles.abilityIcon}
-                      resizeMode="cover"
+                      resizeMode={FastImage.resizeMode.cover}
                     />
                   )}
                 </View>
@@ -358,18 +359,21 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.augmentCard}>
             <View style={styles.augmentHeader}>
               <View style={styles.augmentIconContainer}>
-                <Image
+                <FastImage
                   source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_GuinsoosRageblade.png'}}
                   style={styles.augmentIcon}
+                  resizeMode={FastImage.resizeMode.cover}
                 />
                 <View style={styles.augmentItemBadges}>
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_RecurveBow.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_NeedlesslyLargeRod.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
                 </View>
               </View>
@@ -398,18 +402,21 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.augmentCard}>
             <View style={styles.augmentHeader}>
               <View style={styles.augmentIconContainer}>
-                <Image
+                <FastImage
                   source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_IonicSpark.png'}}
                   style={styles.augmentIcon}
+                  resizeMode={FastImage.resizeMode.cover}
                 />
                 <View style={styles.augmentItemBadges}>
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_NeedlesslyLargeRod.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_NegatronCloak.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
                 </View>
               </View>
@@ -435,18 +442,21 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.augmentCard}>
             <View style={styles.augmentHeader}>
               <View style={styles.augmentIconContainer}>
-                <Image
+                <FastImage
                   source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_StatikkShiv.png'}}
                   style={styles.augmentIcon}
+                  resizeMode={FastImage.resizeMode.cover}
                 />
                 <View style={styles.augmentItemBadges}>
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_RecurveBow.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_TearOfTheGoddess.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
                 </View>
               </View>
@@ -476,18 +486,21 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.augmentCard}>
             <View style={styles.augmentHeader}>
               <View style={styles.augmentIconContainer}>
-                <Image
+                <FastImage
                   source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_Bloodthirster.png'}}
                   style={styles.augmentIcon}
+                  resizeMode={FastImage.resizeMode.cover}
                 />
                 <View style={styles.augmentItemBadges}>
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_BFSword.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_BFSword.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
                 </View>
               </View>
@@ -509,18 +522,21 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
           <View style={styles.augmentCard}>
             <View style={styles.augmentHeader}>
               <View style={styles.augmentIconContainer}>
-                <Image
+                <FastImage
                   source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_GuinsoosRageblade.png'}}
                   style={styles.augmentIcon}
+                  resizeMode={FastImage.resizeMode.cover}
                 />
                 <View style={styles.augmentItemBadges}>
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_RecurveBow.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
-                  <Image
+                  <FastImage
                     source={{uri: 'https://ddragon.leagueoflegends.com/cdn/14.15.1/img/tft-item/TFT_Item_NeedlesslyLargeRod.png'}}
                     style={styles.augmentItemBadge}
+                    resizeMode={FastImage.resizeMode.cover}
                   />
                 </View>
               </View>

@@ -1,5 +1,6 @@
 import React, {useMemo} from 'react';
-import {View, Image} from 'react-native';
+import {View} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -47,14 +48,14 @@ const TraitHeader: React.FC<TraitHeaderProps> = ({
       <View style={styles.headerSection}>
         <View style={[styles.typeIndicator, {backgroundColor: colors.primary + '15'}]}>
           {localizedIcon || trait.icon || trait.apiName ? (
-            <Image
+            <FastImage
               source={{
                 uri: (localizedIcon || trait.icon)?.startsWith('http')
                   ? (localizedIcon || trait.icon) || ''
                   : getTraitIconUrl(trait.apiName || trait.name, 64),
               }}
               style={styles.traitIcon}
-              resizeMode="contain"
+              resizeMode={FastImage.resizeMode.contain}
             />
           ) : (
             <Icon

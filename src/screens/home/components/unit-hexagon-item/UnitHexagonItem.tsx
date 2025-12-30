@@ -1,5 +1,6 @@
 import React, {useMemo} from 'react';
 import {View, Image} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import Hexagon from '@screens/detail/components/Hexagon';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
@@ -69,10 +70,11 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             {unit.items && unit.items.length > 0 && (
               <View style={styles.itemsRow}>
                 {unit.items.map((itemApiName, itemIndex) => (
-                  <Image
+                  <FastImage
                     key={`unit-${index}-item-${itemIndex}`}
                     source={{uri: getItemIcon(itemApiName)}}
-                    style={styles.itemIcon}
+                    style={styles.itemIcon as any}
+                    resizeMode={FastImage.resizeMode.contain}
                   />
                 ))}
               </View>

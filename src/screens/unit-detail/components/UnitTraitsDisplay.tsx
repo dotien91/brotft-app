@@ -1,5 +1,6 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, Image, TouchableOpacity} from 'react-native';
+import {View, TouchableOpacity} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper'; // Đảm bảo đúng đường dẫn TextWrapper của bạn
@@ -105,10 +106,10 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
               key={`${item.apiName}-${idx}`}
               style={[styles.unitTraitItem, {flexDirection: 'row', alignItems: 'center', marginRight: 8, marginBottom: 2}]}
               onPress={() => handleTraitPress(item.id)}>
-              <Image
+              <FastImage
                 source={{uri: getTraitIconUrl(item.apiName)}}
                 style={[styles.unitTraitIcon, {width: 24, height: 24, tintColor: '#ffffff'}]}
-                resizeMode="contain"
+                resizeMode={FastImage.resizeMode.contain}
               />
             </TouchableOpacity>
           ))}

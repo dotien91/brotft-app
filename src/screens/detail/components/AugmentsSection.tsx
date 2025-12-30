@@ -1,5 +1,6 @@
 import React, {useMemo} from 'react';
-import {View, Image} from 'react-native';
+import {View} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -150,10 +151,10 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
           return (
             <View key={`${augment.name}-${index}`} style={styles.augmentItem}>
               {augmentIconUrl ? (
-                <Image
+                <FastImage
                   source={{uri: augmentIconUrl}}
                   style={styles.augmentIcon}
-                  resizeMode="contain"
+                  resizeMode={FastImage.resizeMode.contain}
                 />
               ) : (
                 <View style={styles.augmentIconPlaceholder}>

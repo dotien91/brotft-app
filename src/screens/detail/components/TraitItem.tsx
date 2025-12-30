@@ -1,5 +1,6 @@
 import React from 'react';
-import {View, Image} from 'react-native';
+import {View} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import * as NavigationService from 'react-navigation-helpers';
@@ -53,10 +54,10 @@ const TraitItem = ({trait}: any) => {
       style={styles.traitCardNew} 
       onPress={() => id && NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: id})}
     >
-      <Image
+      <FastImage
         source={{uri: getTraitIconUrl(apiName)}}
         style={[styles.traitCardIconNew, {tintColor: tierColor}]}
-        resizeMode="contain"
+        resizeMode={FastImage.resizeMode.contain}
       />
       <View style={styles.traitCardInfoContainer}>
         {highestBP > 0 && (

@@ -1,5 +1,6 @@
 import React, {useMemo} from 'react';
-import {View, Image, TouchableOpacity} from 'react-native';
+import {View, TouchableOpacity} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import type {ITftAugment} from '@services/models/tft-augment';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -114,10 +115,10 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
       {/* Augment Icon */}
       <View style={styles.iconContainer}>
         {imageUri ? (
-          <Image
+          <FastImage
             source={{uri: imageUri}}
             style={styles.icon}
-            resizeMode="cover"
+            resizeMode={FastImage.resizeMode.cover}
           />
         ) : (
           <View style={[styles.icon, placeholderIconStyle]}>

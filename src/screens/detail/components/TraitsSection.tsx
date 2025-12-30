@@ -17,141 +17,93 @@ export interface TraitData {
   breakpoints: number[];
 }
 
-interface TeamUnit {
-  championKey?: string;
-  name?: string;
-  traits?: string[]; 
-}
-
-interface TraitsSectionProps {
-  units: TeamUnit[];
-}
-
-const TraitsSection: React.FC<TraitsSectionProps> = ({units}) => {
+const TraitsSection: React.FC<{units: any[]}> = ({units}) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore(state => state.language);
 
   const traits = useMemo<TraitData[]>(() => {
-    // 1. Kiểm tra đầu vào cơ bản
     if (!units?.length || !language) return [];
 
     try {
       const locale = getLocaleFromLanguage(language);
-      const unitsDataRaw = LocalStorage.getString(`data_units_${locale}`);
-      const traitsDataRaw = LocalStorage.getString(`data_traits_${locale}`);
-      
-      if (!unitsDataRaw || !traitsDataRaw) return [];
+      const unitsData = JSON.parse(LocalStorage.getString(`data_units_${locale}`) || '[]');
+      const traitsData = JSON.parse(LocalStorage.getString(`data_traits_${locale}`) || '[]');
 
-      const unitsData = JSON.parse(unitsDataRaw);
-      const traitsData = JSON.parse(traitsDataRaw);
+      const unitsMap = new Map();
+      const rawUnits = Array.isArray(unitsData) ? unitsData : Object.values(unitsData);
+      rawUnits.forEach((u: any) => u.apiName && unitsMap.set(u.apiName, u));
 
-      // 2. Tạo Map từ LocalStorage để truy xuất nhanh O(1)
-      const unitsMapFromStorage = new Map();
-      const rawUnitsList = Array.isArray(unitsData) ? unitsData : Object.values(unitsData);
-      rawUnitsList.forEach((u: any) => {
-        if (u.apiName) unitsMapFromStorage.set(u.apiName, u);
-      });
+      const traitsMap = new Map();
+      const rawTraits = Array.isArray(traitsData) ? traitsData : Object.values(traitsData);
+      rawTraits.forEach((t: any) => t.apiName && traitsMap.set(t.apiName, t));
 
-      const traitsMapFromStorage = new Map();
-      const rawTraitsList = Array.isArray(traitsData) ? traitsData : Object.values(traitsData);
-      rawTraitsList.forEach((t: any) => {
-        if (t.apiName) traitsMapFromStorage.set(t.apiName, t);
-      });
-
-      // 3. Tính toán count
       const traitCountMap: Record<string, number> = {};
-      const processedChampionKeys = new Set<string>();
+      const processedKeys = new Set<string>();
 
       units.forEach(unit => {
-        const key = unit.championKey;
-        if (!key || processedChampionKeys.has(key)) return;
-
-        // Quan trọng: Lấy traits từ Storage vì traits trong props bị rỗng
-        const storageUnit = unitsMapFromStorage.get(key);
-        
-        if (storageUnit && Array.isArray(storageUnit.traits)) {
-          processedChampionKeys.add(key);
+        if (!unit.championKey || processedKeys.has(unit.championKey)) return;
+        const storageUnit = unitsMap.get(unit.championKey);
+        if (storageUnit?.traits) {
+          processedKeys.add(unit.championKey);
           storageUnit.traits.forEach((tName: string) => {
-            // Chuẩn hóa tên trait qua apiName để tránh lệch tên
-            // Tìm trait object tương ứng trong storage
-            let finalTraitKey = tName;
-            
-            // Nếu tName là nickname, cố gắng tìm apiName chuẩn
-            for (const [apiName, detail] of traitsMapFromStorage) {
-              if (detail.apiName === tName || detail.name === tName) {
-                finalTraitKey = apiName;
-                break;
-              }
-            }
-            
-            if (finalTraitKey) {
-              traitCountMap[finalTraitKey] = (traitCountMap[finalTraitKey] || 0) + 1;
-            }
+            const traitObj = traitsMap.get(tName) || 
+                           Array.from(traitsMap.values()).find((t: any) => t.name === tName);
+            const finalKey = traitObj?.apiName || tName;
+            traitCountMap[finalKey] = (traitCountMap[finalKey] || 0) + 1;
           });
         }
       });
 
-      // 4. Chuyển đổi sang format TraitData và lấy Breakpoints
       return Object.entries(traitCountMap)
         .map(([apiName, count]) => {
-          const detail = traitsMapFromStorage.get(apiName);
-          
+          const detail = traitsMap.get(apiName);
           let breakpoints: number[] = [];
-          if (detail?.effects && Array.isArray(detail.effects)) {
+          if (detail?.effects) {
             const bpSet = new Set<number>();
-            detail.effects.forEach((eff: any) => {
-              if (eff.minUnits !== undefined && eff.minUnits !== null) {
-                bpSet.add(Number(eff.minUnits));
-              }
-            });
+            detail.effects.forEach((eff: any) => eff.minUnits != null && bpSet.add(Number(eff.minUnits)));
             breakpoints = Array.from(bpSet).sort((a, b) => a - b);
           }
-
           return {
             name: detail?.name || apiName,
-            count: count,
+            count,
             id: detail?.id,
-            apiName: apiName,
-            breakpoints: breakpoints,
+            apiName,
+            breakpoints,
           };
         })
-        // 5. Lọc: Chỉ hiện những hệ tộc đã kích hoạt ít nhất mốc 1
-        .filter(trait => {
-          if (trait.breakpoints.length === 0) return false;
-          const minBreakpoint = Math.min(...trait.breakpoints);
-          return trait.count >= minBreakpoint;
-        })
-        // 6. Sắp xếp: Ưu tiên mốc cao nhất -> số lượng tướng
+        .filter(t => t.breakpoints.length > 0 && t.count >= t.breakpoints[0])
         .sort((a, b) => {
-          const aMaxBP = Math.max(...a.breakpoints.filter(bp => a.count >= bp), 0);
-          const bMaxBP = Math.max(...b.breakpoints.filter(bp => b.count >= bp), 0);
+          const getSortScore = (trait: TraitData) => {
+            const {count, breakpoints} = trait;
+            const highestIdx = breakpoints.filter(bp => count >= bp).length - 1;
+            const isMax = count >= breakpoints[breakpoints.length - 1];
+            const isUnique = breakpoints.length === 1;
 
-          if (bMaxBP !== aMaxBP) return bMaxBP - aMaxBP;
+            // Score 1000 cho Unique (Cam) và Max (Vàng/Kim cương)
+            if (isUnique || isMax) return 1000 + highestIdx;
+            return (highestIdx + 1) * 10; 
+          };
+
+          const scoreA = getSortScore(a);
+          const scoreB = getSortScore(b);
+
+          if (scoreB !== scoreA) return scoreB - scoreA;
           return b.count - a.count;
         });
-
-    } catch (error) {
-      console.error('[TraitsSection] Error processing data:', error);
+    } catch (e) {
       return [];
     }
   }, [units, language]);
 
-  // Không hiển thị gì nếu không có trait nào đạt mốc
-  if (traits.length === 0) return null;
-console.log('traits=====222', traits?.[0]);
+  if (!traits.length) return null;
+
   return (
     <View style={styles.traitsSection}>
-      <Text style={styles.traitsSectionTitle}>
-        {translations.traitsSection || 'Active Traits'}
-      </Text>
+      <Text style={styles.traitsSectionTitle}>{translations.traitsSection}</Text>
       <View style={styles.traitsColumn}>
         {traits.map((trait, index) => (
-          <TraitItem 
-            key={`${trait.apiName}-${index}`} 
-            trait={trait} 
-            index={index} 
-          />
+          <TraitItem key={`${trait.apiName}-${index}`} trait={trait} index={index} />
         ))}
       </View>
     </View>

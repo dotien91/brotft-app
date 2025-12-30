@@ -10,7 +10,6 @@ import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
-import TraitItem from '@screens/detail/components/TraitItem';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 
 interface GuideUnitItemProps {
@@ -26,10 +25,8 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
 
   const language = useStore((state) => state.language);
   const [localizedName, setLocalizedName] = useState<string | null>(null);
-  const [localizedTraits, setLocalizedTraits] = useState<Array<{name: string; apiName?: string; id?: string}>>([]);
 
-  const {name, cost, traits, icon, squareIcon, apiName} = data;
-
+  const {name, cost, icon, squareIcon, apiName} = data;
   // Get localized name from storage
   useEffect(() => {
     if (!data || !language) {
@@ -104,106 +101,6 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
     }
   }, [data, language]);
 
-  // Get localized traits from storage - use same approach as TraitsSection
-  useEffect(() => {
-    if (!data || !language) {
-      setLocalizedTraits([]);
-      return;
-    }
-
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
-      
-      if (!unitsDataString) {
-        setLocalizedTraits((traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
-        return;
-      }
-
-      const unitsData = JSON.parse(unitsDataString);
-      let localizedUnit: any = null;
-
-      // Find localized unit data first
-      if (Array.isArray(unitsData)) {
-        localizedUnit = unitsData.find((localUnit: any) => {
-          if (apiName && localUnit.apiName === apiName) {
-            return true;
-          }
-          if (name && localUnit.name) {
-            return name.toLowerCase() === localUnit.name.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof unitsData === 'object' && unitsData !== null) {
-        if (apiName && unitsData[apiName]) {
-          localizedUnit = unitsData[apiName];
-        } else {
-          const unitsArray = Object.values(unitsData) as any[];
-          localizedUnit = unitsArray.find((localUnit: any) => {
-            if (apiName && localUnit.apiName === apiName) {
-              return true;
-            }
-            if (name && localUnit.name) {
-              return name.toLowerCase() === localUnit.name.toLowerCase();
-            }
-            return false;
-          });
-        }
-      }
-
-      // Get traits from localized unit data
-      const unitTraits = localizedUnit?.traits || traits || [];
-      const traitsArray = Array.isArray(unitTraits) ? unitTraits : [];
-
-      if (traitsArray.length === 0) {
-        setLocalizedTraits([]);
-        return;
-      }
-
-      // Get trait details from local storage
-      const traitsKey = `data_traits_${locale}`;
-      const traitsDataString = LocalStorage.getString(traitsKey);
-      
-      if (!traitsDataString) {
-        setLocalizedTraits(traitsArray.map(t => ({name: typeof t === 'string' ? t : String(t)})));
-        return;
-      }
-
-      const traitsData = JSON.parse(traitsDataString);
-      const localized: Array<{name: string; apiName?: string; id?: string}> = [];
-
-      traitsArray.forEach((traitName: string) => {
-        const traitNameStr = typeof traitName === 'string' ? traitName : String(traitName);
-        let traitDetail: any = null;
-
-        // Find trait detail from local storage - use same logic as GuideTraitItem
-        if (traitsData) {
-          if (Array.isArray(traitsData)) {
-            traitDetail = traitsData.find((trait: any) => 
-              trait.name === traitNameStr || trait.apiName === traitNameStr
-            );
-          } else if (typeof traitsData === 'object' && traitsData !== null) {
-            traitDetail = Object.values(traitsData).find((trait: any) => 
-              trait.name === traitNameStr || trait.apiName === traitNameStr
-            );
-          }
-        }
-
-        localized.push({
-          name: traitDetail?.name || traitNameStr, // Use localized name if available
-          apiName: traitDetail?.apiName || traitNameStr,
-          id: traitDetail?.id,
-        });
-      });
-
-      setLocalizedTraits(localized);
-    } catch (error) {
-      console.error('Error loading localized traits:', error);
-      setLocalizedTraits((traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)})));
-    }
-  }, [data, traits, apiName, name, language]);
-
   // Get TFT unit avatar URL from metatft.com
   // Size: 64x64 for hexagon display (56px hexagon needs ~64px image)
   const getTftUnitAvatarUrl = () => {
@@ -222,32 +119,9 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
 
   const imageUri = getTftUnitAvatarUrl();
 
-  // Use localized traits if available, otherwise fallback to original traits
-  const displayTraits = localizedTraits.length > 0 
-    ? localizedTraits 
-    : (traits || []).map(t => ({name: typeof t === 'string' ? t : String(t)}));
-
-  // Get tier color
-  const getTierColor = (tier: string): string => {
-    switch (tier.toUpperCase()) {
-      case 'S':
-        return '#ff7e83';
-      case 'A':
-        return '#ffbf7f';
-      case 'B':
-        return '#ffdf80';
-      case 'C':
-        return '#feff7f';
-      case 'D':
-        return '#bffe7f';
-      default:
-        return colors.primary;
-    }
-  };
-
   // Get unit border color based on cost
-  const getUnitCostBorderColor = (cost?: number): string => {
-    if (!cost) return colors.border;
+  const getUnitCostBorderColor = (cost?: number | null): string => {
+    if (!cost || cost === null) return colors.border;
     switch (cost) {
       case 1:
         return '#c0c0c0'; // Xám/Trắng
@@ -290,7 +164,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
                 borderWidth={2}
                 imageUri={imageUri}>
                 {/* 3 Stars icon */}
-                {data.need3Star && (
+                {(data as any).need3Star && (
                   <View style={[styles.compactTier3Icon, {
                     top: -8,
                     right: 5,
@@ -318,7 +192,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
         {/* Cost below name */}
         {cost !== null && cost !== undefined && (
           <View style={styles.compactCostContainer}>
-            <UnitCostBadge cost={cost} />
+            <UnitCostBadge cost={cost as number} />
           </View>
         )}
       </TouchableOpacity>
@@ -370,34 +244,10 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
           )}
         </View>
         {cost !== null && cost !== undefined && (
-          <UnitCostBadge cost={cost} />
+          <UnitCostBadge cost={cost as number} />
         )}
       </View>
 
-      {/* Traits and Tier - hide in compact mode */}
-      {!compact && (
-        <View style={styles.traitsContainer}>
-          {displayTraits.slice(0, 3).map((trait, index) => (
-            <TraitItem
-              key={index}
-              trait={trait}
-              index={index}
-              variant="badge"
-              badgeStyle={styles.traitItem}
-              badgeIconStyle={styles.traitIcon}
-              badgeTextStyle={styles.traitText}
-            />
-          ))}
-          {displayTraits.length > 3 && (
-            <Text style={styles.traitMoreText}>+{displayTraits.length - 3}</Text>
-          )}
-          {false && data.tier && (
-            <View style={[styles.tierBadge, {backgroundColor: getTierColor(data.tier)}]}>
-              <Text style={styles.tierBadgeText}>{data.tier}</Text>
-            </View>
-          )}
-        </View>
-      )}
     </TouchableOpacity>
   );
 };

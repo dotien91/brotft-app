@@ -573,13 +573,9 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
     },
     carryCard: {
-      borderRadius: 16,
-      padding: 16,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
+      paddingHorizontal: 16,
       marginBottom: 20,
-      marginHorizontal: 16,
+      marginTop: 12
     },
     sectionLabel: {
       fontSize: 18,
@@ -618,7 +614,6 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       marginRight: 16,
       position: 'relative',
-      minWidth: 80,
     },
     carryHexagonWrapper: {
       position: 'relative',
@@ -726,7 +721,7 @@ export default (theme: ExtendedTheme) => {
     itemsGrid: {
       marginTop: 12,
       flexDirection: 'row',
-      gap: 8,
+      gap: 6,
     },
     itemsGridRow: {
       flexDirection: 'row',
@@ -734,7 +729,7 @@ export default (theme: ExtendedTheme) => {
     },
     itemsGridColumn: {
       alignItems: 'center',
-      gap: 4,
+      gap: 3,
     },
     itemsGridItem: {
       width: 48,
@@ -746,8 +741,8 @@ export default (theme: ExtendedTheme) => {
       borderColor: colors.border,
     },
     itemsGridMainItem: {
-      width: 48,
-      height: 48,
+      width: 36,
+      height: 36,
       borderRadius: 5,
       overflow: 'hidden',
       backgroundColor: colors.card,
@@ -760,12 +755,12 @@ export default (theme: ExtendedTheme) => {
     },
     itemsGridComponentsRow: {
       flexDirection: 'row',
-      gap: 4,
+      gap: 3,
       justifyContent: 'center',
     },
     itemsGridComponentItem: {
-      width: 24,
-      height: 24,
+      width: 18,
+      height: 18,
       borderRadius: 3,
       overflow: 'hidden',
       backgroundColor: colors.card,

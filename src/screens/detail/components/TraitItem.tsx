@@ -8,6 +8,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getTraitIconUrl} from '../../../utils/metatft';
 import {SCREENS} from '@shared-constants';
 import createStyles from '../DetailScreen.style';
+import { Image } from 'react-native';
 
 const TraitItem = ({trait}: any) => {
   const theme = useTheme();
@@ -54,7 +55,7 @@ const TraitItem = ({trait}: any) => {
       style={styles.traitCardNew} 
       onPress={() => id && NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId: id})}
     >
-      <FastImage
+      <Image
         source={{uri: getTraitIconUrl(apiName)}}
         style={[styles.traitCardIconNew, {tintColor: tierColor}]}
         resizeMode={FastImage.resizeMode.contain}

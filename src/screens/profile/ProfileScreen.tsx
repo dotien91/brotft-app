@@ -89,8 +89,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           {/* Header */}
           <ScreenHeader title={translations.settings} />
 
-          {/* Appearance Section */}
-          <View style={styles.section}>
+          {/* Appearance Section - Tạm ẩn */}
+          {/* <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
                 name="color-palette"
@@ -123,7 +123,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 </View>
               </View>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* Language Section */}
           <View style={styles.section}>

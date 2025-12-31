@@ -19,6 +19,7 @@ import TeamCard from './components/team-card/TeamCard';
 import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
 import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
 import SelectedUnitsFilter from './components/selected-units-filter/SelectedUnitsFilter';
+import AdBanner from '@shared-components/banner-ad/BannerAd';
 import {translations} from '../../shared/localization';
 
 const ITEM_HEIGHT = 120; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
@@ -102,8 +103,12 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   const renderTeamCard = useCallback(
-    ({item}: {item: IComposition}) => (
-      <TeamCard composition={item} onPress={handleTeamPress} />
+    ({item, index}: {item: IComposition; index: number}) => (
+      <View>
+        <TeamCard composition={item} onPress={handleTeamPress} />
+        {/* Hiển thị banner ad sau đội hình đầu tiên */}
+        {index === 0 && <AdBanner style={{marginTop: 10, marginBottom: 10}} />}
+      </View>
     ),
     [handleTeamPress],
   );
@@ -165,14 +170,15 @@ const HomeScreen: React.FC = () => {
     }
   }, [hasMore, isLoadingMore, isLoading, loadMore]);
 
-  const getItemLayout = useCallback(
-    (_data: any, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: ITEM_HEIGHT * index,
-      index,
-    }),
-    [],
-  );
+  // Không dùng getItemLayout vì có banner ad với chiều cao không cố định
+  // const getItemLayout = useCallback(
+  //   (_data: any, index: number) => ({
+  //     length: ITEM_HEIGHT,
+  //     offset: ITEM_HEIGHT * index,
+  //     index,
+  //   }),
+  //   [],
+  // );
 
   if (isError) {
     return (
@@ -220,7 +226,7 @@ const HomeScreen: React.FC = () => {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.3}
           showsVerticalScrollIndicator={false}
-          getItemLayout={getItemLayout}
+          // getItemLayout={getItemLayout} // Tắt vì có banner ad với chiều cao không cố định
         />
         <UnitFilterModal
           visible={isFilterModalVisible}

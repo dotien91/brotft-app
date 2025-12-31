@@ -40,6 +40,7 @@
       "@screens/*": ["./screens/*"],
       "@utils": ["./utils/"],
       "@assets": ["./assets/"],
+      "@config/*": ["./config/*"],
       "@local-storage": ["./services/local-storage"],
       "@zustand": ["./services/zustand/store"],
     },

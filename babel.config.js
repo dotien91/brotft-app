@@ -18,6 +18,7 @@ module.exports = {
           '@screens': './src/screens',
           '@utils': './src/utils/',
           '@assets': './src/assets/',
+          '@config': './src/config',
           '@event-emitter': './src/services/event-emitter',
           '@local-storage': './src/services/local-storage',
           '@zustand': './src/services/zustand/store',

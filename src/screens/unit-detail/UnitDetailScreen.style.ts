@@ -72,6 +72,8 @@ interface Style {
   unitTraitsGroup: ViewStyle;
   unitTraitItem: ViewStyle;
   unitTraitIcon: ImageStyle;
+  referenceCompositionsSection: ViewStyle;
+  compositionsList: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -490,8 +492,16 @@ export default (theme: ExtendedTheme) => {
       justifyContent: 'center',
     },
     unitTraitIcon: {
-      width: 24,
-      height: 24,
+      width: 18,
+      height: 18,
+    },
+    referenceCompositionsSection: {
+      paddingHorizontal: 16,
+      paddingTop: 24,
+      paddingBottom: 16,
+    },
+    compositionsList: {
+      gap: 12,
     },
   });
 };

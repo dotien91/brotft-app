@@ -200,7 +200,6 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   if (isError && unitsList.length === 0) {
     return renderError();
   }
-
   return (
     <View style={styles.container}>
       {/* Filter Button and Active Filters */}

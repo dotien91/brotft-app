@@ -1,6 +1,6 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, ScrollView, ActivityIndicator} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
+
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import createStyles from './ItemDetailScreen.style';
@@ -355,10 +355,10 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         <View style={styles.mainContent}>
           {/* Item Icon - Left */}
           <View style={styles.itemIconContainer}>
-            <FastImage
+            <Image
               source={{uri: imageUri}}
               style={styles.itemIcon}
-              resizeMode={FastImage.resizeMode.cover}
+              resizeMode="cover"
             />
           </View>
 
@@ -374,10 +374,10 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
                     return (
                       <React.Fragment key={index}>
                         <View style={styles.componentIconContainer}>
-                          <FastImage
+                          <Image
                             source={{uri: componentImage}}
                             style={styles.componentIcon}
-                            resizeMode={FastImage.resizeMode.cover}
+                            resizeMode="cover"
                           />
                         </View>
                         {index === 0 && displayComponents.length > 1 && (

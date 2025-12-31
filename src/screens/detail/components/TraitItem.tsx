@@ -1,6 +1,5 @@
 import React from 'react';
-import {View} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {View, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import * as NavigationService from 'react-navigation-helpers';
@@ -8,7 +7,6 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getTraitIconUrl} from '../../../utils/metatft';
 import {SCREENS} from '@shared-constants';
 import createStyles from '../DetailScreen.style';
-import { Image } from 'react-native';
 
 const TraitItem = ({trait}: any) => {
   const theme = useTheme();
@@ -58,7 +56,7 @@ const TraitItem = ({trait}: any) => {
       <Image
         source={{uri: getTraitIconUrl(apiName)}}
         style={[styles.traitCardIconNew, {tintColor: tierColor}]}
-        resizeMode={FastImage.resizeMode.contain}
+        resizeMode="contain"
       />
       <View style={styles.traitCardInfoContainer}>
         {highestBP > 0 && (

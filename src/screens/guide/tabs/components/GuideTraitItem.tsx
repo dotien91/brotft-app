@@ -1,6 +1,5 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {View, TouchableOpacity} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import type {ITftTrait} from '@services/models/tft-trait';
@@ -114,10 +113,10 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
       <View style={styles.headerRow}>
         <View style={styles.iconContainer}>
           {traitIconUrl ? (
-            <FastImage
+            <Image
               source={{uri: traitIconUrl}}
               style={styles.traitIcon}
-              resizeMode={FastImage.resizeMode.contain}
+              resizeMode="contain"
             />
           ) : (
             <View style={styles.iconPlaceholder}>

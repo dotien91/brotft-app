@@ -1,9 +1,8 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, TouchableOpacity} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import * as NavigationService from 'react-navigation-helpers';
-import Text from '@shared-components/text-wrapper/TextWrapper'; // Đảm bảo đúng đường dẫn TextWrapper của bạn
+import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getTraitIconUrl} from '../../../utils/metatft';
 import {SCREENS} from '@shared-constants';
 import useStore from '@services/zustand/store';
@@ -23,6 +22,7 @@ interface UnitTraitsDisplayProps {
     name?: string;
     traits?: string[];
   };
+  fromDetailScreen?: boolean;
 }
 
 const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailScreen = false}) => {
@@ -55,7 +55,11 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
       );
 
       const traitNamesToFind = localizedUnit?.traits || unit.traits;
-      if (!traitNamesToFind) return;
+      if (!traitNamesToFind || !Array.isArray(traitNamesToFind)) {
+        setOrigins([]);
+        setClasses([]);
+        return;
+      }
 
       const traitsMap = new Map();
       const rawTraits = Array.isArray(traitsData) ? traitsData : Object.values(traitsData);
@@ -88,6 +92,8 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
       setClasses(cList);
     } catch (e) {
       console.log('Error loading traits:', e);
+      setOrigins([]);
+      setClasses([]);
     }
   }, [unit, language]);
 
@@ -97,8 +103,8 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
     }
   };
 
-  const renderTraitGroup = (title: string, data: TraitInfo[]) => {
-    if (data.length === 0) return null;
+  const renderTraitGroup = (data: TraitInfo[]) => {
+    if (!data || !Array.isArray(data) || data.length === 0) return null;
 
     return <>
           {data.map((item, idx) => (
@@ -106,22 +112,26 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
               key={`${item.apiName}-${idx}`}
               style={[styles.unitTraitItem, {flexDirection: 'row', alignItems: 'center', marginRight: 8, marginBottom: 2}]}
               onPress={() => handleTraitPress(item.id)}>
-              <FastImage
+              <Image
                 source={{uri: getTraitIconUrl(item.apiName)}}
-                style={[styles.unitTraitIcon, {width: 24, height: 24, tintColor: '#ffffff'}]}
-                resizeMode={FastImage.resizeMode.contain}
+                style={[styles.unitTraitIcon, {width: 18, height: 18, tintColor: '#ffffff'}]}
+                resizeMode="contain"
               />
+              {fromDetailScreen && (
+                <Text style={{color: theme.colors.text, marginLeft: 6, fontSize: 12}}>
+                  {item.name}
+                </Text>
+              )}
             </TouchableOpacity>
           ))}
           </>
   };
 
   if (origins.length === 0 && classes.length === 0) return null;
-
   return (
     <View style={[styles.unitTraitsContainer, fromDetailScreen && {justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap'}]}>
-      {renderTraitGroup('Tộc', origins)}
-      {renderTraitGroup('Hệ', classes)}
+      {renderTraitGroup(origins)}
+      {renderTraitGroup(classes)}
     </View>
   );
 };

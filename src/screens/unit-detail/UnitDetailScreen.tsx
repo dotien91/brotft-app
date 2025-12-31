@@ -1,6 +1,5 @@
 import React, {useMemo, useEffect, useState} from 'react';
 import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
-import FastImage from 'react-native-fast-image';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import createStyles from './UnitDetailScreen.style';
@@ -21,6 +20,7 @@ import {translations} from '../../shared/localization';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import BackButton from '@shared-components/back-button/BackButton';
 import UnitTraitsDisplay from './components/UnitTraitsDisplay';
+import ReferenceCompositionsSection from './components/ReferenceCompositionsSection';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -389,8 +389,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
       return parseTextWithVariables(desc, unit.ability.variables, unit);
     };
 
-    console.log('unit111', unit.traits);
-
     return (
       <ScrollView
         style={styles.scrollView}
@@ -399,10 +397,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         
         {/* Hero Section with overlay */}
         <View style={styles.heroSection}>
-          <FastImage
-            source={{uri: splashUri, priority: FastImage.priority.normal}}
+          <Image
+            source={{uri: splashUri}}
             style={styles.heroImage}
-            resizeMode={FastImage.resizeMode.cover}
+            resizeMode="cover"
             defaultSource={require('@assets/splash/splash.png')}
           />
           <View style={styles.heroOverlay} />
@@ -539,10 +537,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                       const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
                       if (abilityIconUrl) {
                         return (
-                    <FastImage
+                    <Image
                             source={{uri: abilityIconUrl}}
                       style={styles.abilityIcon}
-                      resizeMode={FastImage.resizeMode.cover}
+                      resizeMode="cover"
                       onError={() => {
                               // Failed to load ability icon
                             }}
@@ -554,10 +552,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     // Fallback to unit avatar
                     if (avatarUri) {
                       return (
-                    <FastImage
+                    <Image
                       source={{uri: avatarUri}}
                       style={styles.abilityIcon}
-                      resizeMode={FastImage.resizeMode.cover}
+                      resizeMode="cover"
                     />
                       );
                     }
@@ -622,6 +620,12 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             </View>
           </View>
         )}
+
+        {/* Reference Compositions Section */}
+        <ReferenceCompositionsSection
+          unitApiName={unitApiName}
+          unitApiNameFromUnit={unit?.apiName}
+        />
 
         {/* Suggested Items Section */}
         {/* <View style={styles.augmentsSection}>

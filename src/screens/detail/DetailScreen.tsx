@@ -1,6 +1,5 @@
 import React, {useMemo, useState, useEffect} from 'react';
 import {View, ScrollView, Switch, useWindowDimensions, ActivityIndicator, Image} from 'react-native';
-import FastImage from 'react-native-fast-image';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import RNBounceable from '@freakycoder/react-native-bounceable';
@@ -465,14 +464,14 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                           {unit.items && unit.items.length > 0 && (
                             <View style={styles.unitItemsRow}>
                               {unit.items.map(item => (
-                                <FastImage
+                                <Image
                                   key={item.id}
                                   source={{uri: item.icon}}
                                   style={[styles.unitItemIcon, {
                                     width: Math.max(hexSize * 0.2, 12),
                                     height: Math.max(hexSize * 0.2, 12),
                                   }]}
-                                  resizeMode={FastImage.resizeMode.contain}
+                                  resizeMode="contain"
                                 />
                               ))}
                             </View>

@@ -1,6 +1,5 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, TouchableOpacity} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import type {ITftItem} from '@services/models/tft-item';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -107,10 +106,10 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       {/* Item Icon */}
       <View style={styles.iconContainer}>
-        <FastImage
+        <Image
           source={{uri: imageUri}}
           style={styles.icon}
-          resizeMode={FastImage.resizeMode.cover}
+          resizeMode="cover"
           onError={() => {
             try {
               // await deleteTftItem(String(data.id));

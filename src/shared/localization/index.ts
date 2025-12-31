@@ -116,6 +116,7 @@ export const translations = new LocalizedStrings({
     silverI: "Gümüş I",
     goldII: "Altın II",
     prismaticIII: "Prismatik III",
+    referenceCompositions: "Đội hình tham khảo",
   },
   en: {
     noLocationService: "Location Service Not Available",
@@ -233,6 +234,7 @@ export const translations = new LocalizedStrings({
     silverI: "Silver I",
     goldII: "Gold II",
     prismaticIII: "Prismatic III",
+    referenceCompositions: "Reference Compositions",
   },
   vi: {
     noLocationService: "Dịch vụ vị trí không khả dụng",
@@ -350,6 +352,7 @@ export const translations = new LocalizedStrings({
     silverI: "Bạc I",
     goldII: "Vàng II",
     prismaticIII: "Kim Cương III",
+    referenceCompositions: "Đội hình tham khảo",
   },
   "zh-CN": {
     noLocationService: "位置服务不可用",
@@ -467,6 +470,7 @@ export const translations = new LocalizedStrings({
     silverI: "白银 I",
     goldII: "黄金 II",
     prismaticIII: "棱彩 III",
+    referenceCompositions: "参考阵容",
   },
 });
 

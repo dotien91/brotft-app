@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -21,36 +21,14 @@ const TraitsSection: React.FC<{units: any[]}> = ({units}) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore(state => state.language);
-  const [unitsData, setUnitsData] = useState<any>(null);
-  const [traitsData, setTraitsData] = useState<any>(null);
-
-  // Load data from LocalStorage
-  useEffect(() => {
-    const loadData = async () => {
-      if (!language) {
-        setUnitsData(null);
-        setTraitsData(null);
-        return;
-      }
-      try {
-        const locale = getLocaleFromLanguage(language);
-        const unitsDataString = await LocalStorage.getString(`data_units_${locale}`);
-        const traitsDataString = await LocalStorage.getString(`data_traits_${locale}`);
-        setUnitsData(unitsDataString ? JSON.parse(unitsDataString) : null);
-        setTraitsData(traitsDataString ? JSON.parse(traitsDataString) : null);
-      } catch (error) {
-        console.error('Error loading traits data:', error);
-        setUnitsData(null);
-        setTraitsData(null);
-      }
-    };
-    loadData();
-  }, [language]);
 
   const traits = useMemo<TraitData[]>(() => {
-    if (!units?.length || !language || !unitsData || !traitsData) return [];
+    if (!units?.length || !language) return [];
 
     try {
+      const locale = getLocaleFromLanguage(language);
+      const unitsData = JSON.parse(LocalStorage.getString(`data_units_${locale}`) || '[]');
+      const traitsData = JSON.parse(LocalStorage.getString(`data_traits_${locale}`) || '[]');
 
       const unitsMap = new Map();
       const rawUnits = Array.isArray(unitsData) ? unitsData : Object.values(unitsData);

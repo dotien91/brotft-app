@@ -62,18 +62,18 @@ export const fetchAllDataByLocale = async (language: string) => {
 };
 
 // Save data to storage
-const saveDataToStorage = async (locale: string, data: any) => {
+const saveDataToStorage = (locale: string, data: any) => {
   if (data.units) {
-    await LocalStorage.set(`data_units_${locale}`, JSON.stringify(data.units));
+    LocalStorage.set(`data_units_${locale}`, JSON.stringify(data.units));
   }
   if (data.items) {
-    await LocalStorage.set(`data_items_${locale}`, JSON.stringify(data.items));
+    LocalStorage.set(`data_items_${locale}`, JSON.stringify(data.items));
   }
   if (data.traits) {
-    await LocalStorage.set(`data_traits_${locale}`, JSON.stringify(data.traits));
+    LocalStorage.set(`data_traits_${locale}`, JSON.stringify(data.traits));
   }
   if (data.augments) {
-    await LocalStorage.set(`data_augments_${locale}`, JSON.stringify(data.augments));
+    LocalStorage.set(`data_augments_${locale}`, JSON.stringify(data.augments));
   }
 };
 
@@ -91,10 +91,10 @@ export const checkAndFetchDataByLocale = async (language: string): Promise<boole
   const traitsKey = `data_traits_${locale}`;
   const augmentsKey = `data_augments_${locale}`;
 
-  const hasUnits = await LocalStorage.getString(unitsKey);
-  const hasItems = await LocalStorage.getString(itemsKey);
-  const hasTraits = await LocalStorage.getString(traitsKey);
-  const hasAugments = await LocalStorage.getString(augmentsKey);
+  const hasUnits = LocalStorage.getString(unitsKey);
+  const hasItems = LocalStorage.getString(itemsKey);
+  const hasTraits = LocalStorage.getString(traitsKey);
+  const hasAugments = LocalStorage.getString(augmentsKey);
 
   // If all data exists, return early
   if (hasUnits && hasItems && hasTraits && hasAugments) {
@@ -104,7 +104,7 @@ export const checkAndFetchDataByLocale = async (language: string): Promise<boole
   // If any data is missing, fetch all data
   try {
     const data = await fetchAllDataByLocale(language);
-    await saveDataToStorage(locale, data);
+    saveDataToStorage(locale, data);
     return true;
   } catch (error) {
     return false;

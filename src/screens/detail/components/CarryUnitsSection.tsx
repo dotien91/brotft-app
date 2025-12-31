@@ -189,44 +189,25 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
     }
   }, [team]);
 
-  const [unitsData, setUnitsData] = useState<any>(null);
-  const [traitsData, setTraitsData] = useState<any>(null);
-
-  // Load data from LocalStorage
-  useEffect(() => {
-    const loadData = async () => {
-      if (!language) {
-        setUnitsData(null);
-        setTraitsData(null);
-        return;
-      }
-      try {
-        const locale = getLocaleFromLanguage(language);
-        const unitsKey = `data_units_${locale}`;
-        const traitsKey = `data_traits_${locale}`;
-        const unitsDataString = await LocalStorage.getString(unitsKey);
-        const traitsDataString = await LocalStorage.getString(traitsKey);
-        setUnitsData(unitsDataString ? JSON.parse(unitsDataString) : null);
-        setTraitsData(traitsDataString ? JSON.parse(traitsDataString) : null);
-      } catch (error) {
-        console.error('Error loading units/traits data:', error);
-        setUnitsData(null);
-        setTraitsData(null);
-      }
-    };
-    loadData();
-  }, [language]);
-
   // Get traits for each unit from LocalStorage
   const getUnitTraits = (unit: TeamUnit | TeamCarry): Array<{name: string; apiName?: string}> => {
     const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
     const unitName = 'name' in unit ? unit.name : ('championName' in unit ? unit.championName : null);
     
-    if (!championKey || !language || !unitsData) {
+    if (!championKey || !language) {
       return [];
     }
 
     try {
+      const locale = getLocaleFromLanguage(language);
+      const unitsKey = `data_units_${locale}`;
+      const unitsDataString = LocalStorage.getString(unitsKey);
+      
+      if (!unitsDataString) {
+        return [];
+      }
+
+      const unitsData = JSON.parse(unitsDataString);
       let localizedUnit: any = null;
 
       // Handle both array and object formats
@@ -259,6 +240,14 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
 
       if (localizedUnit && localizedUnit.traits) {
         const traits = Array.isArray(localizedUnit.traits) ? localizedUnit.traits : [];
+        
+        // Get trait details from local storage to get apiName
+        const traitsKey = `data_traits_${locale}`;
+        const traitsDataString = LocalStorage.getString(traitsKey);
+        let traitsData: any = null;
+        if (traitsDataString) {
+          traitsData = JSON.parse(traitsDataString);
+        }
 
         return traits.map((traitName: string) => {
           let traitDetail: any = null;

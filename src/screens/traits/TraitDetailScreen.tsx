@@ -86,68 +86,64 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
       return;
     }
 
-    const loadLocalizedData = async () => {
-      try {
-        const locale = getLocaleFromLanguage(language);
-        const traitsKey = `data_traits_${locale}`;
-        const traitsDataString = await LocalStorage.getString(traitsKey);
-        console.log('traitsDataString', traitsDataString);
-        if (!traitsDataString) {
-          // Fallback to API data
-          setLocalizedName(trait.name || null);
-          setLocalizedDesc(trait.desc || null);
-          setLocalizedIcon(trait.icon || null);
-          setLocalizedEffects(trait.effects || null);
-          return;
-        }
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const traitsKey = `data_traits_${locale}`;
+      const traitsDataString = LocalStorage.getString(traitsKey);
+      
+      if (!traitsDataString) {
+        // Fallback to API data
+        setLocalizedName(trait.name || null);
+        setLocalizedDesc(trait.desc || null);
+        setLocalizedIcon(trait.icon || null);
+        setLocalizedEffects(trait.effects || null);
+        return;
+      }
 
-        const traitsData = JSON.parse(traitsDataString);
-        let localizedTrait: any = null;
+      const traitsData = JSON.parse(traitsDataString);
+      let localizedTrait: any = null;
 
-        // Find trait from local storage
-        if (traitsData) {
-          if (Array.isArray(traitsData)) {
-            localizedTrait = traitsData.find((t: any) => 
+      // Find trait from local storage
+      if (traitsData) {
+        if (Array.isArray(traitsData)) {
+          localizedTrait = traitsData.find((t: any) => 
+            (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
+            (trait.name && t.name === trait.name)
+          );
+        } else if (typeof traitsData === 'object' && traitsData !== null) {
+          // Try by apiName first
+          if (trait.apiName && traitsData[trait.apiName]) {
+            localizedTrait = traitsData[trait.apiName];
+          } else {
+            // Search through values
+            const traitsArray = Object.values(traitsData) as any[];
+            localizedTrait = traitsArray.find((t: any) => 
               (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
               (trait.name && t.name === trait.name)
             );
-          } else if (typeof traitsData === 'object' && traitsData !== null) {
-            // Try by apiName first
-            if (trait.apiName && traitsData[trait.apiName]) {
-              localizedTrait = traitsData[trait.apiName];
-            } else {
-              // Search through values
-              const traitsArray = Object.values(traitsData) as any[];
-              localizedTrait = traitsArray.find((t: any) => 
-                (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
-                (trait.name && t.name === trait.name)
-              );
-            }
           }
         }
+      }
 
-        if (localizedTrait) {
-          setLocalizedName(localizedTrait.name || trait.name || null);
-          setLocalizedDesc(localizedTrait.desc || localizedTrait.description || trait.desc || null);
-          setLocalizedIcon(localizedTrait.icon || trait.icon || null);
-          setLocalizedEffects(localizedTrait.effects || trait.effects || null);
-        } else {
-          // Fallback to API data
-          setLocalizedName(trait.name || null);
-          setLocalizedDesc(trait.desc || null);
-          setLocalizedIcon(trait.icon || null);
-          setLocalizedEffects(trait.effects || null);
-        }
-      } catch (error) {
-        // Fallback to API data on error
+      if (localizedTrait) {
+        setLocalizedName(localizedTrait.name || trait.name || null);
+        setLocalizedDesc(localizedTrait.desc || localizedTrait.description || trait.desc || null);
+        setLocalizedIcon(localizedTrait.icon || trait.icon || null);
+        setLocalizedEffects(localizedTrait.effects || trait.effects || null);
+      } else {
+        // Fallback to API data
         setLocalizedName(trait.name || null);
         setLocalizedDesc(trait.desc || null);
         setLocalizedIcon(trait.icon || null);
         setLocalizedEffects(trait.effects || null);
       }
-    };
-
-    loadLocalizedData();
+    } catch (error) {
+      // Fallback to API data on error
+      setLocalizedName(trait.name || null);
+      setLocalizedDesc(trait.desc || null);
+      setLocalizedIcon(trait.icon || null);
+      setLocalizedEffects(trait.effects || null);
+    }
   }, [trait, language]);
 
 

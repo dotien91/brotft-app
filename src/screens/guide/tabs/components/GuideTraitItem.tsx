@@ -29,7 +29,6 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
 
   // Get localized trait name and description from storage
   useEffect(() => {
-    const loadLocalizedData = async () => {
       if (!name || !apiName || !language) {
         setLocalizedName(null);
         setLocalizedDesc(null);
@@ -40,7 +39,7 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
       try {
         const locale = getLocaleFromLanguage(language);
         const traitsKey = `data_traits_${locale}`;
-        const traitsDataString = await LocalStorage.getString(traitsKey);
+        const traitsDataString = LocalStorage.getString(traitsKey);
         
         if (!traitsDataString) {
           setLocalizedName(null);
@@ -75,14 +74,11 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
           setLocalizedEffects(null);
         }
       } catch (error) {
-        console.error('Error loading localized trait data:', error);
+        console.error('Error loading localized trait:', error);
         setLocalizedName(null);
         setLocalizedDesc(null);
         setLocalizedEffects(null);
       }
-    };
-
-    loadLocalizedData();
   }, [name, apiName, language]);
 
   // Get trait icon URL

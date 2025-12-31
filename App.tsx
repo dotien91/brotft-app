@@ -9,6 +9,7 @@ import {queryClient} from '@services/api/react-query';
 import useStore from './src/services/zustand/store';
 import {translations} from './src/shared/localization';
 import {checkAndFetchDataByLocale} from './src/services/api/data';
+import {checkAndForceUpdate} from '@services/version-check';
 
 LogBox.ignoreAllLogs();
 
@@ -27,6 +28,16 @@ const App = () => {
   React.useEffect(() => {
     checkAndFetchDataByLocale(language);
   }, [language]);
+
+  // Check app version on startup
+  React.useEffect(() => {
+    // Check version sau khi app đã load xong
+    const timer = setTimeout(() => {
+      checkAndForceUpdate();
+    }, 1500); // Đợi 1.5 giây để app load xong
+
+    return () => clearTimeout(timer);
+  }, []);
 
   React.useEffect(() => {
     StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');

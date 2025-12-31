@@ -38,6 +38,7 @@
     "react-native-svg": "^15.15.0",
     "react-native-tab-view": "^4.2.0",
     "react-native-vector-icons": "^10.1.0",
+    "react-native-version-check": "^3.5.0",
     "react-navigation-helpers": "^2.3.1",
     "use-deep-compare-effect": "^1.8.1",
     "zustand": "^4.5.5"

@@ -3,29 +3,9 @@ import {View, StyleSheet, ViewStyle, TextStyle, Image, ImageStyle} from 'react-n
 import {useTheme} from '@react-navigation/native';
 import {useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import {getUnitAvatarUrl} from '../../../utils/metatft';
+import {getUnitCostBorderColor} from '../../../utils/unitCost';
 import Hexagon from '@screens/detail/components/Hexagon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-
-// Get unit border color based on cost
-const getUnitCostBorderColor = (cost: number | undefined, primaryColor: string): string => {
-  if (!cost) return primaryColor;
-  switch (cost) {
-    case 1:
-      return '#c0c0c0'; // Xám/Trắng
-    case 2:
-      return '#4ade80'; // Xanh lá
-    case 3:
-      return '#60a5fa'; // Xanh dương
-    case 4:
-      return '#a78bfa'; // Tím
-    case 5:
-      return '#ffd700'; // Vàng (Huyền thoại)
-    case 6:
-      return '#ff6b35'; // Đỏ/Cam
-    default:
-      return primaryColor;
-  }
-};
 
 interface UnitAvatarProps {
   apiName: string;

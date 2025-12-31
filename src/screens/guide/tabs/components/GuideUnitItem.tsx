@@ -6,6 +6,7 @@ import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl} from '../../../../utils/metatft';
+import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../../../utils/unitCost';
 import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
@@ -123,23 +124,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
 
   // Get unit border color based on cost
   const getUnitCostBorderColor = (cost?: number | null): string => {
-    if (!cost || cost === null) return colors.border;
-    switch (cost) {
-      case 1:
-        return '#c0c0c0'; // Xám/Trắng
-      case 2:
-        return '#4ade80'; // Xanh lá
-      case 3:
-        return '#60a5fa'; // Xanh dương
-      case 4:
-        return '#a78bfa'; // Tím
-      case 5:
-        return '#ffd700'; // Vàng (Huyền thoại)
-      case 6:
-        return '#ff6b35'; // Đỏ/Cam
-      default:
-        return colors.border;
-    }
+    return getUnitCostBorderColorUtil(cost, colors.border || '#94a3b8');
   };
 
   const hexSize = compact ? 48 : 56;

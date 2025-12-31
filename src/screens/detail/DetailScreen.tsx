@@ -15,6 +15,7 @@ import AugmentsSection from './components/AugmentsSection';
 import CarryUnitsSection from './components/CarryUnitsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
 import {getUnitAvatarUrl, getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
+import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import {getTftItemByApiName} from '@services/api/tft-items';
 import LocalStorage from '@services/local-storage';
@@ -362,23 +363,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
   // Get unit border color based on cost
   const getUnitCostBorderColor = (cost?: number): string => {
-    if (!cost) return colors.border;
-    switch (cost) {
-      case 1:
-        return '#c0c0c0'; // Xám/Trắng
-      case 2:
-        return '#4ade80'; // Xanh lá
-      case 3:
-        return '#60a5fa'; // Xanh dương
-      case 4:
-        return '#a78bfa'; // Tím
-      case 5:
-        return '#ffd700'; // Vàng (Huyền thoại)
-      case 6:
-        return '#ff6b35'; // Đỏ/Cam
-      default:
-        return colors.border;
-    }
+    return getUnitCostBorderColorUtil(cost, colors.border || '#94a3b8');
   };
 
   // Always return black text color

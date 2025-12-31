@@ -10,6 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl, getUnitSplashUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
+import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
@@ -377,23 +378,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
 
     // Get unit border color based on cost
     const getUnitCostBorderColor = (cost?: number | null): string => {
-      if (!cost || cost === null) return colors.highlight;
-      switch (cost) {
-        case 1:
-          return '#c0c0c0'; // Xám/Trắng
-        case 2:
-          return '#4ade80'; // Xanh lá
-        case 3:
-          return '#60a5fa'; // Xanh dương
-        case 4:
-          return '#a78bfa'; // Tím
-        case 5:
-          return '#ffd700'; // Vàng (Huyền thoại)
-        case 6:
-          return '#ff6b35'; // Đỏ/Cam
-        default:
-          return colors.highlight;
-      }
+      return getUnitCostBorderColorUtil(cost, colors.highlight || '#94a3b8');
     };
 
     const borderColor = getUnitCostBorderColor(unit.cost);

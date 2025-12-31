@@ -3,6 +3,7 @@ import {View, StyleSheet} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import CostIcon from '@shared-components/cost-icon/CostIcon';
+import {getUnitCostBorderColor} from '../../../utils/unitCost';
 import createStyles from '../DetailScreen.style';
 
 interface UnitCostBadgeProps {
@@ -14,28 +15,7 @@ const UnitCostBadge: React.FC<UnitCostBadgeProps> = ({cost, fromDetailScreen = f
   const styles = createStyles(theme);
   const colors = theme.colors as any;
 
-  // Get unit border color based on cost
-  const getUnitCostBorderColor = (cost?: number): string => {
-    if (!cost) return colors.border;
-    switch (cost) {
-      case 1:
-        return '#c0c0c0'; // Xám/Trắng
-      case 2:
-        return '#4ade80'; // Xanh lá
-      case 3:
-        return '#60a5fa'; // Xanh dương
-      case 4:
-        return '#a78bfa'; // Tím
-      case 5:
-        return '#ffd700'; // Vàng (Huyền thoại)
-      case 6:
-        return '#ff6b35'; // Đỏ/Cam
-      default:
-        return colors.border;
-    }
-  };
-
-  const costColor = getUnitCostBorderColor(cost);
+  const costColor = getUnitCostBorderColor(cost, colors.border || '#94a3b8');
   const textColor = '#ffffff'; // White text for all costs
 
   return (

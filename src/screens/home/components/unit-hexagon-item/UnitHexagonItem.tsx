@@ -6,28 +6,8 @@ import Hexagon from '@screens/detail/components/Hexagon';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import type {ICompositionUnit} from '@services/models/composition';
 import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../../../utils/metatft';
+import {getUnitCostBorderColor} from '../../../../utils/unitCost';
 import createStyles from './UnitHexagonItem.style';
-
-// Get unit border color based on cost
-const getUnitCostBorderColor = (cost: number | undefined, primaryColor: string): string => {
-  if (!cost) return primaryColor;
-  switch (cost) {
-    case 1:
-      return '#c0c0c0'; // Xám/Trắng
-    case 2:
-      return '#4ade80'; // Xanh lá
-    case 3:
-      return '#60a5fa'; // Xanh dương
-    case 4:
-      return '#a78bfa'; // Tím
-    case 5:
-      return '#ffd700'; // Vàng (Huyền thoại)
-    case 6:
-      return '#ff6b35'; // Đỏ/Cam
-    default:
-      return primaryColor;
-  }
-};
 
 interface UnitHexagonItemProps {
   unit: ICompositionUnit;
@@ -54,7 +34,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
           <Hexagon
             size={50}
             backgroundColor="transparent"
-            borderColor={getUnitCostBorderColor(unit.cost, colors.primary)}
+            borderColor={getUnitCostBorderColor(unit.cost, colors.primary || '#94a3b8')}
             borderWidth={1}
           />
         </View>

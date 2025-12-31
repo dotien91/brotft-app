@@ -1,7 +1,8 @@
-import {Alert, Linking, Platform} from 'react-native';
+import {Alert, Linking} from 'react-native';
 // @ts-ignore
 import VersionCheck from 'react-native-version-check';
 import {isAndroid} from '@freakycoder/react-native-helpers';
+import {translations} from '../../shared/localization';
 
 // App Store ID và Play Store Package Name
 const APP_STORE_ID = 'YOUR_IOS_APP_ID'; // Thay bằng App Store ID thật
@@ -12,11 +13,11 @@ let isUpdateAlertVisible = false;
 const showDeviceNotSupportedAlert = () => {
   if (isUpdateAlertVisible) return;
   Alert.alert(
-    'Không hỗ trợ',
-    'Không thể mở cửa hàng ứng dụng. Vui lòng cập nhật ứng dụng thủ công.',
+    translations.deviceNotSupported || 'Không hỗ trợ',
+    translations.deviceNotSupportedMessage || 'Không thể mở cửa hàng ứng dụng. Vui lòng cập nhật ứng dụng thủ công.',
     [
       {
-        text: 'Đóng',
+        text: translations.close || 'Đóng',
         style: 'cancel',
         onPress: () => {
           isUpdateAlertVisible = false;
@@ -84,11 +85,11 @@ export const checkAndForceUpdate = async () => {
     };
 
     Alert.alert(
-      'Cập nhật bắt buộc',
-      'Phiên bản hiện tại của ứng dụng đã lỗi thời. Vui lòng cập nhật lên phiên bản mới nhất để tiếp tục sử dụng.',
+      translations.updateRequired || 'Cập nhật bắt buộc',
+      translations.updateRequiredMessage || 'Phiên bản hiện tại của ứng dụng đã lỗi thời. Vui lòng cập nhật lên phiên bản mới nhất để tiếp tục sử dụng.',
       [
         {
-          text: 'Cập nhật ngay',
+          text: translations.updateNow || 'Cập nhật ngay',
           onPress: () => {
             isUpdateAlertVisible = false;
             moveToStore();

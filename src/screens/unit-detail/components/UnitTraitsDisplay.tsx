@@ -34,15 +34,16 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
   const [classes, setClasses] = useState<TraitInfo[]>([]);
 
   useEffect(() => {
-    if (!unit || !language) return;
+    const loadTraitsData = async () => {
+      if (!unit || !language) return;
 
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const traitsKey = `data_traits_${locale}`;
-      
-      const unitsDataString = LocalStorage.getString(unitsKey);
-      const traitsDataString = LocalStorage.getString(traitsKey);
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const unitsKey = `data_units_${locale}`;
+        const traitsKey = `data_traits_${locale}`;
+        
+        const unitsDataString = await LocalStorage.getString(unitsKey);
+        const traitsDataString = await LocalStorage.getString(traitsKey);
 
       if (!unitsDataString || !traitsDataString) return;
 
@@ -91,10 +92,13 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
       setOrigins(oList);
       setClasses(cList);
     } catch (e) {
-      console.log('Error loading traits:', e);
-      setOrigins([]);
-      setClasses([]);
-    }
+        console.log('Error loading traits:', e);
+        setOrigins([]);
+        setClasses([]);
+      }
+    };
+
+    loadTraitsData();
   }, [unit, language]);
 
   const handleTraitPress = (traitId?: string) => {

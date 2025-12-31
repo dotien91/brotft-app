@@ -31,15 +31,16 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
   const {name, cost, icon, squareIcon, apiName} = data;
   // Get localized name from storage
   useEffect(() => {
-    if (!data || !language) {
-      setLocalizedName(null);
-      return;
-    }
+    const loadLocalizedName = async () => {
+      if (!data || !language) {
+        setLocalizedName(null);
+        return;
+      }
 
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const unitsKey = `data_units_${locale}`;
+        const unitsDataString = await LocalStorage.getString(unitsKey);
       
       if (!unitsDataString) {
         setLocalizedName(null);
@@ -97,10 +98,13 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
       } else {
         setLocalizedName(null);
       }
-    } catch (error) {
-      console.error('Error loading localized unit name:', error);
-      setLocalizedName(null);
-    }
+      } catch (error) {
+        console.error('Error loading localized unit name:', error);
+        setLocalizedName(null);
+      }
+    };
+
+    loadLocalizedName();
   }, [data, language]);
 
   // Get TFT unit avatar URL from metatft.com

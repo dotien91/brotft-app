@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {View, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
@@ -20,21 +20,30 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore((state) => state.language);
+  const [augmentsData, setAugmentsData] = useState<any>(null);
 
-  // Get localized augments data from LocalStorage (same as GuideAugmentItem)
-  const augmentsData = useMemo(() => {
-    if (!language) return null;
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const augmentsKey = `data_augments_${locale}`;
-      const augmentsDataString = LocalStorage.getString(augmentsKey);
-      if (augmentsDataString) {
-        return JSON.parse(augmentsDataString);
+  // Get localized augments data from LocalStorage
+  useEffect(() => {
+    const loadAugmentsData = async () => {
+      if (!language) {
+        setAugmentsData(null);
+        return;
       }
-    } catch (error) {
-      // Ignore error
-    }
-    return null;
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const augmentsKey = `data_augments_${locale}`;
+        const augmentsDataString = await LocalStorage.getString(augmentsKey);
+        if (augmentsDataString) {
+          setAugmentsData(JSON.parse(augmentsDataString));
+        } else {
+          setAugmentsData(null);
+        }
+      } catch (error) {
+        // Ignore error
+        setAugmentsData(null);
+      }
+    };
+    loadAugmentsData();
   }, [language]);
 
   // Helper function to get augment icon URL (same logic as GuideAugmentItem)

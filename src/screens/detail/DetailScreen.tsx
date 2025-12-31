@@ -122,6 +122,31 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const {width: windowWidth} = useWindowDimensions();
   const language = useStore((state) => state.language);
+  const [itemsData, setItemsData] = useState<any>(null);
+
+  // Load items data from LocalStorage
+  useEffect(() => {
+    const loadItemsData = async () => {
+      if (!language) {
+        setItemsData(null);
+        return;
+      }
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const itemsKey = `data_items_${locale}`;
+        const itemsDataString = await LocalStorage.getString(itemsKey);
+        if (itemsDataString) {
+          setItemsData(JSON.parse(itemsDataString));
+        } else {
+          setItemsData(null);
+        }
+      } catch (error) {
+        console.error('Error loading items data:', error);
+        setItemsData(null);
+      }
+    };
+    loadItemsData();
+  }, [language]);
 
   // Get compId from params
   const compIdFromParams =
@@ -275,20 +300,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   // Map IComposition to TeamComposition format
   const team = useMemo<TeamComposition>(() => {
     if (compositionData) {
-      // Get localized items data
-      let itemsData: any = null;
-      if (language) {
-        try {
-          const locale = getLocaleFromLanguage(language);
-          const itemsKey = `data_items_${locale}`;
-          const itemsDataString = LocalStorage.getString(itemsKey);
-          if (itemsDataString) {
-            itemsData = JSON.parse(itemsDataString);
-          }
-        } catch (error) {
-          console.error('Error loading items data:', error);
-        }
-      }
 
       return {
         id: compositionData.id,

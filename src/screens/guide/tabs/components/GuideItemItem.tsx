@@ -32,45 +32,24 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
       return;
     }
 
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const itemsKey = `data_items_${locale}`;
-      const itemsDataString = LocalStorage.getString(itemsKey);
-      
-      if (!itemsDataString) {
-        setLocalizedName(null);
-        return;
-      }
+    const loadLocalizedName = async () => {
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const itemsKey = `data_items_${locale}`;
+        const itemsDataString = await LocalStorage.getString(itemsKey);
+        
+        if (!itemsDataString) {
+          setLocalizedName(null);
+          return;
+        }
 
-      const itemsData = JSON.parse(itemsDataString);
-      let localizedItem: any = null;
+        const itemsData = JSON.parse(itemsDataString);
+        let localizedItem: any = null;
 
-      // Handle both array and object formats
-      if (Array.isArray(itemsData)) {
-        // If it's an array, find the item
-        localizedItem = itemsData.find((localItem: any) => {
-          // Try to match by apiName first
-          if (data.apiName && localItem.apiName === data.apiName) {
-            return true;
-          }
-          // Fallback to name matching (case insensitive)
-          if (data.name && localItem.name) {
-            return data.name.toLowerCase() === localItem.name.toLowerCase();
-          }
-          // Try enName matching
-          if (data.enName && localItem.enName) {
-            return data.enName.toLowerCase() === localItem.enName.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof itemsData === 'object' && itemsData !== null) {
-        // If it's an object, try to find by apiName as key first
-        if (data.apiName && itemsData[data.apiName]) {
-          localizedItem = itemsData[data.apiName];
-        } else {
-          // Otherwise, search through object values
-          const itemsArray = Object.values(itemsData) as any[];
-          localizedItem = itemsArray.find((localItem: any) => {
+        // Handle both array and object formats
+        if (Array.isArray(itemsData)) {
+          // If it's an array, find the item
+          localizedItem = itemsData.find((localItem: any) => {
             // Try to match by apiName first
             if (data.apiName && localItem.apiName === data.apiName) {
               return true;
@@ -85,18 +64,43 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
             }
             return false;
           });
+        } else if (typeof itemsData === 'object' && itemsData !== null) {
+          // If it's an object, try to find by apiName as key first
+          if (data.apiName && itemsData[data.apiName]) {
+            localizedItem = itemsData[data.apiName];
+          } else {
+            // Otherwise, search through object values
+            const itemsArray = Object.values(itemsData) as any[];
+            localizedItem = itemsArray.find((localItem: any) => {
+              // Try to match by apiName first
+              if (data.apiName && localItem.apiName === data.apiName) {
+                return true;
+              }
+              // Fallback to name matching (case insensitive)
+              if (data.name && localItem.name) {
+                return data.name.toLowerCase() === localItem.name.toLowerCase();
+              }
+              // Try enName matching
+              if (data.enName && localItem.enName) {
+                return data.enName.toLowerCase() === localItem.enName.toLowerCase();
+              }
+              return false;
+            });
+          }
         }
-      }
 
-      if (localizedItem && localizedItem.name) {
-        setLocalizedName(localizedItem.name);
-      } else {
+        if (localizedItem && localizedItem.name) {
+          setLocalizedName(localizedItem.name);
+        } else {
+          setLocalizedName(null);
+        }
+      } catch (error) {
+        console.error('Error loading localized name:', error);
         setLocalizedName(null);
       }
-    } catch (error) {
-      console.error('Error loading localized name:', error);
-      setLocalizedName(null);
-    }
+    };
+
+    loadLocalizedName();
   }, [data, language]);
 
   // Get item image URL with CDN optimization - chỉ dùng MetaTFT

@@ -50,6 +50,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
 
   // Get localized name and description from storage
   useEffect(() => {
+    const loadLocalizedData = async () => {
       if (!item || !language) {
         setLocalizedDesc(null);
         setLocalizedName(null);
@@ -59,10 +60,10 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         return;
       }
 
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const itemsKey = `data_items_${locale}`;
-      const itemsDataString = LocalStorage.getString(itemsKey);
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const itemsKey = `data_items_${locale}`;
+        const itemsDataString = await LocalStorage.getString(itemsKey);
       
       if (!itemsDataString) {
         setLocalizedDesc(null);
@@ -163,12 +164,15 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         setLocalizedEffects(item.effects || null);
       }
     } catch (error) {
-      setLocalizedDesc(null);
-      setLocalizedName(null);
-      setLocalizedIcon(null);
-      setLocalizedComposition(null);
-      setLocalizedEffects(null);
-    }
+        setLocalizedDesc(null);
+        setLocalizedName(null);
+        setLocalizedIcon(null);
+        setLocalizedComposition(null);
+        setLocalizedEffects(null);
+      }
+    };
+
+    loadLocalizedData();
   }, [item, language]);
 
 

@@ -86,16 +86,17 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
   const needUnlock = !!(unit && (unit as any).needUnlock);
   // Get localized name, ability & unlock info from storage (per language)
   useEffect(() => {
-    if (!unit || !language) {
-      setLocalizedName(null);
-      setLocalizedUnlockText(null);
-      return;
-    }
+    const loadLocalizedData = async () => {
+      if (!unit || !language) {
+        setLocalizedName(null);
+        setLocalizedUnlockText(null);
+        return;
+      }
 
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
+      try {
+        const locale = getLocaleFromLanguage(language);
+        const unitsKey = `data_units_${locale}`;
+        const unitsDataString = await LocalStorage.getString(unitsKey);
       
       if (!unitsDataString) {
         setLocalizedName(null);
@@ -208,10 +209,13 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
       console.error('Error loading localized unit data:', error);
       setLocalizedName(null);
       setLocalizedUnlockText(null);
-      setLocalizedAbilityName(null);
-      setLocalizedAbilityDesc(null);
-      setLocalizedTooltipElements(null);
-    }
+        setLocalizedAbilityName(null);
+        setLocalizedAbilityDesc(null);
+        setLocalizedTooltipElements(null);
+      }
+    };
+
+    loadLocalizedData();
   }, [unit, language]);
 
 

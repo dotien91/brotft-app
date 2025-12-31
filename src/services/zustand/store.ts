@@ -1,5 +1,5 @@
 import create, {StoreApi} from 'zustand';
-import LocalStorage from '@local-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import createAppSlice, {AppState} from '@services/zustand/app/AppSlice';
 import createUserSlice, {UserState} from '@services/zustand/user/UserSlice';
 import {createJSONStorage, persist, StateStorage} from 'zustand/middleware';
@@ -10,16 +10,29 @@ export type StoreSlice<T> = (
   get: StoreApi<StoreState>['getState'],
 ) => T;
 
-const ZustandMMKVStorage: StateStorage = {
-  setItem: (name: string, value: string) => {
-    return LocalStorage.set(name, value);
+const ZustandAsyncStorage: StateStorage = {
+  setItem: async (name: string, value: string) => {
+    try {
+      await AsyncStorage.setItem(name, value);
+    } catch (error) {
+      console.warn('ZustandAsyncStorage.setItem failed:', error);
+    }
   },
-  getItem: (name: string) => {
-    const value = LocalStorage.getString(name);
-    return value ?? null;
+  getItem: async (name: string): Promise<string | null> => {
+    try {
+      const value = await AsyncStorage.getItem(name);
+      return value ?? null;
+    } catch (error) {
+      console.warn('ZustandAsyncStorage.getItem failed:', error);
+      return null;
+    }
   },
-  removeItem: (name: string) => {
-    return LocalStorage.delete(name);
+  removeItem: async (name: string) => {
+    try {
+      await AsyncStorage.removeItem(name);
+    } catch (error) {
+      console.warn('ZustandAsyncStorage.removeItem failed:', error);
+    }
   },
 };
 
@@ -31,7 +44,7 @@ const useStore = create<StoreState>()(
     }),
     {
       name: 'store',
-      storage: createJSONStorage(() => ZustandMMKVStorage),
+      storage: createJSONStorage(() => ZustandAsyncStorage),
     },
   ),
 );

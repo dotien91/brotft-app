@@ -7,6 +7,7 @@ import createStyles from './TermsScreen.style';
 import BackButton from '@shared-components/back-button/BackButton';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import useStore, {StoreState} from '@services/zustand/store';
+import {translations} from '../../shared/localization';
 
 const TERMS_URL = 'https://web.apporastudio.com/tos';
 
@@ -62,7 +63,7 @@ const TermsScreen: React.FC = () => {
         <View style={styles.header}>
           <BackButton />
           <Text h3 bold color={colors.text} style={styles.headerTitle}>
-            Terms of Service
+            {translations.termsOfService}
           </Text>
           <View style={styles.headerSpacer} />
         </View>

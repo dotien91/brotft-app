@@ -212,7 +212,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 size={24}
               />
               <Text h3 color={colors.text} style={styles.sectionTitle}>
-                Legal
+                {translations.legal}
               </Text>
             </View>
 
@@ -228,7 +228,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                     size={20}
                   />
                   <Text color={colors.text} style={styles.optionText}>
-                    Privacy Policy
+                    {translations.privacyPolicy}
                   </Text>
                 </View>
                 <Icon
@@ -252,7 +252,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                     size={20}
                   />
                   <Text color={colors.text} style={styles.optionText}>
-                    Terms of Service
+                    {translations.termsOfService}
                   </Text>
                 </View>
                 <Icon
@@ -275,7 +275,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 size={24}
               />
               <Text h3 color={colors.text} style={styles.sectionTitle}>
-                Support
+                {translations.support}
               </Text>
             </View>
 
@@ -291,7 +291,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                     size={20}
                   />
                   <Text color={colors.text} style={styles.optionText}>
-                    Send Feedback
+                    {translations.sendFeedback}
                   </Text>
                 </View>
                 <Icon

@@ -7,6 +7,7 @@ import createStyles from './PrivacyScreen.style';
 import BackButton from '@shared-components/back-button/BackButton';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import useStore, {StoreState} from '@services/zustand/store';
+import {translations} from '../../shared/localization';
 
 const PRIVACY_URL = 'https://web.apporastudio.com/privacy';
 
@@ -62,7 +63,7 @@ const PrivacyScreen: React.FC = () => {
         <View style={styles.header}>
           <BackButton />
           <Text h3 bold color={colors.text} style={styles.headerTitle}>
-            Privacy Policy
+            {translations.privacyPolicy}
           </Text>
           <View style={styles.headerSpacer} />
         </View>

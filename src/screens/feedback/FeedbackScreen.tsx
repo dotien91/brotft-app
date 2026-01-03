@@ -8,6 +8,7 @@ import BackButton from '@shared-components/back-button/BackButton';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {submitFeedback, type IFeedbackRequest} from '@services/api/feedback';
+import {translations} from '../../shared/localization';
 
 const FeedbackScreen: React.FC = () => {
   const theme = useTheme();
@@ -20,7 +21,7 @@ const FeedbackScreen: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!content.trim()) {
-      Alert.alert('Error', 'Please enter your feedback content');
+      Alert.alert('Error', translations.feedbackError);
       return;
     }
 
@@ -36,10 +37,10 @@ const FeedbackScreen: React.FC = () => {
       
       Alert.alert(
         'Success',
-        'Thank you for your feedback!',
+        translations.feedbackSuccess,
         [
           {
-            text: 'OK',
+            text: translations.ok,
             onPress: () => {
               // Reset form
               setContent('');
@@ -51,7 +52,7 @@ const FeedbackScreen: React.FC = () => {
     } catch (error: any) {
       Alert.alert(
         'Error',
-        error?.response?.data?.message || error?.message || 'Failed to submit feedback. Please try again.',
+        error?.response?.data?.message || error?.message || translations.feedbackSubmitError,
       );
     } finally {
       setIsSubmitting(false);
@@ -64,7 +65,7 @@ const FeedbackScreen: React.FC = () => {
         <View style={styles.header}>
           <BackButton />
           <Text h3 bold color={colors.text} style={styles.headerTitle}>
-            Feedback
+            {translations.feedback}
           </Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -76,10 +77,10 @@ const FeedbackScreen: React.FC = () => {
           
           {/* Content Input */}
           <View style={styles.section}>
-            <Text style={styles.label}>Your Feedback *</Text>
+            <Text style={styles.label}>{translations.yourFeedback} *</Text>
             <TextInput
               style={styles.textArea}
-              placeholder="Please describe your feedback, suggestion, or report a bug..."
+              placeholder={translations.feedbackPlaceholder}
               placeholderTextColor={colors.placeholder}
               value={content}
               onChangeText={setContent}
@@ -91,10 +92,10 @@ const FeedbackScreen: React.FC = () => {
 
           {/* Email Input */}
           <View style={styles.section}>
-            <Text style={styles.label}>Email (Optional)</Text>
+            <Text style={styles.label}>{translations.emailOptional}</Text>
             <TextInput
               style={styles.input}
-              placeholder="your@email.com"
+              placeholder={translations.emailPlaceholder}
               placeholderTextColor={colors.placeholder}
               value={email}
               onChangeText={setEmail}
@@ -103,7 +104,7 @@ const FeedbackScreen: React.FC = () => {
               autoCorrect={false}
             />
             <Text style={styles.hint}>
-              We'll use this to follow up on your feedback if needed
+              {translations.feedbackHint}
             </Text>
           </View>
 
@@ -115,7 +116,7 @@ const FeedbackScreen: React.FC = () => {
             {isSubmitting ? (
               <ActivityIndicator color={colors.white} />
             ) : (
-              <Text style={styles.submitButtonText}>Submit Feedback</Text>
+              <Text style={styles.submitButtonText}>{translations.submitFeedback}</Text>
             )}
           </RNBounceable>
         </ScrollView>

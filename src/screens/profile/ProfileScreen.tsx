@@ -264,6 +264,45 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
               </View>
             </RNBounceable>
           </View>
+
+          {/* Support Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon
+                name="chatbubble-ellipses"
+                type={IconType.Ionicons}
+                color={colors.primary}
+                size={24}
+              />
+              <Text h3 color={colors.text} style={styles.sectionTitle}>
+                Support
+              </Text>
+            </View>
+
+            <RNBounceable
+              style={styles.optionItem}
+              onPress={() => NavigationService.push(SCREENS.FEEDBACK)}>
+              <View style={styles.optionContent}>
+                <View style={styles.optionLeft}>
+                  <Icon
+                    name="chatbubble-ellipses"
+                    type={IconType.Ionicons}
+                    color={colors.text}
+                    size={20}
+                  />
+                  <Text color={colors.text} style={styles.optionText}>
+                    Send Feedback
+                  </Text>
+                </View>
+                <Icon
+                  name="chevron-forward"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={20}
+                />
+              </View>
+            </RNBounceable>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>

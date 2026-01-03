@@ -15,6 +15,7 @@ export const SCREENS = {
   CHAMPION_DETAIL: 'ChampionDetail',
   PRIVACY: 'Privacy',
   TERMS: 'Terms',
+  FEEDBACK: 'Feedback',
   // Legacy screens (kept for compatibility)
   TOOL: 'Tool',
   SEARCH: 'Search',

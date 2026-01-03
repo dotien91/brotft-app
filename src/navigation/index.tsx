@@ -20,6 +20,7 @@ import ItemDetailScreen from '@screens/item-detail/ItemDetailScreen';
 import ChampionDetailScreen from '@screens/champion-detail/ChampionDetailScreen';
 import PrivacyScreen from '@screens/privacy/PrivacyScreen';
 import TermsScreen from '@screens/terms/TermsScreen';
+import FeedbackScreen from '@screens/feedback/FeedbackScreen';
 
 // ? If you want to use stack or tab or both
 const Tab = createBottomTabNavigator();
@@ -55,6 +56,7 @@ const getTrackingScreenName = (routeName: string): string => {
     [SCREENS.CHAMPION_DETAIL]: 'champion-detail',
     [SCREENS.PRIVACY]: 'privacy',
     [SCREENS.TERMS]: 'terms',
+    [SCREENS.FEEDBACK]: 'feedback',
     [SCREENS.HOME_ROOT]: 'home', // HomeRoot maps to home
   };
 
@@ -201,6 +203,9 @@ const Navigation = () => {
         </Stack.Screen>
         <Stack.Screen name={SCREENS.TERMS}>
           {props => <TermsScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name={SCREENS.FEEDBACK}>
+          {props => <FeedbackScreen {...props} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

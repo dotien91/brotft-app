@@ -7,10 +7,12 @@ import createStyles from './ProfileScreen.style';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import useStore, {StoreState} from '@services/zustand/store';
 import RNBounceable from '@freakycoder/react-native-bounceable';
+import * as NavigationService from 'react-navigation-helpers';
 import {translations} from '../../shared/localization';
 import {queryClient} from '@services/api/react-query';
 import {checkAndFetchDataByLocale} from '@services/api/data';
 import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
+import {SCREENS} from '@shared-constants';
 
 interface ProfileScreenProps {}
 
@@ -198,6 +200,69 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 </View>
               </TouchableOpacity>
             </Modal>
+          </View>
+
+          {/* Legal Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon
+                name="document-text"
+                type={IconType.Ionicons}
+                color={colors.primary}
+                size={24}
+              />
+              <Text h3 color={colors.text} style={styles.sectionTitle}>
+                Legal
+              </Text>
+            </View>
+
+            <RNBounceable
+              style={styles.optionItem}
+              onPress={() => NavigationService.push(SCREENS.PRIVACY)}>
+              <View style={styles.optionContent}>
+                <View style={styles.optionLeft}>
+                  <Icon
+                    name="shield-checkmark"
+                    type={IconType.Ionicons}
+                    color={colors.text}
+                    size={20}
+                  />
+                  <Text color={colors.text} style={styles.optionText}>
+                    Privacy Policy
+                  </Text>
+                </View>
+                <Icon
+                  name="chevron-forward"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={20}
+                />
+              </View>
+            </RNBounceable>
+
+            <RNBounceable
+              style={styles.optionItem}
+              onPress={() => NavigationService.push(SCREENS.TERMS)}>
+              <View style={styles.optionContent}>
+                <View style={styles.optionLeft}>
+                  <Icon
+                    name="document-text"
+                    type={IconType.Ionicons}
+                    color={colors.text}
+                    size={20}
+                  />
+                  <Text color={colors.text} style={styles.optionText}>
+                    Terms of Service
+                  </Text>
+                </View>
+                <Icon
+                  name="chevron-forward"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={20}
+                />
+              </View>
+            </RNBounceable>
           </View>
         </ScrollView>
       </SafeAreaView>

@@ -12,6 +12,9 @@ export const SCREENS = {
   TRAITS: 'Traits',
   TRAIT_DETAIL: 'TraitDetail',
   ITEM_DETAIL: 'ItemDetail',
+  CHAMPION_DETAIL: 'ChampionDetail',
+  PRIVACY: 'Privacy',
+  TERMS: 'Terms',
   // Legacy screens (kept for compatibility)
   TOOL: 'Tool',
   SEARCH: 'Search',

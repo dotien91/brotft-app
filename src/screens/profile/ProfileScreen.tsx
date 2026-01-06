@@ -13,6 +13,7 @@ import {queryClient} from '@services/api/react-query';
 import {checkAndFetchDataByLocale} from '@services/api/data';
 import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
 import {SCREENS} from '@shared-constants';
+import LocalStorage from '@services/local-storage';
 
 interface ProfileScreenProps {}
 
@@ -51,6 +52,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     setLanguage(lang);
     translations.setLanguage(lang);
     setIsLanguageDropdownOpen(false);
+
+    // Mark that user has manually set language preference
+    const LANGUAGE_FIRST_LAUNCH_KEY = 'language_first_launch_set';
+    LocalStorage.set(LANGUAGE_FIRST_LAUNCH_KEY, true);
 
     // Check and fetch data by locale in background
     try {

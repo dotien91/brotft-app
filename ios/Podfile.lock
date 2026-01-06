@@ -1644,6 +1644,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNLocalize (3.6.1):
+    - React-Core
   - RNReanimated (3.14.0):
     - DoubleConversion
     - glog
@@ -1795,6 +1797,7 @@ DEPENDENCIES:
   - "RNCMaskedView (from `../node_modules/@react-native-masked-view/masked-view`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -1958,6 +1961,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fast-image"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2046,6 +2051,7 @@ SPEC CHECKSUMS:
   RNCMaskedView: e07a0b5e9e8d6962826def06e6ff2ecdb815433f
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNGestureHandler: aa5b570c3d7cf4173e9326b1c91fdc245a006097
+  RNLocalize: c7344c139695a6587b3a250609bf8deff1482cf6
   RNReanimated: 4fd04925e2feb34c6c66daff6a02a2ff2fc4c4fe
   RNScreens: 6649de620b77a84d4bf7c7c8ff8830cc96f11cac
   RNSVG: 71c504c46dd9aa79ed52178b346e0d0de82c742f

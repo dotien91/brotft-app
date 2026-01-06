@@ -150,7 +150,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
                 borderWidth={2}
                 imageUri={imageUri}>
                 {/* 3 Stars icon */}
-                {(data as any).need3Star && (
+                {((data as any).need3Star || (cost <= 3 && (data as any).carry)) && (
                   <View style={[styles.compactTier3Icon, {
                     top: -8,
                     right: 5,

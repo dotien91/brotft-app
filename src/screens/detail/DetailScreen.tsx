@@ -479,7 +479,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                         </Hexagon>
                       </View>
                       {/* 3 Stars icon */}
-                      {unit.need3Star && (
+                      {(unit.need3Star || (unit.cost <= 3 && unit.carry)) && (
                         <View style={[styles.tier3Icon, {
                           top: -8,
                           right: 5,

@@ -60,7 +60,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             )}
           </Hexagon>
         </View>
-        {unit.need3Star && (
+        {(unit.need3Star || (unit.cost <= 3 && unit.carry)) && (
           <View style={styles.tier3Icon}>
             <ThreeStars size={36} color="#fbbf24" />
           </View>

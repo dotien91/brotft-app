@@ -1,5 +1,6 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
+import {View, ScrollView, ActivityIndicator} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import createStyles from './UnitDetailScreen.style';
@@ -21,6 +22,21 @@ import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import BackButton from '@shared-components/back-button/BackButton';
 import UnitTraitsDisplay from './components/UnitTraitsDisplay';
 import ReferenceCompositionsSection from './components/ReferenceCompositionsSection';
+import PopularItemsSection from './components/PopularItemsSection';
+
+// Popular items list
+const POPULAR_ITEMS = [
+  'TFT_Item_InfinityEdge',
+  'TFT_Item_GuinsoosRageblade',
+  'TFT_Item_SpearOfShojin',
+  'TFT_Item_MadredsBloodrazor',
+  'TFT_Item_RunaansHurricane',
+  'TFT_Item_Deathblade',
+  'TFT_Item_LastWhisper',
+  'TFT_Item_RapidFireCannon',
+  'TFT_Item_PowerGauntlet',
+  'TFT_Item_BlueBuff',
+];
 
 interface UnitDetailScreenProps {
   route?: {
@@ -397,11 +413,13 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
         
         {/* Hero Section with overlay */}
         <View style={styles.heroSection}>
-          <Image
-            source={{uri: splashUri}}
+          <FastImage
+            source={{
+              uri: splashUri,
+              priority: FastImage.priority.high,
+            }}
             style={styles.heroImage}
-            resizeMode="cover"
-            defaultSource={require('@assets/splash/splash.png')}
+            resizeMode={FastImage.resizeMode.cover}
           />
           <View style={styles.heroOverlay} />
           
@@ -423,10 +441,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     {localizedName || unit.name}
                   </Text>
                   {needUnlock && (
-                    <Image
+                    <FastImage
                       source={require('@assets/icons/unlock.png')}
                       style={styles.unlockIcon}
-                      resizeMode="contain"
+                      resizeMode={FastImage.resizeMode.contain}
                     />
                   )}
                 </View>
@@ -537,13 +555,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                       const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
                       if (abilityIconUrl) {
                         return (
-                    <Image
-                            source={{uri: abilityIconUrl}}
+                    <FastImage
+                            source={{uri: abilityIconUrl, priority: FastImage.priority.normal}}
                       style={styles.abilityIcon}
-                      resizeMode="cover"
-                      onError={() => {
-                              // Failed to load ability icon
-                            }}
+                      resizeMode={FastImage.resizeMode.cover}
                     />
                         );
                       }
@@ -552,10 +567,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
                     // Fallback to unit avatar
                     if (avatarUri) {
                       return (
-                    <Image
-                      source={{uri: avatarUri}}
+                    <FastImage
+                      source={{uri: avatarUri, priority: FastImage.priority.normal}}
                       style={styles.abilityIcon}
-                      resizeMode="cover"
+                      resizeMode={FastImage.resizeMode.cover}
                     />
                       );
                     }
@@ -610,10 +625,10 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
             </Text>
             <View style={styles.unlockCard}>
               <View style={styles.unlockRow}>
-                <Image
+                <FastImage
                   source={require('@assets/icons/unlock.png')}
                   style={styles.unlockIcon}
-                  resizeMode="contain"
+                  resizeMode={FastImage.resizeMode.contain}
                 />
                 <Text style={styles.unlockText}>{unlockText}</Text>
               </View>
@@ -626,6 +641,9 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
           unitApiName={unitApiName}
           unitApiNameFromUnit={unit?.apiName}
         />
+
+        {/* Popular Items Section */}
+        <PopularItemsSection popularItems={POPULAR_ITEMS} />
 
         {/* Suggested Items Section */}
         {/* <View style={styles.augmentsSection}>

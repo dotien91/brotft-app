@@ -29,6 +29,7 @@ interface Style {
   comingSoonTitle: TextStyle;
   footerLoader: ViewStyle;
   footerText: TextStyle;
+  costFilterText: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -195,6 +196,12 @@ export default (theme: ExtendedTheme) => {
     footerText: {
       marginTop: 8,
       fontSize: 14,
+    },
+    costFilterText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: '#ffffff',
+      letterSpacing: 0.2,
     },
   });
 };

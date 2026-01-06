@@ -14,6 +14,8 @@ import {getLocaleFromLanguage} from '@services/api/data';
 import BackButton from '@shared-components/back-button/BackButton';
 import {getItemImageUrlWithCDN} from '../../utils/metatft';
 import {translations} from '../../shared/localization';
+import RecommendedUnitsSection from './components/RecommendedUnitsSection';
+import ScreenHeaderWithBack from '@shared-components/screen-header-with-back/ScreenHeaderWithBack';
 
 interface ItemDetailScreenProps {
   route?: {
@@ -30,11 +32,20 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const language = useStore((state) => state.language);
+  
+  // Update translations when language changes
+  useEffect(() => {
+    if (language && translations.getLanguage() !== language) {
+      translations.setLanguage(language);
+    }
+  }, [language]);
+
   const [localizedDesc, setLocalizedDesc] = useState<string | null>(null);
   const [localizedName, setLocalizedName] = useState<string | null>(null);
   const [localizedIcon, setLocalizedIcon] = useState<string | null>(null);
   const [localizedComposition, setLocalizedComposition] = useState<string[] | null>(null);
   const [localizedEffects, setLocalizedEffects] = useState<any>(null);
+  const [localizedUnits, setLocalizedUnits] = useState<string[] | null>(null);
 
   const itemId =
     (routeProp?.params?.itemId ||
@@ -56,6 +67,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         setLocalizedIcon(null);
         setLocalizedComposition(null);
         setLocalizedEffects(null);
+        setLocalizedUnits(null);
         return;
       }
 
@@ -70,6 +82,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         setLocalizedIcon(null);
         setLocalizedComposition(null);
         setLocalizedEffects(null);
+        setLocalizedUnits(null);
         return;
       }
 
@@ -154,6 +167,13 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         } else {
           setLocalizedEffects(null);
         }
+        
+        // Set localized units if available
+        if (localizedItem.units && Array.isArray(localizedItem.units)) {
+          setLocalizedUnits(localizedItem.units);
+        } else {
+          setLocalizedUnits(null);
+        }
       } else {
         // Fallback to API data if no localized item found
         setLocalizedName(item.name || null);
@@ -161,6 +181,8 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         setLocalizedIcon(item.icon || null);
         setLocalizedComposition(item.composition || null);
         setLocalizedEffects(item.effects || null);
+        // Check if item has units field (may not be in interface but could be in response)
+        setLocalizedUnits((item as any).units || null);
       }
     } catch (error) {
       setLocalizedDesc(null);
@@ -168,6 +190,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
       setLocalizedIcon(null);
       setLocalizedComposition(null);
       setLocalizedEffects(null);
+      setLocalizedUnits(null);
     }
   }, [item, language]);
 
@@ -176,7 +199,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
       <Text color={colors.placeholder} style={styles.loadingText}>
-        Loading item...
+        {translations.loadingItem}
       </Text>
     </View>
   );
@@ -344,13 +367,6 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         
-        {/* Item Name */}
-        <View style={styles.nameSection}>
-          <Text h1 style={styles.itemName}>
-            {localizedName || item.name}
-          </Text>
-        </View>
-
         {/* Main Content: Icon + Recipe + Stats */}
         <View style={styles.mainContent}>
           {/* Item Icon - Left */}
@@ -367,7 +383,7 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
             {/* Recipe Section */}
             {displayComponents.length > 0 && (
               <View style={styles.recipeSection}>
-                <Text style={styles.recipeLabel}>Công Thức</Text>
+                <Text style={styles.recipeLabel}>{translations.recipe}</Text>
                 <View style={styles.recipeRow}>
                   {displayComponents.slice(0, 2).map((component, index) => {
                     const componentImage = getComponentImageUrl(component);
@@ -401,16 +417,23 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
             </Text>
           </View>
         )}
+
+        {/* Recommended Units Section */}
+        {(localizedUnits || (item as any).units) && (
+          <RecommendedUnitsSection 
+            units={localizedUnits || (item as any).units || []} 
+          />
+        )}
       </ScrollView>
     );
   };
 
+  const displayName = item ? (localizedName || item.name || '') : '';
+
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={[]}>
-        <View style={styles.header}>
-          <BackButton />
-        </View>
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScreenHeaderWithBack title={displayName} />
         {renderContent()}
       </SafeAreaView>
     </View>

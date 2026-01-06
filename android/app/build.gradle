@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.tftbuddy"
+    namespace "com.apporastudio.tftbuddy"
     defaultConfig {
-        applicationId "com.tftbuddy"
+        applicationId "com.apporastudio.tftbuddy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,4 +1,4 @@
-package com.tftbuddy
+package com.apporastudio.tftbuddy
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

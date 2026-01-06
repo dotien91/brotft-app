@@ -21,6 +21,8 @@ const App = () => {
     // Load language from store
     if (language) {
       translations.setLanguage(language);
+    } else {
+      useStore.setState({language: 'en'});
     }
   }, []);
 
@@ -40,15 +42,15 @@ const App = () => {
   }, []);
 
   React.useEffect(() => {
-    StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');
+    StatusBar.setBarStyle('light-content');
     if (isAndroid) {
       StatusBar.setBackgroundColor('rgba(0,0,0,0)');
       StatusBar.setTranslucent(true);
     }
 
-    setTimeout(() => {
-      SplashScreen.hide();
-    }, 750);
+    // setTimeout(() => {
+    //   SplashScreen.hide();
+    // }, 750);
   }, [isDarkMode]);
 
   return (

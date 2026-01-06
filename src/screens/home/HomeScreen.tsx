@@ -199,7 +199,7 @@ const HomeScreen: React.FC = () => {
   }
 
   return (
-      <SafeAreaView style={styles.safeContent} edges={['bottom', 'left', 'right']}>
+    <>
         <FlatList
           data={compositions}
           renderItem={renderTeamCard}
@@ -228,7 +228,7 @@ const HomeScreen: React.FC = () => {
           onApply={handleApplyFilter}
           selectedUnits={selectedUnits}
         />
-      </SafeAreaView>
+        </>
   );
 };
 

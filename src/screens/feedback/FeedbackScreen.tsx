@@ -4,7 +4,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import createStyles from './FeedbackScreen.style';
-import BackButton from '@shared-components/back-button/BackButton';
+import ScreenHeaderWithBack from '@shared-components/screen-header-with-back/ScreenHeaderWithBack';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {submitFeedback, type IFeedbackRequest} from '@services/api/feedback';
@@ -18,10 +18,14 @@ const FeedbackScreen: React.FC = () => {
   const [content, setContent] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async () => {
+    // Clear previous errors
+    setErrors({});
+
     if (!content.trim()) {
-      Alert.alert('Error', translations.feedbackError);
+      setErrors({content: translations.feedbackError});
       return;
     }
 
@@ -45,15 +49,33 @@ const FeedbackScreen: React.FC = () => {
               // Reset form
               setContent('');
               setEmail('');
+              setErrors({});
             },
           },
         ],
       );
     } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error?.response?.data?.message || error?.message || translations.feedbackSubmitError,
-      );
+      // Handle validation errors (422)
+      if (error?.response?.status === 422 && error?.response?.data?.errors) {
+        const validationErrors: Record<string, string> = {};
+        const apiErrors = error.response.data.errors;
+        
+        // Map API errors to form fields
+        Object.keys(apiErrors).forEach((field) => {
+          const errorMessage = Array.isArray(apiErrors[field]) 
+            ? apiErrors[field][0] 
+            : apiErrors[field];
+          validationErrors[field] = errorMessage;
+        });
+        
+        setErrors(validationErrors);
+      } else {
+        // Handle other errors
+        Alert.alert(
+          'Error',
+          error?.response?.data?.message || error?.message || translations.feedbackSubmitError,
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -62,13 +84,7 @@ const FeedbackScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.header}>
-          <BackButton />
-          <Text h3 bold color={colors.text} style={styles.headerTitle}>
-            {translations.feedback}
-          </Text>
-          <View style={styles.headerSpacer} />
-        </View>
+        <ScreenHeaderWithBack title={translations.feedback} />
 
         <ScrollView
           style={styles.scrollView}
@@ -79,33 +95,53 @@ const FeedbackScreen: React.FC = () => {
           <View style={styles.section}>
             <Text style={styles.label}>{translations.yourFeedback} *</Text>
             <TextInput
-              style={styles.textArea}
+              style={[
+                styles.textArea,
+                errors.content && styles.inputError,
+              ]}
               placeholder={translations.feedbackPlaceholder}
               placeholderTextColor={colors.placeholder}
               value={content}
-              onChangeText={setContent}
+              onChangeText={(text) => {
+                setContent(text);
+                if (errors.content) {
+                  setErrors(prev => ({...prev, content: ''}));
+                }
+              }}
               multiline
               numberOfLines={6}
               textAlignVertical="top"
             />
+            {errors.content && (
+              <Text style={styles.errorText}>{errors.content}</Text>
+            )}
           </View>
 
           {/* Email Input */}
           <View style={styles.section}>
             <Text style={styles.label}>{translations.emailOptional}</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.email && styles.inputError]}
               placeholder={translations.emailPlaceholder}
               placeholderTextColor={colors.placeholder}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) {
+                  setErrors(prev => ({...prev, email: ''}));
+                }
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <Text style={styles.hint}>
-              {translations.feedbackHint}
-            </Text>
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : (
+              <Text style={styles.hint}>
+                {translations.feedbackHint}
+              </Text>
+            )}
           </View>
 
           {/* Submit Button */}

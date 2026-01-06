@@ -118,16 +118,20 @@ export default (theme: ExtendedTheme) => {
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.blackOverlay,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 20,
     },
     dropdownContainer: {
       backgroundColor: colors.card,
       borderRadius: 12,
       minWidth: 200,
-      maxWidth: 300,
       overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
     dropdownItem: {
       borderBottomWidth: 1,

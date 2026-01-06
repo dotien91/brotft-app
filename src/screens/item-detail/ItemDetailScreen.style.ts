@@ -69,6 +69,7 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
     },
     scrollContent: {
+      paddingTop: 16,
       paddingBottom: 40,
     },
     loadingContainer: {
@@ -135,6 +136,7 @@ export default (theme: ExtendedTheme) => {
     mainContent: {
       flexDirection: 'row',
       paddingHorizontal: 20,
+      paddingTop: 8,
       paddingBottom: 20,
       gap: 16,
     },

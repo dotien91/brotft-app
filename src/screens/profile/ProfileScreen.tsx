@@ -1,4 +1,4 @@
-import React, {useMemo, useEffect, useState} from 'react';
+import React, {useMemo, useEffect, useState, useRef} from 'react';
 import {View, ScrollView, Modal, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
@@ -33,6 +33,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const setLanguage = useStore((state: StoreState) => state.setLanguage);
 
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const languageOptionRef = useRef<View>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0});
 
   // Update translations when language changes
   useEffect(() => {
@@ -142,21 +144,32 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
             </View>
 
             {/* Language Dropdown */}
-            <RNBounceable
-              style={styles.optionItem}
-              onPress={() => setIsLanguageDropdownOpen(true)}>
-              <View style={styles.optionContent}>
-                <Text color={colors.text} style={styles.optionText}>
-                  {getCurrentLanguageLabel()}
-                </Text>
-                <Icon
-                  name="chevron-down"
-                  type={IconType.Ionicons}
-                  color={colors.placeholder}
-                  size={20}
-                />
-              </View>
-            </RNBounceable>
+            <View ref={languageOptionRef}>
+              <RNBounceable
+                style={styles.optionItem}
+                onPress={() => {
+                  languageOptionRef.current?.measure((x, y, width, height, pageX, pageY) => {
+                    setDropdownPosition({
+                      top: pageY + height,
+                      left: pageX,
+                      width: width,
+                    });
+                    setIsLanguageDropdownOpen(true);
+                  });
+                }}>
+                <View style={styles.optionContent}>
+                  <Text color={colors.text} style={styles.optionText}>
+                    {getCurrentLanguageLabel()}
+                  </Text>
+                  <Icon
+                    name="chevron-down"
+                    type={IconType.Ionicons}
+                    color={colors.placeholder}
+                    size={20}
+                  />
+                </View>
+              </RNBounceable>
+            </View>
 
             {/* Language Dropdown Modal */}
             <Modal
@@ -169,7 +182,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 activeOpacity={1}
                 onPress={() => setIsLanguageDropdownOpen(false)}>
                 <View
-                  style={styles.dropdownContainer}
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      position: 'absolute',
+                      top: dropdownPosition.top,
+                      left: dropdownPosition.left,
+                      width: dropdownPosition.width || 300,
+                    },
+                  ]}
                   onStartShouldSetResponder={() => true}
                   onTouchEnd={(e) => e.stopPropagation()}>
                   {languages.map((lang) => (

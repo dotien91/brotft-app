@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect, useCallback} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {
   FlatList,
   View,
@@ -11,14 +11,14 @@ import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideUnitItem from './components/GuideUnitItem';
-import FilterModal from './components/FilterModal';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnitsFilters} from '@services/models/tft-unit';
 import {SCREENS} from '@shared-constants';
-import UnitCost from '@shared-components/unit-cost/UnitCost';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
+import {getUnitCostBorderColor} from '../../../utils/unitCost';
+import CostIcon from '@shared-components/cost-icon/CostIcon';
 
 interface UnitsTabProps {
   enabled?: boolean;
@@ -33,41 +33,6 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   const [appliedCost, setAppliedCost] = useState<number | undefined>(undefined);
   const [appliedTrait, setAppliedTrait] = useState<string | undefined>(undefined);
   const [appliedRole, setAppliedRole] = useState<string | undefined>(undefined);
-  
-  // Temp filters (for modal, before applying)
-  const [tempCost, setTempCost] = useState<number | undefined>(undefined);
-  const [tempTrait, setTempTrait] = useState<string | undefined>(undefined);
-  const [tempRole, setTempRole] = useState<string | undefined>(undefined);
-  
-  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
-  // Initialize temp filters when opening modal
-  useEffect(() => {
-    if (isFilterModalVisible) {
-      setTempCost(appliedCost);
-      setTempTrait(appliedTrait);
-      setTempRole(appliedRole);
-    }
-  }, [isFilterModalVisible, appliedCost, appliedTrait, appliedRole]);
-
-  const handleApplyFilters = () => {
-    setAppliedCost(tempCost);
-    setAppliedTrait(tempTrait);
-    setAppliedRole(tempRole);
-    setIsFilterModalVisible(false);
-  };
-
-  const handleClearAllFilters = () => {
-    setTempCost(undefined);
-    setTempTrait(undefined);
-    setTempRole(undefined);
-  };
-
-  const handleClearAppliedFilters = () => {
-    setAppliedCost(undefined);
-    setAppliedTrait(undefined);
-    setAppliedRole(undefined);
-  };
 
   // Build filters object from applied filters
   const filters = useMemo<ITftUnitsFilters | undefined>(() => {
@@ -166,32 +131,37 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   ), [styles.centerContainer, styles.centerText, colors.danger, colors.placeholder, error, translations.errorLoadingUnitsTab, translations.somethingWentWrong]);
 
   const hasActiveFilters = useMemo(() => appliedCost !== undefined || appliedTrait || appliedRole, [appliedCost, appliedTrait, appliedRole]);
-  const hasTempFilters = useMemo(() => !!(tempCost !== undefined || tempTrait || tempRole), [tempCost, tempTrait, tempRole]);
 
-  const activeFiltersCount = useMemo(() => [appliedCost, appliedTrait, appliedRole].filter(Boolean).length, [appliedCost, appliedTrait, appliedRole]);
+  const handleCostToggle = useCallback((cost: number) => {
+    // If clicking the same cost, clear it (toggle off)
+    // Otherwise, set it (toggle on)
+    setAppliedCost(currentCost => currentCost === cost ? undefined : cost);
+  }, []);
 
-  const handleFilterModalOpen = useCallback(() => setIsFilterModalVisible(true), []);
-  const handleFilterModalClose = useCallback(() => setIsFilterModalVisible(false), []);
-
-  const handleRemoveCostFilter = useCallback(() => setAppliedCost(undefined), []);
   const handleRemoveTraitFilter = useCallback(() => setAppliedTrait(undefined), []);
   const handleRemoveRoleFilter = useCallback(() => setAppliedRole(undefined), []);
 
-  const handleCostSelect = useCallback((value: string | number | boolean) => {
-    setTempCost(tempCost === value ? undefined : (value as number));
-  }, [tempCost]);
+  // Cost options for direct display
+  const costOptions = useMemo(() => [1, 2, 3, 4, 5, 7], []);
 
-  // Filter sections for modal
-  const filterSections = useMemo(() => [
-    {
-      title: translations.cost,
-      type: 'single' as const,
-      compact: true, // Enable compact layout for short content
-      options: [1, 2, 3, 4, 5].map(cost => ({label: `${translations.cost} ${cost}`, value: cost})),
-      selected: tempCost,
-      onSelect: handleCostSelect,
-    },
-  ], [tempCost, translations.cost, handleCostSelect]);
+  // Style helpers for cost buttons - style like UnitCostBadge
+  const getCostButtonStyle = useCallback((cost: number) => {
+    const costColor = getUnitCostBorderColor(cost, colors.border || '#94a3b8');
+    const isActive = appliedCost === cost;
+    
+    return {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      paddingHorizontal: 6,
+      paddingVertical: 4,
+      borderRadius: 8,
+      borderWidth: 1,
+      gap: 4,
+      backgroundColor: costColor,
+      borderColor: costColor,
+      opacity: isActive ? 1 : 0.6,
+    };
+  }, [appliedCost, colors.border]);
 
   if (isLoading && unitsList.length === 0) {
     return renderLoading();
@@ -200,100 +170,56 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   if (isError && unitsList.length === 0) {
     return renderError();
   }
+
   return (
     <View style={styles.container}>
-      {/* Filter Button and Active Filters */}
+      {/* Cost Filter Buttons */}
       <View style={styles.activeFiltersContainer}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.activeFiltersContent}>
-          <TouchableOpacity
-            onPress={handleFilterModalOpen}
-            style={[styles.filterButton, hasActiveFilters && {backgroundColor: colors.primary + '20'}]}>
-            <Icon
-              name="filter"
-              type={IconType.Ionicons}
-              color={hasActiveFilters ? colors.primary : colors.placeholder}
-              size={20}
-            />
-            {hasActiveFilters && (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>
-                  {activeFiltersCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-          {!hasActiveFilters && (
-            <Text style={styles.allText}>{translations.all}</Text>
-          )}
-          {hasActiveFilters && (
-            <>
-            {appliedCost !== undefined && (
-              <View style={styles.activeFilterChip}>
-                <UnitCost cost={appliedCost} size={14} active={true} />
-                <TouchableOpacity
-                  onPress={handleRemoveCostFilter}
-                  style={styles.activeFilterClose}>
-                  <Icon
-                    name="close-circle"
-                    type={IconType.Ionicons}
-                    color={colors.placeholder}
-                    size={16}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-            {appliedTrait && (
-              <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
-                <TouchableOpacity
-                  onPress={handleRemoveTraitFilter}
-                  style={styles.activeFilterClose}>
-                  <Icon
-                    name="close-circle"
-                    type={IconType.Ionicons}
-                    color={colors.placeholder}
-                    size={16}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-            {appliedRole && (
-              <View style={styles.activeFilterChip}>
-                <Text style={styles.activeFilterText}>{translations.role}: {appliedRole}</Text>
-                <TouchableOpacity
-                  onPress={handleRemoveRoleFilter}
-                  style={styles.activeFilterClose}>
-                  <Icon
-                    name="close-circle"
-                    type={IconType.Ionicons}
-                    color={colors.placeholder}
-                    size={16}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
+          {costOptions.map((cost) => (
             <TouchableOpacity
-              onPress={handleClearAppliedFilters}
-              style={styles.clearAllButton}>
-              <Text style={styles.clearAllText}>{translations.clearAll}</Text>
+              key={cost}
+              onPress={() => handleCostToggle(cost)}
+              style={getCostButtonStyle(cost)}>
+              <CostIcon size={12} color="#ffffff" />
+              <Text style={styles.costFilterText}>{cost}</Text>
             </TouchableOpacity>
-            </>
+          ))}
+          {appliedTrait && (
+            <View style={styles.activeFilterChip}>
+              <Text style={styles.activeFilterText}>{translations.trait}: {appliedTrait}</Text>
+              <TouchableOpacity
+                onPress={handleRemoveTraitFilter}
+                style={styles.activeFilterClose}>
+                <Icon
+                  name="close-circle"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={16}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+          {appliedRole && (
+            <View style={styles.activeFilterChip}>
+              <Text style={styles.activeFilterText}>{translations.role}: {appliedRole}</Text>
+              <TouchableOpacity
+                onPress={handleRemoveRoleFilter}
+                style={styles.activeFilterClose}>
+                <Icon
+                  name="close-circle"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={16}
+                />
+              </TouchableOpacity>
+            </View>
           )}
         </ScrollView>
       </View>
-
-      {/* Filter Modal */}
-      <FilterModal
-        visible={isFilterModalVisible}
-        onClose={handleFilterModalClose}
-        onApply={handleApplyFilters}
-        sections={filterSections}
-        hasActiveFilters={hasTempFilters}
-        onClearAll={handleClearAllFilters}
-      />
 
       {/* Units List */}
       {isNoData ? (

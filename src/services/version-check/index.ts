@@ -6,7 +6,7 @@ import {translations} from '../../shared/localization';
 
 // App Store ID và Play Store Package Name
 const APP_STORE_ID = 'YOUR_IOS_APP_ID'; // Thay bằng App Store ID thật
-const PLAY_STORE_ID = 'com.tftbuddy';
+const PLAY_STORE_ID = 'com.apporastudio.tftbuddy';
 
 let isUpdateAlertVisible = false;
 
@@ -42,6 +42,11 @@ export const checkAndForceUpdate = async () => {
   
   try {
     const currentVersion = VersionCheck.getCurrentVersion();
+    if (!currentVersion) {
+      console.log('Version check: Could not get current version');
+      return;
+    }
+
     const latestVersion = (await Promise.race([
       VersionCheck.getLatestVersion({
         packageName: PLAY_STORE_ID,
@@ -51,14 +56,21 @@ export const checkAndForceUpdate = async () => {
       ),
     ])) as string;
     
-    const {isNeeded} = await VersionCheck.needUpdate({
+    if (!latestVersion) {
+      console.log('Version check: Could not get latest version');
+      return;
+    }
+    
+    const updateInfo = await VersionCheck.needUpdate({
       currentVersion,
       latestVersion,
     });
 
-    if (!isNeeded) {
+    if (!updateInfo || !updateInfo.isNeeded) {
       return;
     }
+
+    const {isNeeded} = updateInfo;
 
     const moveToStore = async () => {
       let urlString = '';

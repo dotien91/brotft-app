@@ -1,4 +1,4 @@
-package com.tftbuddy
+package com.apporastudio.tftbuddy
 
 import android.app.Application
 import com.facebook.react.PackageList

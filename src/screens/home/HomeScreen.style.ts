@@ -188,6 +188,7 @@ export default (theme: ExtendedTheme) => {
       padding: 2,
     },
     listContent: {
+      paddingBottom: 100,
     },
     teamCard: {
       backgroundColor: colors.card,

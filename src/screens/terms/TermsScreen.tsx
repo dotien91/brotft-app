@@ -4,8 +4,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
 import {WebView} from 'react-native-webview';
 import createStyles from './TermsScreen.style';
-import BackButton from '@shared-components/back-button/BackButton';
-import Text from '@shared-components/text-wrapper/TextWrapper';
+import ScreenHeaderWithBack from '@shared-components/screen-header-with-back/ScreenHeaderWithBack';
 import useStore, {StoreState} from '@services/zustand/store';
 import {translations} from '../../shared/localization';
 
@@ -60,13 +59,7 @@ const TermsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.header}>
-          <BackButton />
-          <Text h3 bold color={colors.text} style={styles.headerTitle}>
-            {translations.termsOfService}
-          </Text>
-          <View style={styles.headerSpacer} />
-        </View>
+        <ScreenHeaderWithBack title={translations.termsOfService} />
         <WebView
           source={{uri: TERMS_URL}}
           style={styles.webView}

@@ -176,7 +176,6 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
             source={{uri: splashUri}}
             style={styles.heroImage}
             resizeMode="cover"
-            defaultSource={require('@assets/splash/splash.png')}
           />
           <View style={styles.heroOverlay} />
           

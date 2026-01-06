@@ -40,25 +40,28 @@ const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   // Build filters object from applied filters
+  // Temporarily disabled - always return undefined
   const filters = useMemo<ITftAugmentsFilters | undefined>(() => {
-    const filterObj: ITftAugmentsFilters = {};
-    
-    if (appliedStage) {
-      filterObj.stage = appliedStage;
-    }
-    if (appliedTrait) {
-      filterObj.trait = appliedTrait;
-    }
-    if (appliedTier !== undefined) {
-      filterObj.tier = appliedTier;
-    }
+    // Temporarily commented out - filters disabled
+    // const filterObj: ITftAugmentsFilters = {};
+    // 
+    // if (appliedStage) {
+    //   filterObj.stage = appliedStage;
+    // }
+    // if (appliedTrait) {
+    //   filterObj.trait = appliedTrait;
+    // }
+    // if (appliedTier !== undefined) {
+    //   filterObj.tier = appliedTier;
+    // }
 
-    // Return undefined if no filters to avoid unnecessary API calls
-    if (Object.keys(filterObj).length === 0) {
-      return undefined;
-    }
+    // // Return undefined if no filters to avoid unnecessary API calls
+    // if (Object.keys(filterObj).length === 0) {
+    //   return undefined;
+    // }
 
-    return filterObj;
+    // return filterObj;
+    return undefined;
   }, [appliedStage, appliedTrait, appliedTier]);
 
   // Default sort (always by name, ascending)
@@ -243,7 +246,8 @@ const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
   return (
     <View style={styles.container}>
       {/* Filter Button and Active Filters */}
-      <View style={styles.activeFiltersContainer}>
+      {/* Temporarily commented out */}
+      {/* <View style={styles.activeFiltersContainer}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -323,17 +327,18 @@ const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
             </>
           )}
         </ScrollView>
-      </View>
+      </View> */}
 
       {/* Filter Modal */}
-      <FilterModal
+      {/* Temporarily commented out */}
+      {/* <FilterModal
         visible={isFilterModalVisible}
         onClose={handleFilterModalClose}
         onApply={handleApplyFilters}
         sections={filterSections}
         hasActiveFilters={hasTempFilters}
         onClearAll={handleClearAllFilters}
-      />
+      /> */}
 
       {/* Augments List */}
       {isNoData ? (

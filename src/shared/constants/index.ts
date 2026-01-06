@@ -1,5 +1,7 @@
 // ? API
-export const API_BASE_URL = 'http://localhost:3900';
+export const API_BASE_URL = __DEV__
+  ? 'http://localhost:3900'
+  : 'https://api.apporastudio.com';
 
 // ? Screens
 export const SCREENS = {

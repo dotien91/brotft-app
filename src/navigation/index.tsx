@@ -198,15 +198,9 @@ const Navigation = () => {
         <Stack.Screen name={SCREENS.CHAMPION_DETAIL}>
           {props => <ChampionDetailScreen {...props} />}
         </Stack.Screen>
-        <Stack.Screen name={SCREENS.PRIVACY}>
-          {props => <PrivacyScreen {...props} />}
-        </Stack.Screen>
-        <Stack.Screen name={SCREENS.TERMS}>
-          {props => <TermsScreen {...props} />}
-        </Stack.Screen>
-        <Stack.Screen name={SCREENS.FEEDBACK}>
-          {props => <FeedbackScreen {...props} />}
-        </Stack.Screen>
+        <Stack.Screen name={SCREENS.PRIVACY} component={PrivacyScreen} />
+        <Stack.Screen name={SCREENS.TERMS} component={TermsScreen} />
+        <Stack.Screen name={SCREENS.FEEDBACK} component={FeedbackScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

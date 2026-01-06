@@ -312,7 +312,7 @@ export const useChampionsByCost = (
   return createListQueryHook({
     queryKey: championKeys.byCost,
     queryFn: getChampionsByCost,
-    enabled: (cost?: number) => !!cost && cost >= 1 && cost <= 5,
+    enabled: (cost?: number) => !!cost && cost >= 1 && cost <= 7,
   })(cost, queryOptions);
 };
 
@@ -558,7 +558,7 @@ export const useTftUnitsByCost = (
   return createListQueryHook({
     queryKey: tftUnitKeys.byCost,
     queryFn: getTftUnitsByCost,
-    enabled: (cost?: number) => !!cost && cost >= 1 && cost <= 5,
+    enabled: (cost?: number) => !!cost && cost >= 1 && cost <= 7,
   })(cost, queryOptions);
 };
 

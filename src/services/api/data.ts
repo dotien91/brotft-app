@@ -98,8 +98,10 @@ export const checkAndFetchDataByLocale = async (language: string): Promise<boole
 
   // If all data exists, return early
   if (hasUnits && hasItems && hasTraits && hasAugments) {
+
     return true;
   }
+
 
   // If any data is missing, fetch all data
   try {

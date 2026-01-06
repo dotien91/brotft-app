@@ -4,16 +4,15 @@ import {ExtendedTheme} from '@react-navigation/native';
 interface Style {
   container: ViewStyle;
   safeArea: ViewStyle;
-  header: ViewStyle;
-  headerTitle: TextStyle;
-  headerSpacer: ViewStyle;
   scrollView: ViewStyle;
   scrollContent: ViewStyle;
   section: ViewStyle;
   label: TextStyle;
   textArea: TextStyle;
   input: TextStyle;
+  inputError: ViewStyle;
   hint: TextStyle;
+  errorText: TextStyle;
   submitButton: ViewStyle;
   submitButtonDisabled: ViewStyle;
   submitButtonText: TextStyle;
@@ -28,27 +27,6 @@ export default (theme: ExtendedTheme) => {
     },
     safeArea: {
       flex: 1,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 16,
-      backgroundColor: colors.card,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    headerTitle: {
-      flex: 1,
-      textAlign: 'center',
-      marginHorizontal: 12,
-      fontSize: 20,
-      fontWeight: '700',
-      letterSpacing: -0.3,
-    },
-    headerSpacer: {
-      width: 44,
     },
     scrollView: {
       flex: 1,
@@ -86,11 +64,20 @@ export default (theme: ExtendedTheme) => {
       borderWidth: 1,
       borderColor: colors.border,
     },
+    inputError: {
+      borderColor: colors.danger || '#ef4444',
+      borderWidth: 1.5,
+    },
     hint: {
       fontSize: 12,
       color: colors.placeholder,
       marginTop: 8,
       fontStyle: 'italic',
+    },
+    errorText: {
+      fontSize: 12,
+      color: colors.danger || '#ef4444',
+      marginTop: 8,
     },
     submitButton: {
       backgroundColor: colors.primary,

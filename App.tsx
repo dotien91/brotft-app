@@ -73,44 +73,46 @@ const App = () => {
   const isDarkMode = useStore((state) => state.isDarkMode);
   const language = useStore((state) => state.language);
   const setLanguage = useStore((state) => state.setLanguage);
+  const [isLanguageReady, setIsLanguageReady] = React.useState(false);
 
   React.useEffect(() => {
     // Check if this is first time app launch (no language preference saved)
     // Zustand persist key is 'store', we check if language was actually saved by user
     const LANGUAGE_FIRST_LAUNCH_KEY = 'language_first_launch_set';
     
-    React.startTransition(() => {
-      // Check if user has ever set a language preference
-      const hasSetLanguageBefore = LocalStorage.getBoolean(LANGUAGE_FIRST_LAUNCH_KEY) ?? false;
-      if (hasSetLanguageBefore) {
-        // User has set language before, use saved preference
-        if (language) {
-          translations.setLanguage(language);
-
-        } else {
-          translations.setLanguage('en');
-        }
+    // Check if user has ever set a language preference
+    const hasSetLanguageBefore = LocalStorage.getBoolean(LANGUAGE_FIRST_LAUNCH_KEY) ?? false;
+    
+    if (hasSetLanguageBefore) {
+      // User has set language before, use saved preference
+      if (language) {
+        translations.setLanguage(language);
       } else {
-        // First time launch - auto-detect from device
-        try {
-          const locales = getLocales();
-          const detectedLanguage = getLanguageFromLocales(locales);
-          
-          // Set detected language
-          setLanguage(detectedLanguage);
-          translations.setLanguage(detectedLanguage);
-          
-          // Mark that language has been set (even if auto-detected)
-          LocalStorage.set(LANGUAGE_FIRST_LAUNCH_KEY, true);
-        } catch (error) {
-          // Fallback to English if detection fails
-          console.log('Failed to detect device language:', error);
-          setLanguage('en');
-          translations.setLanguage('en');
-          LocalStorage.set(LANGUAGE_FIRST_LAUNCH_KEY, true);
-        }
+        translations.setLanguage('en');
       }
-    });
+      setIsLanguageReady(true);
+    } else {
+      // First time launch - auto-detect from device
+      try {
+        const locales = getLocales();
+        const detectedLanguage = getLanguageFromLocales(locales);
+        
+        // Set detected language
+        setLanguage(detectedLanguage);
+        translations.setLanguage(detectedLanguage);
+        
+        // Mark that language has been set (even if auto-detected)
+        LocalStorage.set(LANGUAGE_FIRST_LAUNCH_KEY, true);
+        setIsLanguageReady(true);
+      } catch (error) {
+        // Fallback to English if detection fails
+        console.log('Failed to detect device language:', error);
+        setLanguage('en');
+        translations.setLanguage('en');
+        LocalStorage.set(LANGUAGE_FIRST_LAUNCH_KEY, true);
+        setIsLanguageReady(true);
+      }
+    }
   }, []);
 
   // Check and fetch data by locale on app startup
@@ -139,6 +141,11 @@ const App = () => {
     //   SplashScreen.hide();
     // }, 750);
   }, [isDarkMode]);
+
+  // Only render Navigation after language has been set
+  if (!isLanguageReady) {
+    return null; // or return a loading screen
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import type {ITftAugment} from '@services/models/tft-augment';
@@ -7,6 +7,9 @@ import createStyles from './GuideItemItem.style';
 import {getAugmentIconUrlFromPath} from '../../../../utils/metatft';
 import {parseAugmentDescription} from '../../../../shared/utils/parseAugmentDescription';
 import {translations} from '../../../../shared/localization';
+import useStore from '@services/zustand/store';
+import LocalStorage from '@services/local-storage';
+import {getLocaleFromLanguage} from '@services/api/data';
 
 interface GuideAugmentItemProps {
   data: ITftAugment;
@@ -17,14 +20,91 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const language = useStore((state) => state.language);
+  const [localizedName, setLocalizedName] = useState<string | null>(null);
+  const [localizedDesc, setLocalizedDesc] = useState<string | null>(null);
+  const [localizedEffects, setLocalizedEffects] = useState<any | null>(null);
+  const [localizedVariableMatches, setLocalizedVariableMatches] = useState<any | null>(null);
 
-  const {name, icon, stage, trait, unique, desc, tags, effects, variableMatches} = data;
+  const {name, icon, stage, trait, unique, desc, tags, effects, variableMatches, apiName} = data;
+
+  // Get localized augment name and description from storage
+  useEffect(() => {
+    if (!apiName || !language) {
+      setLocalizedName(null);
+      setLocalizedDesc(null);
+      setLocalizedEffects(null);
+      setLocalizedVariableMatches(null);
+      return;
+    }
+
+    try {
+      const locale = getLocaleFromLanguage(language);
+      const augmentsKey = `data_augments_${locale}`;
+      const augmentsDataString = LocalStorage.getString(augmentsKey);
+      
+      if (!augmentsDataString) {
+        setLocalizedName(null);
+        setLocalizedDesc(null);
+        setLocalizedEffects(null);
+        setLocalizedVariableMatches(null);
+        return;
+      }
+
+      const augmentsData = JSON.parse(augmentsDataString);
+      let localizedAugment: any = null;
+
+      // Find augment by apiName from local storage
+      if (augmentsData) {
+        if (Array.isArray(augmentsData)) {
+          localizedAugment = augmentsData.find((augment: any) => 
+            augment.apiName === apiName || augment.apiName === name || augment.name === name
+          );
+        } else if (typeof augmentsData === 'object' && augmentsData !== null) {
+          // Try by apiName as key first
+          if (augmentsData[apiName]) {
+            localizedAugment = augmentsData[apiName];
+          } else {
+            // Search through object values
+            const augmentsArray = Object.values(augmentsData) as any[];
+            localizedAugment = augmentsArray.find((augment: any) => 
+              augment.apiName === apiName || augment.apiName === name || augment.name === name
+            );
+          }
+        }
+      }
+
+      if (localizedAugment) {
+        setLocalizedName(localizedAugment.name || null);
+        setLocalizedDesc(localizedAugment.desc || localizedAugment.description || null);
+        setLocalizedEffects(localizedAugment.effects || null);
+        setLocalizedVariableMatches(localizedAugment.variableMatches || null);
+      } else {
+        setLocalizedName(null);
+        setLocalizedDesc(null);
+        setLocalizedEffects(null);
+        setLocalizedVariableMatches(null);
+      }
+    } catch (error) {
+      console.error('Error loading localized augment:', error);
+      setLocalizedName(null);
+      setLocalizedDesc(null);
+      setLocalizedEffects(null);
+      setLocalizedVariableMatches(null);
+    }
+  }, [apiName, name, language]);
+
+  // Use localized or fallback to API data
+  const displayName = localizedName || name || '---';
+  const displayDesc = localizedDesc || desc;
+  const displayEffects = localizedEffects || effects;
+  const displayVariableMatches = localizedVariableMatches || variableMatches;
 
   // Parse description with variables
   const parsedDescription = useMemo(() => {
-    if (!desc) return null;
-    return parseAugmentDescription(desc, effects, variableMatches);
-  }, [desc, effects, variableMatches]);
+    if (!displayDesc) return null;
+    return parseAugmentDescription(displayDesc, displayEffects, displayVariableMatches);
+  }, [displayDesc, displayEffects, displayVariableMatches]);
 
   // Get augment image URL - memoized
   const imageUri = useMemo(() => {
@@ -131,7 +211,7 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
         {/* Title and Tags */}
         <View style={titleRowStyle}>
           <Text style={styles.itemName} numberOfLines={1}>
-            {name || '---'}
+            {displayName}
           </Text>
           {(stage || trait || unique || (tags && tags.length > 0)) && (
             <View style={tagsContainerStyle}>

@@ -25,6 +25,17 @@ module.exports = {
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
     ],
+    // Remove console logs in production (keep console.error and console.warn)
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          [
+            'transform-remove-console',
+            {
+              exclude: ['error', 'warn'],
+            },
+          ],
+        ]
+      : []),
     'react-native-reanimated/plugin',
   ],
 };

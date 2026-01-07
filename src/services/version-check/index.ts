@@ -5,7 +5,7 @@ import {isAndroid} from '@freakycoder/react-native-helpers';
 import {translations} from '../../shared/localization';
 
 // App Store ID và Play Store Package Name
-const APP_STORE_ID = 'YOUR_IOS_APP_ID'; // Thay bằng App Store ID thật
+const APP_STORE_ID = '6757330447'; // Thay bằng App Store ID thật
 const PLAY_STORE_ID = 'com.apporastudio.tftbuddy';
 
 let isUpdateAlertVisible = false;

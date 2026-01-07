@@ -30,6 +30,10 @@ const getLanguageFromLocales = (locales: Array<{languageCode: string; countryCod
     'zh-CN': 'zh-CN',
     'tr': 'tr-TR',
     'tr-TR': 'tr-TR',
+    'ja': 'ja-JP',
+    'ja-JP': 'ja-JP',
+    'es': 'es-ES',
+    'es-ES': 'es-ES',
     'en': 'en',
   };
   
@@ -38,6 +42,8 @@ const getLanguageFromLocales = (locales: Array<{languageCode: string; countryCod
     'VN': 'vi',
     'CN': 'zh-CN',
     'TR': 'tr-TR',
+    'JP': 'ja-JP',
+    'ES': 'es-ES',
   };
   
   // Get first locale (highest priority)
@@ -76,11 +82,11 @@ const App = () => {
     React.startTransition(() => {
       // Check if user has ever set a language preference
       const hasSetLanguageBefore = LocalStorage.getBoolean(LANGUAGE_FIRST_LAUNCH_KEY) ?? false;
-      
       if (hasSetLanguageBefore) {
         // User has set language before, use saved preference
         if (language) {
           translations.setLanguage(language);
+
         } else {
           translations.setLanguage('en');
         }
@@ -113,14 +119,14 @@ const App = () => {
   }, [language]);
 
   // Check app version on startup
-  React.useEffect(() => {
-    // Check version sau khi app đã load xong
-    const timer = setTimeout(() => {
-      checkAndForceUpdate();
-    }, 1500); // Đợi 1.5 giây để app load xong
+  // React.useEffect(() => {
+  //   // Check version sau khi app đã load xong
+  //   const timer = setTimeout(() => {
+  //     checkAndForceUpdate();
+  //   }, 1500); // Đợi 1.5 giây để app load xong
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   React.useEffect(() => {
     StatusBar.setBarStyle('light-content');

@@ -1,11 +1,11 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useEffect} from 'react';
 import {View, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {translations} from '../../../../shared/localization';
 import createStyles from '../../HomeScreen.style';
 
-const HomeHeaderCover: React.FC = React.memo(() => {
+const HomeHeaderCover: React.FC = (() => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 

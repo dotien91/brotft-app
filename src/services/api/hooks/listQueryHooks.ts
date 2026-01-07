@@ -1514,6 +1514,7 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
   } = useCompositions({page, limit}, {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to ensure refetch on page change
   });
 
   // Handle data accumulation and hasMore state
@@ -1560,12 +1561,18 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
     }
   };
 
-  const refresh = () => {
+  const refresh = async () => {
+    const wasOnPage1 = page === 1;
+    // Set page to 1 first
     setPage(1);
-    setAllCompositions([]);
     setHasMore(true);
     setIsNoData(false);
-    refetch();
+    // If already on page 1, force refetch since query key won't change
+    // Otherwise, React Query will automatically refetch when page changes
+    if (wasOnPage1) {
+      await refetch();
+    }
+    // Don't clear data immediately - let useEffect handle it when new data arrives
   };
 
   return {
@@ -1688,11 +1695,17 @@ export const useSearchCompositionsByUnits = (
     }
   };
 
-  const refresh = () => {
+  const refresh = async () => {
+    const wasOnPage1 = page === 1;
+    // Set page to 1 first
     setPage(1);
-    setAllCompositions([]);
     setHasMore(true);
-    refetch();
+    // If already on page 1, force refetch since query key won't change
+    // Otherwise, React Query will automatically refetch when page changes
+    if (wasOnPage1) {
+      await refetch();
+    }
+    // Don't clear data immediately - let useEffect handle it when new data arrives
   };
 
   // Reset when dto changes

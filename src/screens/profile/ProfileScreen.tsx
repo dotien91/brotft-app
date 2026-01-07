@@ -21,6 +21,8 @@ const languages = [
   {code: 'en', label: 'English', flag: '🇬🇧'},
   {code: 'vi', label: 'Vietnamese', flag: '🇻🇳'},
   {code: 'zh-CN', label: 'Chinese', flag: '🇨🇳'},
+  {code: 'ja-JP', label: 'Japanese', flag: '🇯🇵'},
+  {code: 'es-ES', label: 'Spanish', flag: '🇪🇸'},
 ];
 
 const ProfileScreen: React.FC<ProfileScreenProps> = () => {
@@ -150,8 +152,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
 
             {/* Language Dropdown */}
             <View ref={languageOptionRef}>
-              <RNBounceable
-                style={styles.optionItem}
+            <RNBounceable
+              style={styles.optionItem}
                 onPress={() => {
                   languageOptionRef.current?.measure((x, y, width, height, pageX, pageY) => {
                     setDropdownPosition({
@@ -162,18 +164,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                     setIsLanguageDropdownOpen(true);
                   });
                 }}>
-                <View style={styles.optionContent}>
-                  <Text color={colors.text} style={styles.optionText}>
-                    {getCurrentLanguageLabel()}
-                  </Text>
-                  <Icon
-                    name="chevron-down"
-                    type={IconType.Ionicons}
-                    color={colors.placeholder}
-                    size={20}
-                  />
-                </View>
-              </RNBounceable>
+              <View style={styles.optionContent}>
+                <Text color={colors.text} style={styles.optionText}>
+                  {getCurrentLanguageLabel()}
+                </Text>
+                <Icon
+                  name="chevron-down"
+                  type={IconType.Ionicons}
+                  color={colors.placeholder}
+                  size={20}
+                />
+              </View>
+            </RNBounceable>
             </View>
 
             {/* Language Dropdown Modal */}

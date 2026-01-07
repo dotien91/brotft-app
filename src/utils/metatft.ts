@@ -360,10 +360,10 @@ export const getItemIconUrlsFromPath = (
   if (apiName) {
     formattedKey = apiName.toLowerCase();
   } else {
-    // Try to parse icon path to get filename
-    const filename = parseIconPath(iconPath);
-    if (filename) {
-      // Format filename: TFT_Item_BFSword -> tft_item_bfsword
+  // Try to parse icon path to get filename
+  const filename = parseIconPath(iconPath);
+  if (filename) {
+    // Format filename: TFT_Item_BFSword -> tft_item_bfsword
       formattedKey = filename.toLowerCase();
     }
   }
@@ -393,17 +393,17 @@ export const getItemIconUrlFromPath = (
  * Helper to wrap MetaTFT URL with CDN optimization
  */
 const wrapWithCDN = (url: string, size: number): string => {
-  // If already CDN-optimized, return as is
-  if (url.includes('cdn-cgi/image')) {
+    // If already CDN-optimized, return as is
+    if (url.includes('cdn-cgi/image')) {
+      return url;
+    }
+    // If it's a MetaTFT file URL, wrap it with CDN
+    if (url.includes('cdn.metatft.com/file/metatft')) {
+      return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/${url}`;
+    }
     return url;
-  }
-  // If it's a MetaTFT file URL, wrap it with CDN
-  if (url.includes('cdn.metatft.com/file/metatft')) {
-    return `https://cdn.metatft.com/cdn-cgi/image/width=${size},height=${size},format=auto/${url}`;
-  }
-  return url;
-};
-
+  };
+  
 /**
  * Get item image URLs with CDN optimization and fallback
  * @param icon - Icon path or URL from API (optional)

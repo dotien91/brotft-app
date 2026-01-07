@@ -8,6 +8,8 @@ const getLocaleFromLanguage = (language: string): string => {
     'vi': 'vi_vn',
     'zh-CN': 'zh_cn',
     'tr-TR': 'tr_tr',
+    'ja-JP': 'ja_jp',
+    'es-ES': 'es_es',
   };
   return localeMap[language] || 'en_us';
 };

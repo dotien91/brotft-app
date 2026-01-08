@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import {LogBox, StatusBar} from 'react-native';
+import {LogBox, StatusBar, View} from 'react-native';
+import LottieView from 'lottie-react-native';
 import SplashScreen from 'react-native-splash-screen';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {isAndroid} from '@freakycoder/react-native-helpers';
@@ -74,6 +75,7 @@ const App = () => {
   const language = useStore((state) => state.language);
   const setLanguage = useStore((state) => state.setLanguage);
   const [isLanguageReady, setIsLanguageReady] = React.useState(false);
+  const [isDataReady, setIsDataReady] = React.useState(false);
 
   React.useEffect(() => {
     // Check if this is first time app launch (no language preference saved)
@@ -116,9 +118,25 @@ const App = () => {
   }, []);
 
   // Check and fetch data by locale on app startup
+  // Only run after language is ready
   React.useEffect(() => {
-    checkAndFetchDataByLocale(language);
-  }, [language]);
+    if (!isLanguageReady || !language) {
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const success = await checkAndFetchDataByLocale(language);
+        setIsDataReady(success);
+      } catch (error) {
+        console.log('Error fetching data by locale:', error);
+        // Even if fetch fails, allow app to show (will use cached data if available)
+        setIsDataReady(true);
+      }
+    };
+
+    fetchData();
+  }, [language, isLanguageReady]);
 
   // Check app version on startup
   // React.useEffect(() => {
@@ -142,10 +160,20 @@ const App = () => {
     // }, 750);
   }, [isDarkMode]);
 
-  // Only render Navigation after language has been set
-  if (!isLanguageReady) {
-    return null; // or return a loading screen
-  }
+  // Only render Navigation after language and data are ready
+  // if (!isLanguageReady || !isDataReady) {
+    // Show loading screen while initializing
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000'}}>
+        <LottieView
+          source={require('./src/assets/loading.json')}
+          style={{width: 150, height: 150}}
+          autoPlay
+          loop
+        />
+      </View>
+    );
+  // }
 
   return (
     <QueryClientProvider client={queryClient}>

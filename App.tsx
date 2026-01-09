@@ -159,21 +159,21 @@ const App = () => {
     //   SplashScreen.hide();
     // }, 750);
   }, [isDarkMode]);
-
+console.log('isLanguageReady', isLanguageReady);
   // Only render Navigation after language and data are ready
-  // if (!isLanguageReady || !isDataReady) {
+  if (!isLanguageReady) {
     // Show loading screen while initializing
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000'}}>
         <LottieView
           source={require('./src/assets/loading.json')}
-          style={{width: 150, height: 150}}
+          style={{width: 44, height: 44}}
           autoPlay
           loop
         />
       </View>
     );
-  // }
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

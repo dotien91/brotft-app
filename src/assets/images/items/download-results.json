@@ -1,0 +1,614 @@
+{
+  "success": [
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_hellfirehatchet.png",
+      "filename": "tft_item_artifact_hellfirehatchet.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft4_item_ornnthecollector.png",
+      "filename": "tft4_item_ornnthecollector.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_silvermeredawn.png",
+      "filename": "tft_item_artifact_silvermeredawn.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft4_item_ornnzhonyasparadox.png",
+      "filename": "tft4_item_ornnzhonyasparadox.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_horizonfocus.png",
+      "filename": "tft_item_artifact_horizonfocus.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_steraksgageradiant.png",
+      "filename": "tft5_item_steraksgageradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_titanichydra.png?v=1",
+      "filename": "tft_item_artifact_titanichydra.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_lightshieldcrest.png",
+      "filename": "tft_item_artifact_lightshieldcrest.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_witsend.png",
+      "filename": "tft_item_artifact_witsend.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft4_item_ornndeathsdefiance.png",
+      "filename": "tft4_item_ornndeathsdefiance.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_fishbones.png",
+      "filename": "tft_item_artifact_fishbones.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_crownguardradiant.png",
+      "filename": "tft5_item_crownguardradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_voidgauntlet.png",
+      "filename": "tft_item_artifact_voidgauntlet.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_lichbane.png",
+      "filename": "tft_item_artifact_lichbane.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_guardianangelradiant.png",
+      "filename": "tft5_item_guardianangelradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_mittens.png",
+      "filename": "tft_item_artifact_mittens.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_hextechgunbladeradiant.png",
+      "filename": "tft5_item_hextechgunbladeradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_eternalpact.png",
+      "filename": "tft_item_artifact_eternalpact.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_rapidfirecannonradiant.png",
+      "filename": "tft5_item_rapidfirecannonradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_statikkshiv.png?v=1",
+      "filename": "tft_item_artifact_statikkshiv.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft4_item_ornninfinityforce.png",
+      "filename": "tft4_item_ornninfinityforce.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_prowlersclaw.png",
+      "filename": "tft_item_artifact_prowlersclaw.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_lastwhisperradiant.png",
+      "filename": "tft5_item_lastwhisperradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft9_item_ornnhullbreaker.png",
+      "filename": "tft9_item_ornnhullbreaker.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_talismanofascension.png",
+      "filename": "tft_item_artifact_talismanofascension.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_aegisofdawn.png",
+      "filename": "tft_item_artifact_aegisofdawn.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_aegisofdusk.png",
+      "filename": "tft_item_artifact_aegisofdusk.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_seekersarmguard.png",
+      "filename": "tft_item_artifact_seekersarmguard.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_rapidfirecannon.png",
+      "filename": "tft_item_artifact_rapidfirecannon.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_giantslayerradiant.png",
+      "filename": "tft5_item_giantslayerradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_leviathanradiant.png",
+      "filename": "tft5_item_leviathanradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_titansresolveradiant.png",
+      "filename": "tft5_item_titansresolveradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_blightingjewel.png",
+      "filename": "tft_item_artifact_blightingjewel.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_theindomitable.png?v=1",
+      "filename": "tft_item_artifact_theindomitable.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_trapclawradiant.png",
+      "filename": "tft5_item_trapclawradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_infinityedgeradiant.png",
+      "filename": "tft5_item_infinityedgeradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_ionicsparkradiant.png",
+      "filename": "tft5_item_ionicsparkradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_thedarkinaegis.png",
+      "filename": "tft16_thedarkinaegis.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_rabadonsdeathcapradiant.png",
+      "filename": "tft5_item_rabadonsdeathcapradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_morellonomiconradiant.png",
+      "filename": "tft5_item_morellonomiconradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_deathbladeradiant.png",
+      "filename": "tft5_item_deathbladeradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_runaanshurricaneradiant.png?v=1",
+      "filename": "tft5_item_runaanshurricaneradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_ludenstempest.png",
+      "filename": "tft_item_artifact_ludenstempest.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_spectralgauntletradiant.png",
+      "filename": "tft5_item_spectralgauntletradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_navoriflickerblades.png?v=1",
+      "filename": "tft_item_artifact_navoriflickerblades.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_archangelsstaffradiant.png",
+      "filename": "tft5_item_archangelsstaffradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_forceofnature.png",
+      "filename": "tft_item_forceofnature.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_guinsoosrageblade.png",
+      "filename": "tft_item_guinsoosrageblade.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_bloodthirsterradiant.png",
+      "filename": "tft5_item_bloodthirsterradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_spearofshojinradiant.png",
+      "filename": "tft5_item_spearofshojinradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_thedarkinstaff.png",
+      "filename": "tft16_thedarkinstaff.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft9_item_ornnhorizonfocus.png",
+      "filename": "tft9_item_ornnhorizonfocus.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_sunfirecaperadiant.png",
+      "filename": "tft5_item_sunfirecaperadiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_bluebuffradiant.png",
+      "filename": "tft5_item_bluebuffradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_handofjusticeradiant.png",
+      "filename": "tft5_item_handofjusticeradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_jeweledgauntletradiant.png",
+      "filename": "tft5_item_jeweledgauntletradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_dawncore.png",
+      "filename": "tft_item_artifact_dawncore.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_thiefsglovesradiant.png",
+      "filename": "tft5_item_thiefsglovesradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_redemptionradiant.png?v=1",
+      "filename": "tft5_item_redemptionradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_thedarkinbow.png",
+      "filename": "tft16_thedarkinbow.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_statikkshivradiant.png?v=1",
+      "filename": "tft5_item_statikkshivradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_frozenheartradiant.png",
+      "filename": "tft5_item_frozenheartradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_thiefsgloves.png",
+      "filename": "tft_item_thiefsgloves.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_jeweledgauntlet.png",
+      "filename": "tft_item_jeweledgauntlet.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_nightharvesterradiant.png",
+      "filename": "tft5_item_nightharvesterradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_spearofshojin.png",
+      "filename": "tft_item_spearofshojin.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_redemption.png?v=1",
+      "filename": "tft_item_redemption.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_bramblevestradiant.png",
+      "filename": "tft5_item_bramblevestradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_redbuff.png",
+      "filename": "tft_item_redbuff.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_warmogsarmor.png",
+      "filename": "tft_item_warmogsarmor.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_thedarkinscythe.png",
+      "filename": "tft16_thedarkinscythe.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_gargoylestoneplate.png",
+      "filename": "tft_item_gargoylestoneplate.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_bloodthirster.png",
+      "filename": "tft_item_bloodthirster.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_brawleremblemitem.png",
+      "filename": "tft16_item_brawleremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_infinityedge.png",
+      "filename": "tft_item_infinityedge.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_gargoylestoneplateradiant.png",
+      "filename": "tft5_item_gargoylestoneplateradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_quicksilverradiant.png",
+      "filename": "tft5_item_quicksilverradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_madredsbloodrazor.png",
+      "filename": "tft_item_madredsbloodrazor.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_bramblevest.png",
+      "filename": "tft_item_bramblevest.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_unstableconcoction.png",
+      "filename": "tft_item_unstableconcoction.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft7_item_shimmerscalegamblersblade.png",
+      "filename": "tft7_item_shimmerscalegamblersblade.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_statikkshiv.png?v=1",
+      "filename": "tft_item_statikkshiv.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_rabadonsdeathcap.png",
+      "filename": "tft_item_rabadonsdeathcap.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_guinsoosragebladeradiant.png",
+      "filename": "tft5_item_guinsoosragebladeradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_runaanshurricane.png?v=1",
+      "filename": "tft_item_runaanshurricane.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_dragonsclaw.png",
+      "filename": "tft_item_dragonsclaw.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_dragonsclawradiant.png",
+      "filename": "tft5_item_dragonsclawradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_adaptivehelm.png",
+      "filename": "tft_item_adaptivehelm.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_frozenheart.png",
+      "filename": "tft_item_frozenheart.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_rapidfireemblemitem.png",
+      "filename": "tft16_item_rapidfireemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_yordleemblemitem.png",
+      "filename": "tft16_item_yordleemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_juggernautemblemitem.png",
+      "filename": "tft16_item_juggernautemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_titansresolve.png",
+      "filename": "tft_item_titansresolve.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_zaunemblemitem.png",
+      "filename": "tft16_item_zaunemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_demaciaemblemitem.png",
+      "filename": "tft16_item_demaciaemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_wardenemblemitem.png",
+      "filename": "tft16_item_wardenemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_vanquisheremblemitem.png",
+      "filename": "tft16_item_vanquisheremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_nightharvester.png",
+      "filename": "tft_item_nightharvester.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_hextechgunblade.png",
+      "filename": "tft_item_hextechgunblade.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_spectralgauntlet.png",
+      "filename": "tft_item_spectralgauntlet.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_steraksgage.png",
+      "filename": "tft_item_steraksgage.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_warmogsarmorradiant.png",
+      "filename": "tft5_item_warmogsarmorradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewateremblemitem.png",
+      "filename": "tft16_item_bilgewateremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft5_item_adaptivehelmradiant.png",
+      "filename": "tft5_item_adaptivehelmradiant.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_longshotemblemitem.png",
+      "filename": "tft16_item_longshotemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_archangelsstaff.png",
+      "filename": "tft_item_archangelsstaff.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_morellonomicon.png",
+      "filename": "tft_item_morellonomicon.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_gunslingeremblemitem.png",
+      "filename": "tft16_item_gunslingeremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_magusemblemitem.png",
+      "filename": "tft16_item_magusemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_bluebuff.png",
+      "filename": "tft_item_bluebuff.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_leviathan.png",
+      "filename": "tft_item_leviathan.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_invokeremblemitem.png",
+      "filename": "tft16_item_invokeremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_powergauntlet.png",
+      "filename": "tft_item_powergauntlet.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_ionicspark.png",
+      "filename": "tft_item_ionicspark.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_defenderemblemitem.png",
+      "filename": "tft16_item_defenderemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_rapidfirecannon.png",
+      "filename": "tft_item_rapidfirecannon.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_lastwhisper.png",
+      "filename": "tft_item_lastwhisper.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_noxusemblemitem.png",
+      "filename": "tft16_item_noxusemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_artifact_cappajuice.png",
+      "filename": "tft_item_artifact_cappajuice.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_ioniaemblemitem.png",
+      "filename": "tft16_item_ioniaemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft7_item_shimmerscalemogulsmail.png",
+      "filename": "tft7_item_shimmerscalemogulsmail.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_quicksilver.png",
+      "filename": "tft_item_quicksilver.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_guardianangel.png",
+      "filename": "tft_item_guardianangel.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_crownguard.png",
+      "filename": "tft_item_crownguard.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_slayeremblemitem.png",
+      "filename": "tft16_item_slayeremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_deathblade.png",
+      "filename": "tft_item_deathblade.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_freljordemblemitem.png",
+      "filename": "tft16_item_freljordemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_voidemblemitem.png",
+      "filename": "tft16_item_voidemblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_sorcereremblemitem.png",
+      "filename": "tft16_item_sorcereremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_captainsbrew.png",
+      "filename": "tft16_item_bilgewater_captainsbrew.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_pileocitrus.png",
+      "filename": "tft16_item_bilgewater_pileocitrus.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_freebootersfrock.png",
+      "filename": "tft16_item_bilgewater_freebootersfrock.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_firstmatesflintlock.png",
+      "filename": "tft16_item_bilgewater_firstmatesflintlock.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_deadmansdagger.png",
+      "filename": "tft16_item_bilgewater_deadmansdagger.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_luckyeyepatch.png",
+      "filename": "tft16_item_bilgewater_luckyeyepatch.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_bilgeratcutlass.png",
+      "filename": "tft16_item_bilgewater_bilgeratcutlass.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_chainvest.png",
+      "filename": "tft_item_chainvest.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_tearofthegoddess.png",
+      "filename": "tft_item_tearofthegoddess.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_giantsbelt.png",
+      "filename": "tft_item_giantsbelt.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_bilgewater_blackmarketexplosives.png",
+      "filename": "tft16_item_bilgewater_blackmarketexplosives.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_tacticiansring.png",
+      "filename": "tft_item_tacticiansring.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_negatroncloak.png",
+      "filename": "tft_item_negatroncloak.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_recurvebow.png",
+      "filename": "tft_item_recurvebow.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_needlesslylargerod.png",
+      "filename": "tft_item_needlesslylargerod.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_sparringgloves.png",
+      "filename": "tft_item_sparringgloves.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_tacticiansscepter.png",
+      "filename": "tft_item_tacticiansscepter.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_bfsword.png",
+      "filename": "tft_item_bfsword.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft9_item_crownofdemacia.png",
+      "filename": "tft9_item_crownofdemacia.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_fryingpan.png",
+      "filename": "tft_item_fryingpan.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_piltoveremblemitem.png",
+      "filename": "tft16_item_piltoveremblemitem.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft_item_spatula.png",
+      "filename": "tft_item_spatula.png"
+    },
+    {
+      "url": "https://cdn.metatft.com/cdn-cgi/image/width=48,height=48,format=auto/https://cdn.metatft.com/file/metatft/items/tft16_item_ixtalemblemitem.png",
+      "filename": "tft16_item_ixtalemblemitem.png"
+    }
+  ],
+  "failed": [],
+  "skipped": []
+}

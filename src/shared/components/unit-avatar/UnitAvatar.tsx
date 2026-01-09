@@ -147,11 +147,9 @@ const createStyles = (theme: any) => {
       justifyContent: 'center',
       zIndex: 10,
       width: '100%',
-      paddingHorizontal: 4,
     },
     unitNameBackground: {
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      paddingHorizontal: 6,
       paddingVertical: 2,
       borderRadius: 4,
     },

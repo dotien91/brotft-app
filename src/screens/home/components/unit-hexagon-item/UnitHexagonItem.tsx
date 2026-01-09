@@ -4,8 +4,8 @@ import {useTheme} from '@react-navigation/native';
 import Hexagon from '@screens/detail/components/Hexagon';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import type {ICompositionUnit} from '@services/models/composition';
-import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../../../utils/metatft';
 import {getUnitAvatarImageSource} from '../../../../utils/champion-images';
+import {getItemIconImageSource} from '../../../../utils/item-images';
 import {getUnitCostBorderColor} from '../../../../utils/unitCost';
 import createStyles from './UnitHexagonItem.style';
 
@@ -23,8 +23,9 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
   const unitImage = imageSource.local ? undefined : (imageSource.uri || unit.image || '');
 
   const getItemIcon = (apiName: string) => {
-    const iconUrl = getItemIconUrlFromPath(null, apiName);
-    return iconUrl;
+    const imageSource = getItemIconImageSource(null, apiName, 48);
+    // Only use local image, no URL fallback
+    return imageSource.local || null;
   };
 
   return (
@@ -51,14 +52,20 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             {/* Items inside hexagon */}
             {unit.items && unit.items.length > 0 && (
               <View style={styles.itemsRow}>
-                {unit.items.map((itemApiName, itemIndex) => (
-                  <Image
-                    key={`unit-${index}-item-${itemIndex}`}
-                    source={{uri: getItemIcon(itemApiName)}}
-                    style={styles.itemIcon}
-                    resizeMode="contain"
-                  />
-                ))}
+                {unit.items.map((itemApiName, itemIndex) => {
+                  const itemIcon = getItemIcon(itemApiName);
+                  // Only render if we have a valid source
+                  if (!itemIcon) return null;
+                  
+                  return (
+                    <Image
+                      key={`unit-${index}-item-${itemIndex}`}
+                      source={itemIcon}
+                      style={styles.itemIcon}
+                      resizeMode="contain"
+                    />
+                  );
+                })}
               </View>
             )}
           </Hexagon>

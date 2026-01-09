@@ -8,6 +8,7 @@ import Hexagon from './Hexagon';
 import UnitCostBadge from './UnitCostBadge';
 import {getTraitIconUrl} from '../../../utils/metatft';
 import {getUnitAvatarImageSource} from '../../../utils/champion-images';
+import {getItemIconImageSource} from '../../../utils/item-images';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
@@ -20,6 +21,7 @@ type TeamUnitItem = {
   id?: string;
   name?: string;
   icon: string;
+  iconSource?: any; // Local image source (require())
   apiName?: string;
 };
 
@@ -83,13 +85,19 @@ const ItemsGrid: React.FC<{items: TeamUnitItem[]}> = ({items}) => {
   useEffect(() => {
     const fetchItemsDetails = async () => {
       const details = await Promise.all(
-        items.map(item =>
-          item.apiName
+        items.map(item => {
+          // Get local image source for item
+          const imageSource = getItemIconImageSource(null, item.apiName, 48);
+          if (imageSource.local && !item.iconSource) {
+            item.iconSource = imageSource.local;
+          }
+          
+          return item.apiName
             ? getTftItemByApiName(item.apiName)
                 .then((data: any) => ({item, data}))
                 .catch(() => ({item, data: null}))
-            : Promise.resolve({item, data: null})
-        )
+            : Promise.resolve({item, data: null});
+        })
       );
       setItemsDetails(details);
     };
@@ -116,7 +124,11 @@ const ItemsGrid: React.FC<{items: TeamUnitItem[]}> = ({items}) => {
               <RNBounceable 
               onPress={() => handleItemPress(item, itemDetail)}
               style={styles.itemsGridMainItem}>
-              <Image source={{uri: item.icon}} style={styles.itemsGridMainItemIcon} resizeMode="contain" />
+              <Image 
+                source={item.iconSource || null} 
+                style={styles.itemsGridMainItemIcon} 
+                resizeMode="contain" 
+              />
             </RNBounceable>
             {/* Components below main item */}
             {components.length > 0 && (

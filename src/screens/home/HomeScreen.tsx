@@ -59,7 +59,7 @@ const HomeScreen: React.FC = () => {
     isNoData,
     loadMore,
   } = useCompositionsWithPagination(10);
-
+  console.log('searchDto', searchDto);
   const {
     data: searchCompositions,
     isLoading: isLoadingSearch,
@@ -68,7 +68,6 @@ const HomeScreen: React.FC = () => {
     refresh: refreshSearch,
     isRefetching: isRefetchingSearch,
   } = useSearchCompositionsByUnits(searchDto, 10);
-
   // Use search results if filtering, otherwise use all compositions
   const compositions = searchDto ? searchCompositions : allCompositions;
   const isLoading = searchDto ? isLoadingSearch : isLoadingAll;

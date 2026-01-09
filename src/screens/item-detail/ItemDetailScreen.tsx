@@ -12,7 +12,7 @@ import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import BackButton from '@shared-components/back-button/BackButton';
-import {getItemImageUrlWithCDN} from '../../utils/metatft';
+import {getItemIconImageSource} from '../../utils/item-images';
 import {translations} from '../../shared/localization';
 import RecommendedUnitsSection from './components/RecommendedUnitsSection';
 import ScreenHeaderWithBack from '@shared-components/screen-header-with-back/ScreenHeaderWithBack';
@@ -235,14 +235,13 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
       return renderError();
     }
 
-    // Get item image URL with CDN optimization - chỉ dùng MetaTFT
-    // Dùng apiName từ API, icon và name từ localizedItem
-    const imageUri = getItemImageUrlWithCDN(
-      localizedIcon || item.icon, 
-      item.apiName, 
-      localizedName || item.name, 
+    // Get item image source (local only)
+    const imageSource = getItemIconImageSource(
+      localizedIcon || item.icon,
+      item.apiName,
       80
     );
+    // Only use local image, no URL fallback
     // Get components to display - prefer composition from localizedItem
     const displayComponents = localizedComposition || item.composition || [];
 
@@ -371,11 +370,13 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
         <View style={styles.mainContent}>
           {/* Item Icon - Left */}
           <View style={styles.itemIconContainer}>
-            <Image
-              source={{uri: imageUri}}
-              style={styles.itemIcon}
-              resizeMode="cover"
-            />
+            {imageSource.local ? (
+              <Image
+                source={imageSource.local}
+                style={styles.itemIcon}
+                resizeMode="cover"
+              />
+            ) : null}
           </View>
 
           {/* Recipe + Stats - Right */}

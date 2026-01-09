@@ -72,9 +72,8 @@ export const searchCompositionsByUnits = async (
   if (params?.tier) {
     queryParams.append('tier', params.tier);
   }
-
+console.log('queryParams',  `/compositions?${queryParams.toString()}`);
   const url = `/compositions?${queryParams.toString()}`;
-
   try {
     const response = await axiosInstance.get<ICompositionsResponse>(url);
     return response.data;

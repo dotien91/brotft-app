@@ -8,7 +8,7 @@ import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import {deleteTftItem} from '@services/api/tft-items';
-import {getItemImageUrlWithCDN} from '../../../../utils/metatft';
+import {getItemIconImageSource} from '../../../../utils/item-images';
 
 interface GuideItemItemProps {
   data: ITftItem;
@@ -99,25 +99,27 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
     }
   }, [data, language]);
 
-  // Get item image URL with CDN optimization - chỉ dùng MetaTFT
-  const imageUri = getItemImageUrlWithCDN(icon, data.apiName, name, 48);
+  // Get item image source (local only)
+  const imageSource = getItemIconImageSource(icon, data.apiName, 48);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       {/* Item Icon */}
       <View style={styles.iconContainer}>
-        <Image
-          source={{uri: imageUri}}
-          style={styles.icon}
-          resizeMode="cover"
-          onError={() => {
-            try {
-              // await deleteTftItem(String(data.id));
-            } catch (error) {
-              console.error(`[GuideItemItem] Error deleting item ${data.id}:`, error);
-            }
-          }}
-        />
+        {imageSource.local ? (
+          <Image
+            source={imageSource.local}
+            style={styles.icon}
+            resizeMode="cover"
+            onError={() => {
+              try {
+                // await deleteTftItem(String(data.id));
+              } catch (error) {
+                console.error(`[GuideItemItem] Error deleting item ${data.id}:`, error);
+              }
+            }}
+          />
+        ) : null}
       </View>
 
       {/* Item Name */}

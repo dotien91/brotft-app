@@ -1629,17 +1629,34 @@ export const useCompositionByCompId = (
   });
 };
 
-// Search compositions by units with pagination
+
 export const useSearchCompositionsByUnits = (
   dto: ISearchByUnitsDto | null,
   limit: number = 10,
 ) => {
+  // 1. Tạo state page
   const [page, setPage] = useState(1);
   const [allCompositions, setAllCompositions] = useState<IComposition[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
+  // 2. KỸ THUẬT QUAN TRỌNG: Tạo một stable key từ dto
+  // JSON.stringify giúp so sánh nội dung. Nếu content giống nhau, key không đổi.
+  // Điều này sửa lỗi: Object mới nhưng nội dung cũ, hoặc Object cũ bị mutate.
+  const dtoKey = useMemo(() => {
+    return dto ? JSON.stringify(dto) : '';
+  }, [dto]);
+
   const isEnabled = !!dto && dto.units.length > 0;
+
+  // 3. Reset state KHI dtoKey THAY ĐỔI
+  // Dùng dtoKey thay vì dto để tránh lỗi tham chiếu
+  useEffect(() => {
+    setPage(1);
+    setAllCompositions([]); 
+    setHasMore(true);
+    // Lưu ý: Không cần gọi refetch ở đây, useQuery sẽ tự detect key thay đổi
+  }, [dtoKey]);
 
   const {
     data: compositionsData,
@@ -1649,82 +1666,70 @@ export const useSearchCompositionsByUnits = (
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: [...compositionKeys.all, 'search-by-units', dto, {page, limit}],
+    // Thêm dtoKey vào queryKey thay vì object dto raw
+    // Điều này đảm bảo React Query nhận biết thay đổi chính xác
+    queryKey: [...compositionKeys.all, 'search-by-units', dtoKey, { page, limit }],
     queryFn: () => {
       if (!dto || dto.units.length === 0) {
-        return Promise.resolve({data: [], hasNextPage: false});
+        return Promise.resolve({ data: [], hasNextPage: false });
       }
-      return searchCompositionsByUnits(dto, {page, limit});
+      // Log để debug xem query có thực sự chạy không
+      console.log('Fetching with:', { dto, page }); 
+      return searchCompositionsByUnits(dto, { page, limit });
     },
     enabled: isEnabled,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    // Giữ data cũ khi đang fetch trang mới để tránh UI giật (optional)
+    keepPreviousData: true, 
   });
 
-  // Handle data accumulation and hasMore state
+  // Handle data accumulation
   useEffect(() => {
+    // Chỉ update khi có data thực sự và khớp với logic trang
     if (compositionsData?.data) {
       if (page === 1) {
-        // Reset on first load or refresh
         setAllCompositions(compositionsData.data);
       } else {
-        // Append new data when loading more
-        setAllCompositions(prev => [...prev, ...compositionsData.data]);
+        // Chỉ append nếu không phải đang ở trang 1 (tránh duplicate khi race condition)
+        setAllCompositions(prev => {
+             // Kiểm tra đơn giản để tránh duplicate nếu React StrictMode chạy 2 lần
+             const newItems = compositionsData.data.filter(
+                newItem => !prev.some(existing => existing.id === newItem.id)
+             );
+             return [...prev, ...newItems];
+        });
         setIsLoadingMore(false);
       }
-      // Update hasMore based on hasNextPage from API
-      if (compositionsData.hasNextPage !== undefined) {
-        setHasMore(compositionsData.hasNextPage);
-      } else {
-        // Default to false if hasNextPage is not provided
-        setHasMore(false);
-      }
+      
+      setHasMore(!!compositionsData.hasNextPage);
     }
-  }, [compositionsData, page]);
+  }, [compositionsData, page]); // Bỏ dependency 'dto' ở đây để tránh conflict
 
   const loadMore = () => {
-    // Only load more if not currently loading and there's more data available
-    const canLoadMore =
-      compositionsData?.hasNextPage !== undefined
-        ? compositionsData.hasNextPage
-        : hasMore;
-
-    if (!isLoadingMore && canLoadMore && compositionsData?.data) {
+    if (!isLoadingMore && hasMore && !isLoading && !isRefetching) {
       setIsLoadingMore(true);
       setPage(prev => prev + 1);
     }
   };
 
   const refresh = async () => {
-    const wasOnPage1 = page === 1;
-    // Set page to 1 first
     setPage(1);
     setHasMore(true);
-    // If already on page 1, force refetch since query key won't change
-    // Otherwise, React Query will automatically refetch when page changes
-    if (wasOnPage1) {
-      await refetch();
-    }
-    // Don't clear data immediately - let useEffect handle it when new data arrives
+    // Khi setPage(1), queryKey đổi -> tự động trigger fetch
+    // Nhưng nếu muốn chắc chắn fetch lại từ server (bỏ qua cache)
+    await refetch();
   };
-
-  // Reset when dto changes
-  useEffect(() => {
-    setPage(1);
-    setAllCompositions([]);
-    setHasMore(true);
-  }, [dto]);
 
   return {
     data: allCompositions,
-    isLoading,
+    isLoading: isLoading && page === 1, // Chỉ loading thật sự khi ở trang 1
     isError,
     error,
     isLoadingMore,
     hasMore,
     loadMore,
     refresh,
-    isRefetching: isRefetching && page === 1,
+    isRefetching,
   };
 };
-

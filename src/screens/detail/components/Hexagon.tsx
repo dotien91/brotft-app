@@ -41,7 +41,6 @@ const Hexagon: React.FC<HexagonProps> = ({
     [centerX - radius * 0.866, centerY + radius * 0.5], // bottom-left
     [centerX - radius * 0.866, centerY - radius * 0.5], // top-left
   ].map(p => p.join(',')).join(' ');
-
   return (
     <View style={[styles.container, {width, height}]}>
       <Svg width={width} height={height} style={styles.svg}>

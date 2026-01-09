@@ -13,8 +13,9 @@ import UnitCostBadge from './components/UnitCostBadge';
 import AugmentsSection from './components/AugmentsSection';
 import CarryUnitsSection from './components/CarryUnitsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
+import {getTraitIconUrl} from '../../utils/metatft';
 import {getUnitAvatarImageSource} from '../../utils/champion-images';
+import {getItemIconImageSource} from '../../utils/item-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import {getTftItemByApiName} from '@services/api/tft-items';
@@ -44,6 +45,7 @@ type TeamUnitItem = {
   id?: string;
   name?: string;
   icon: string;
+  iconSource?: any; // Local image source (require())
   apiName?: string; // For fetching item details
 };
 
@@ -161,7 +163,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           return {
             id: itemDetail.id,
             name: itemDetail.name,
-            icon: getItemIconUrlFromPath(itemDetail.icon, itemDetail.tag || itemDetail.id),
+            icon: '', // Use local image via imageSource instead
+            iconSource: getItemIconImageSource(itemDetail.icon, itemDetail.tag || itemDetail.id, 48).local,
             apiName: itemDetail.tag || itemDetail.id,
           };
         });
@@ -196,11 +199,15 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
   // Helper function to get localized item data
   const getLocalizedItem = (itemApiName: string, itemsData: any): TeamUnitItem => {
+    // Get local image source for item
+    const imageSource = getItemIconImageSource(null, itemApiName, 48);
+    
     if (!itemApiName) {
       return {
         id: '',
         name: '',
         icon: '',
+        iconSource: null,
         apiName: '',
       };
     }
@@ -210,7 +217,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
       return {
         id: itemApiName,
         name: itemApiName,
-        icon: getItemIconUrlFromPath(null, itemApiName),
+        icon: '',
+        iconSource: imageSource.local,
         apiName: itemApiName,
       };
     }
@@ -239,19 +247,24 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     }
 
     if (localizedItem) {
+      const finalApiName = localizedItem.apiName || itemApiName;
+      const finalImageSource = getItemIconImageSource(localizedItem.icon, finalApiName, 48);
       return {
         id: localizedItem.id || itemApiName,
         name: localizedItem.name || itemApiName,
-        icon: getItemIconUrlFromPath(localizedItem.icon, localizedItem.apiName || itemApiName),
-        apiName: localizedItem.apiName || itemApiName,
+        icon: '',
+        iconSource: finalImageSource.local,
+        apiName: finalApiName,
       };
     }
 
     // Fallback: return item with apiName only
+    const fallbackImageSource = getItemIconImageSource(null, itemApiName, 48);
     return {
       id: itemApiName,
       name: itemApiName,
-      icon: getItemIconUrlFromPath(null, itemApiName),
+      icon: '',
+      iconSource: fallbackImageSource.local,
       apiName: itemApiName,
     };
   };
@@ -471,7 +484,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                               {unit.items.map(item => (
                                 <Image
                                   key={item.id}
-                                  source={{uri: item.icon}}
+                                  source={item.iconSource || null}
                                   style={[styles.unitItemIcon, {
                                     width: Math.max(hexSize * 0.2, 12),
                                     height: Math.max(hexSize * 0.2, 12),

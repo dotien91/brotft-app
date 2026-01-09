@@ -667,19 +667,18 @@ export default (theme: ExtendedTheme) => {
     carryNameBelowContainer: {
       position: 'absolute',
       bottom: -5,
-      left: 0,
-      right: 0,
+      left: -5,
+      right: -5,
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: 4,
       zIndex: 10,
     },
     carryNameBelow: {
-      fontSize: 13,
+      fontSize: 10,
       fontWeight: '700',
       color: colors.text,
       textAlign: 'center',
-      maxWidth: 80,
     },
     carryRole: {
       fontSize: 14,

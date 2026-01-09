@@ -1,12 +1,11 @@
 import React, {useMemo, useEffect, useState} from 'react';
-import {View, ScrollView} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {View, ScrollView, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import createStyles from './PopularItemsSection.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftItemByApiName} from '@services/api/hooks/listQueryHooks';
-import {getItemIconUrlFromPath} from '../../../utils/metatft';
+import {getItemIconImageSource} from '../../../utils/item-images';
 import {translations} from '../../../shared/localization';
 import * as NavigationService from 'react-navigation-helpers';
 import {SCREENS} from '@shared-constants';
@@ -82,10 +81,12 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
     isLoading,
   } = useTftItemByApiName(itemApiName);
 
-  const itemIcon = useMemo(() => {
-    if (!itemApiName) return '';
-    return getItemIconUrlFromPath(null, itemApiName);
+  const imageSource = useMemo(() => {
+    if (!itemApiName) return {local: null, uri: ''};
+    return getItemIconImageSource(null, itemApiName, 48);
   }, [itemApiName]);
+  // Only use local image, no URL fallback
+  const itemIcon = imageSource.local;
 
   // Get components from item
   const components = useMemo(() => {
@@ -104,10 +105,10 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
         <View style={styles.itemColumn}>
           <View style={[styles.itemIconContainer, {backgroundColor: colors.card}]}>
             {itemIcon ? (
-              <FastImage
-                source={{uri: itemIcon, priority: FastImage.priority.normal}}
+              <Image
+                source={itemIcon}
                 style={styles.itemIcon}
-                resizeMode={FastImage.resizeMode.contain}
+                resizeMode="contain"
               />
             ) : null}
           </View>
@@ -123,11 +124,13 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
         onPress={() => onPress(item?.id)}>
         {/* Main item */}
         <View style={[styles.itemIconContainer, {backgroundColor: colors.card}]}>
-          <FastImage
-            source={{uri: itemIcon, priority: FastImage.priority.normal}}
-            style={styles.itemIcon}
-            resizeMode={FastImage.resizeMode.contain}
-          />
+          {itemIcon ? (
+            <Image
+              source={itemIcon}
+              style={styles.itemIcon}
+              resizeMode="contain"
+            />
+          ) : null}
         </View>
         
         {/* Components below main item */}
@@ -135,10 +138,10 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
           <View style={styles.componentsRow}>
             {components.slice(0, 2).map((component: string, compIdx: number) => (
               <View key={compIdx} style={[styles.componentItem, {backgroundColor: colors.card}]}>
-                <FastImage
-                  source={{uri: getComponentImageUrl(component), priority: FastImage.priority.normal}}
+                <Image
+                  source={{uri: getComponentImageUrl(component)}}
                   style={styles.componentIcon}
-                  resizeMode={FastImage.resizeMode.contain}
+                  resizeMode="contain"
                 />
               </View>
             ))}

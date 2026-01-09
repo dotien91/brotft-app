@@ -57,6 +57,65 @@ export const formatApiNameForMetaTft = (apiName?: string | null): string => {
 };
 
 /**
+ * Format API name for local image file
+ * @param apiName - API name from unit (e.g., "TFT16_Tristana" or "Tristana")
+ * @returns Formatted key for local image (e.g., "tft16_tristana")
+ */
+const formatApiNameForLocal = (apiName?: string | null): string => {
+  if (!apiName) return '';
+  // Format: TFT16_Tristana -> tft16_tristana
+  // Or Tristana -> tft16_tristana (assume TFT16 if no prefix)
+  let formatted = apiName.toLowerCase();
+  if (!formatted.startsWith('tft')) {
+    formatted = `tft16_${formatted}`;
+  }
+  return formatted;
+};
+
+/**
+ * Get unit avatar local image source
+ * Returns require() for local image if available, otherwise returns null
+ * @param apiName - API name from unit
+ * @returns Image source object with require() or null
+ */
+export const getUnitAvatarLocal = (apiName?: string | null): any => {
+  if (!apiName) return null;
+  
+  const formattedKey = formatApiNameForLocal(apiName);
+  if (!formattedKey) return null;
+  
+  // Try to require local image - this will fail at runtime if file doesn't exist
+  // We use a try-catch approach by checking if the image exists
+  // Since we can't dynamically require, we'll use a mapping or return null
+  // and let the component fallback to URL
+  
+  // For now, return null and let components use URL as fallback
+  // Components should check for local image first, then fallback to URL
+  return null;
+};
+
+/**
+ * Get unit avatar image source (local first, then URL fallback)
+ * @param apiName - API name from unit
+ * @param size - Image size (default: 64)
+ * @returns Object with local image source and URL fallback
+ */
+export const getUnitAvatarImageSource = (
+  apiName?: string | null,
+  size: number = 64,
+): {local: any; uri: string} => {
+  const formattedKey = formatApiNameForLocal(apiName);
+  const url = getUnitAvatarUrl(apiName, size);
+  
+  // Try to get local image - for now return null for local
+  // This will be implemented with actual require() mapping
+  return {
+    local: null,
+    uri: url,
+  };
+};
+
+/**
  * Get unit avatar URLs with fallback
  * @param apiName - API name from unit
  * @param size - Image size (default: 64)

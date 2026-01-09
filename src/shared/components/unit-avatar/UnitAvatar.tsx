@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import {View, StyleSheet, ViewStyle, TextStyle, Image, ImageStyle} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import {useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarUrl} from '../../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../../utils/champion-images';
 import {getUnitCostBorderColor} from '../../../utils/unitCost';
 import Hexagon from '@screens/detail/components/Hexagon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -46,7 +46,8 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
     );
   }
 
-  const unitImage = getUnitAvatarUrl(unit.apiName || apiName, 64);
+  const imageSource = getUnitAvatarImageSource(unit.apiName || apiName, 64);
+  const unitImage = imageSource.local ? undefined : imageSource.uri;
   const borderColor = getUnitCostBorderColor(unit.cost ?? undefined, colors.primary);
   const unitName = unit.name || '';
   return (
@@ -69,6 +70,7 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
             borderColor={colors.border}
             borderWidth={2}
             imageUri={unitImage}
+            imageSource={imageSource.local}
           />
           {/* Unit name absolute position inside hexagon */}
           {unitName && (

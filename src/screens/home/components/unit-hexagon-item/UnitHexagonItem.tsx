@@ -5,6 +5,7 @@ import Hexagon from '@screens/detail/components/Hexagon';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import type {ICompositionUnit} from '@services/models/composition';
 import {getUnitAvatarUrl, getItemIconUrlFromPath} from '../../../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../../../utils/champion-images';
 import {getUnitCostBorderColor} from '../../../../utils/unitCost';
 import createStyles from './UnitHexagonItem.style';
 
@@ -18,7 +19,8 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const unitImage = getUnitAvatarUrl(unit.championKey, 64) || unit.image || '';
+  const imageSource = getUnitAvatarImageSource(unit.championKey, 64);
+  const unitImage = imageSource.local ? undefined : (imageSource.uri || unit.image || '');
 
   const getItemIcon = (apiName: string) => {
     const iconUrl = getItemIconUrlFromPath(null, apiName);
@@ -44,7 +46,8 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             backgroundColor={colors.card}
             borderColor={colors.border}
             borderWidth={2}
-            imageUri={unitImage}>
+            imageUri={unitImage}
+            imageSource={imageSource.local}>
             {/* Items inside hexagon */}
             {unit.items && unit.items.length > 0 && (
               <View style={styles.itemsRow}>

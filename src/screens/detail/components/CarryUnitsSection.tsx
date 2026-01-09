@@ -7,6 +7,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from './Hexagon';
 import UnitCostBadge from './UnitCostBadge';
 import {getTraitIconUrl} from '../../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../../utils/champion-images';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
@@ -302,6 +303,12 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
           : ('championName' in unit ? (unit as TeamCarry).championName : translations.unknown || 'Unknown');
         const unitCost = 'cost' in unit ? (unit as TeamUnit).cost : 0;
 
+        // Get local image source for unit
+        const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
+        const championKeyString = championKey ? String(championKey) : '';
+        const imageSource = getUnitAvatarImageSource(championKeyString, 64);
+        const unitImageUri = imageSource.local ? undefined : imageSource.uri;
+
         return (
           <RNBounceable 
             key={'id' in unit ? unit.id : unitIndex} 
@@ -324,7 +331,8 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
                     backgroundColor={colors.card}
                     borderColor={getUnitCostBorderColor(unitCost)}
                     borderWidth={2}
-                    imageUri={unit.image}
+                    imageUri={unitImageUri}
+                    imageSource={imageSource.local}
                   />
                 </View>
                 {/* Champion name at bottom absolute */}

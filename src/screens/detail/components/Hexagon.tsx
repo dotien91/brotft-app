@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Image} from 'react-native';
 import Svg, {Polygon, Defs, ClipPath, Image as SvgImage} from 'react-native-svg';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 interface HexagonProps {
   size?: number;
@@ -9,6 +10,7 @@ interface HexagonProps {
   borderWidth?: number;
   children?: React.ReactNode;
   imageUri?: string;
+  imageSource?: any; // Local image source (require())
 }
 
 const Hexagon: React.FC<HexagonProps> = ({
@@ -18,6 +20,7 @@ const Hexagon: React.FC<HexagonProps> = ({
   borderWidth = 2,
   children,
   imageUri,
+  imageSource,
 }) => {
   const width = size;
   const height = size * 1.15; // Hexagon height ratio
@@ -54,8 +57,8 @@ const Hexagon: React.FC<HexagonProps> = ({
           stroke={borderColor}
           strokeWidth={borderWidth}
         />
-        {/* Image clipped to hexagon shape */}
-        {imageUri && (
+        {/* Image clipped to hexagon shape (for URL images) */}
+        {imageUri && !imageSource && (
           <SvgImage
             href={{uri: imageUri}}
             x="0"
@@ -67,6 +70,22 @@ const Hexagon: React.FC<HexagonProps> = ({
           />
         )}
       </Svg>
+      {/* Local image overlay (for require() images) */}
+      {imageSource && (
+        <MaskedView
+          style={styles.localImageContainer}
+          maskElement={
+            <Svg width={width} height={height} style={styles.localImageSvg}>
+              <Polygon points={points} fill="white" />
+            </Svg>
+          }>
+          <Image
+            source={imageSource}
+            style={[styles.localImage, {width, height}]}
+            resizeMode="cover"
+          />
+        </MaskedView>
+      )}
       <View style={styles.content}>
         {children}
       </View>
@@ -79,9 +98,21 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   svg: {
     position: 'absolute',
+  },
+  localImageContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  localImageSvg: {
+    flex: 1,
+  },
+  localImage: {
+    flex: 1,
   },
   content: {
     alignItems: 'center',

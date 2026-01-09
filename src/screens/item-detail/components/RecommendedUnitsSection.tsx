@@ -6,7 +6,7 @@ import createStyles from './RecommendedUnitsSection.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarUrl} from '../../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../../utils/champion-images';
 import {getUnitCostBorderColor} from '../../../utils/unitCost';
 import {translations} from '../../../shared/localization';
 import * as NavigationService from 'react-navigation-helpers';
@@ -85,10 +85,11 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
     isLoading,
   } = useTftUnitByApiName(unitApiName);
 
-  const unitAvatar = useMemo(() => {
-    if (!unitApiName) return '';
-    return getUnitAvatarUrl(unitApiName, 64);
+  const imageSource = useMemo(() => {
+    if (!unitApiName) return {local: null, uri: ''};
+    return getUnitAvatarImageSource(unitApiName, 64);
   }, [unitApiName]);
+  const unitAvatar = imageSource.local ? undefined : imageSource.uri;
 
   const borderColor = useMemo(() => {
     return getUnitCostBorderColor(unit?.cost, colors.highlight || '#94a3b8');
@@ -104,6 +105,7 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
             borderColor={borderColor}
             borderWidth={2}
             imageUri={unitAvatar}
+            imageSource={imageSource.local}
           />
         </View>
       </View>
@@ -122,6 +124,7 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
             borderColor={borderColor}
             borderWidth={2}
             imageUri={unitAvatar}
+            imageSource={imageSource.local}
           />
         </View>
       </RNBounceable>

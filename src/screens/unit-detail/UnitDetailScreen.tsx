@@ -9,7 +9,8 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl, getUnitSplashUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
+import {getUnitSplashUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../utils/champion-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
@@ -366,23 +367,24 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
       return renderError();
     }
 
-    // Get TFT unit avatar URL from metatft.com
+    // Get TFT unit avatar image source (local only)
     // Size: 80x80 for hexagon display (70px hexagon needs ~80px image)
-    const getTftUnitAvatarUrl = () => {
-      // Try API icon fields first
-      if (unit?.icon && unit.icon.startsWith('http')) {
-        return unit.icon;
+    const getTftUnitAvatarSource = () => {
+      // Try API icon fields first (if they're local paths)
+      if (unit?.icon && !unit.icon.startsWith('http')) {
+        // Could be a local path, but we'll use apiName for consistency
       }
-      if (unit?.squareIcon && unit.squareIcon.startsWith('http')) {
-        return unit.squareIcon;
+      if (unit?.squareIcon && !unit.squareIcon.startsWith('http')) {
+        // Could be a local path, but we'll use apiName for consistency
       }
       
-      // Use metatft.com for avatar
+      // Use local image only
       const apiName = unit?.apiName || unit?.name || '';
-      return getUnitAvatarUrl(apiName, 80);
+      return getUnitAvatarImageSource(apiName, 80);
     };
 
-    const avatarUri = getTftUnitAvatarUrl();
+    const avatarSource = getTftUnitAvatarSource();
+    const avatarUri = avatarSource.local ? undefined : avatarSource.uri;
     // Get splash art for background from metatft.com
     // Size: 768x456 for better quality on larger screens
     const getSplashArtUrl = () => {
@@ -427,12 +429,13 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
           <View style={styles.heroContent}>
             <View style={styles.unitHeader}>
               <View style={styles.unitAvatarContainer}>
-                <Hexagon 
+                <Hexagon
                   size={70} 
                   backgroundColor={colors.card} 
                   borderColor={borderColor} 
                   borderWidth={2}
                   imageUri={avatarUri}
+                  imageSource={avatarSource.local}
                 />
               </View>
               <View style={styles.unitInfo}>

@@ -13,7 +13,8 @@ import UnitCostBadge from './components/UnitCostBadge';
 import AugmentsSection from './components/AugmentsSection';
 import CarryUnitsSection from './components/CarryUnitsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarUrl, getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
+import {getTraitIconUrl, getItemIconUrlFromPath} from '../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../utils/champion-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import {getTftItemByApiName} from '@services/api/tft-items';
@@ -171,6 +172,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         });
       }
 
+      const imageSource = getUnitAvatarImageSource(unit.championKey, 64);
       return {
         ...unit,
         id: unit.championId || unit.championKey,
@@ -184,7 +186,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           row: (unit.position?.row || 0) + 1,
           col: (unit.position?.col || 0) + 1,
         },
-        image: getUnitAvatarUrl(unit.championKey, 64) || unit.image || '',
+        image: '', // Use local image via imageSource instead
+        imageSource: imageSource.local, // Add local image source
         items: mappedItems,
         championKey: unit.championKey,
       };
@@ -266,7 +269,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         championId: carryItem.championId || carryItem.championKey,
         championName: carryItem.championName || carryItem.name,
         role: carryItem.role || 'Carry',
-        image: getUnitAvatarUrl(carryItem.championKey, 64) || carryItem.image || '',
+        image: '', // Use local image via imageSource instead
+        imageSource: getUnitAvatarImageSource(carryItem.championKey, 64).local, // Add local image source
         items: mappedItems,
       };
     });
@@ -458,7 +462,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                           backgroundColor={colors.card}
                           borderColor={getUnitCostBorderColor(unit.cost)}
                           borderWidth={2}
-                          imageUri={unit.image}>
+                          imageUri={unit.image}
+                          imageSource={(unit as any).imageSource}>
                           {renderUnit(unit)}
                           {/* Items inside hexagon (absolute positioned) */}
                           {unit.items && unit.items.length > 0 && (

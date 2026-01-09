@@ -5,6 +5,7 @@ import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl} from '../../../../utils/metatft';
+import {getUnitAvatarImageSource} from '../../../../utils/champion-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../../../utils/unitCost';
 import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
@@ -103,23 +104,24 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
     }
   }, [data, language]);
 
-  // Get TFT unit avatar URL from metatft.com
+  // Get TFT unit avatar image source (local first, then URL)
   // Size: 64x64 for hexagon display (56px hexagon needs ~64px image)
-  const getTftUnitAvatarUrl = () => {
+  const getTftUnitAvatarSource = () => {
     // Try API icon fields first
     if (icon && icon.startsWith('http')) {
-      return icon;
+      return {local: null, uri: icon};
     }
     if (squareIcon && squareIcon.startsWith('http')) {
-      return squareIcon;
+      return {local: null, uri: squareIcon};
     }
     
-    // Use metatft.com for avatar
+    // Use local image first, then fallback to metatft.com
     const unitKey = apiName || name || '';
-    return getUnitAvatarUrl(unitKey, 64);
+    return getUnitAvatarImageSource(unitKey, 64);
   };
 
-  const imageUri = getTftUnitAvatarUrl();
+  const imageSource = getTftUnitAvatarSource();
+  const imageUri = imageSource.local ? undefined : imageSource.uri;
 
   // Get unit border color based on cost
   const getUnitCostBorderColor = (cost?: number | null): string => {
@@ -148,7 +150,8 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
                 backgroundColor={colors.card}
                 borderColor={getUnitCostBorderColor(cost)}
                 borderWidth={2}
-                imageUri={imageUri}>
+                imageUri={imageUri}
+                imageSource={imageSource.local}>
                 {/* 3 Stars icon */}
                 {((data as any).need3Star || (cost <= 3 && (data as any).carry)) && (
                   <View style={[styles.compactTier3Icon, {
@@ -209,6 +212,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
               borderColor={borderColor}
               borderWidth={2}
               imageUri={imageUri}
+              imageSource={imageSource.local}
             />
           </View>
         </View>

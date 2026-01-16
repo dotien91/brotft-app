@@ -11,7 +11,6 @@ import {SCREENS} from '@shared-constants';
 import {
   useCompositionsWithPagination,
   useSearchCompositionsByUnits,
-  useTftUnitsWithPagination,
 } from '@services/api/hooks/listQueryHooks';
 import type {IComposition} from '@services/models/composition';
 import EmptyList from '@shared-components/empty-list/EmptyList';
@@ -21,7 +20,7 @@ import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
 import SelectedUnitsFilter from './components/selected-units-filter/SelectedUnitsFilter';
 import {translations} from '../../shared/localization';
 
-const ITEM_HEIGHT = 120; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
+const ITEM_HEIGHT = 190; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
@@ -30,9 +29,6 @@ const HomeScreen: React.FC = () => {
 
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
-  // Fetch all units to get unit details (name, cost) for selected units
-  const {data: allUnits} = useTftUnitsWithPagination(1000);
 
   // Build search DTO
   const searchDto = useMemo(() => {
@@ -93,13 +89,6 @@ const HomeScreen: React.FC = () => {
     setSelectedUnits(prev => prev.filter(u => u !== unitKey));
   }, []);
 
-  // Normalize apiName to championKey format (same as in modal)
-  const normalizeToChampionKey = useCallback((apiName: string): string => {
-    let normalized = apiName.replace(/^TFT\d*_?/i, '');
-    normalized = normalized.toLowerCase();
-    return normalized;
-  }, []);
-
   const renderTeamCard = useCallback(
     ({item}: {item: IComposition}) => (
       <TeamCard composition={item} onPress={handleTeamPress} />
@@ -133,14 +122,12 @@ const HomeScreen: React.FC = () => {
         </View>
         <SelectedUnitsFilter
           selectedUnits={selectedUnits}
-          allUnits={allUnits}
           onRemoveUnit={handleRemoveUnit}
           onClearAll={handleClearFilter}
-          normalizeToChampionKey={normalizeToChampionKey}
         />
       </View>
     </View>
-  ), [styles, selectedUnits, allUnits, colors.text, handleClearFilter, handleRemoveUnit, normalizeToChampionKey]);
+  ), [styles, selectedUnits, colors.text, handleClearFilter, handleRemoveUnit]);
 
   const ListFooter = useCallback(() => {
     if (!isLoadingMore) return null;
@@ -206,7 +193,7 @@ const HomeScreen: React.FC = () => {
           contentContainerStyle={styles.listContent}
           // Performance props
           initialNumToRender={7}
-          maxToRenderPerBatch={10}
+          maxToRenderPerBatch={5}
           windowSize={5}
           removeClippedSubviews={true} // Giải phóng bộ nhớ cho item ngoài màn hình
           // Components

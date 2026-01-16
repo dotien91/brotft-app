@@ -3,9 +3,9 @@ import {ExtendedTheme} from '@react-navigation/native';
 
 interface Style {
   container: ViewStyle;
-  safeArea: ViewStyle;
-  webView: ViewStyle;
-  loadingContainer: ViewStyle;
+  scrollView: ViewStyle;
+  contentContainer: ViewStyle;
+  content: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -15,22 +15,17 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       backgroundColor: colors.background,
     },
-    safeArea: {
+    scrollView: {
       flex: 1,
     },
-    webView: {
-      flex: 1,
-      backgroundColor: colors.background,
+    contentContainer: {
+      padding: 20,
+      paddingBottom: 40,
     },
-    loadingContainer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.background,
+    content: {
+      fontSize: 14,
+      lineHeight: 22,
+      letterSpacing: 0.2,
     },
   });
 };

@@ -76,10 +76,11 @@ export default (theme: ExtendedTheme) => {
       justifyContent: 'flex-end',
       alignItems: 'center',
       paddingBottom: 40,
+      paddingHorizontal: 16,
     },
     welcomeText: {
       fontSize: 24,
-      fontWeight: '900',
+      fontWeight: '800',
       color: colors.white,
       textAlign: 'center',
     },
@@ -188,7 +189,7 @@ export default (theme: ExtendedTheme) => {
       padding: 2,
     },
     listContent: {
-      paddingBottom: 100,
+      paddingBottom: 200,
     },
     teamCard: {
       backgroundColor: colors.card,

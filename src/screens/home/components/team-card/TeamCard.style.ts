@@ -26,6 +26,7 @@ export default (theme: ExtendedTheme) => {
       marginBottom: 16,
       borderWidth: 1,
       borderColor: colors.border,
+      height: 190,
     },
     teamHeader: {
       flexDirection: 'row',

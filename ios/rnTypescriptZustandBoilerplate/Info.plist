@@ -48,6 +48,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-9275414127217585~1389409109</string>
 	<key>UIAppFonts</key>
         <array>
           <string>AntDesign.ttf</string>

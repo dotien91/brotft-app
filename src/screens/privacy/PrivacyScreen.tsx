@@ -8,7 +8,7 @@ import ScreenHeaderWithBack from '@shared-components/screen-header-with-back/Scr
 import useStore, {StoreState} from '@services/zustand/store';
 import {translations} from '../../shared/localization';
 
-const PRIVACY_URL = 'https://web.apporastudio.com/privacy';
+const PRIVACY_URL = 'https://apporastudio.com/privacy';
 
 const PrivacyScreen: React.FC = () => {
   const theme = useTheme();

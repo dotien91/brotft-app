@@ -18,9 +18,14 @@ import TeamCard from './components/team-card/TeamCard';
 import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
 import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
 import SelectedUnitsFilter from './components/selected-units-filter/SelectedUnitsFilter';
-import {translations} from '../../shared/localization';
-
+import BannerAdItem from './components/banner-ad-item/BannerAdItem';
+import {translations} from '../../shared/localization'; 
 const ITEM_HEIGHT = 190; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
+const AD_INTERVAL = 4; // Hiển thị quảng cáo sau mỗi 4 đội hình
+
+type ListItem = 
+  | {type: 'composition'; data: IComposition}
+  | {type: 'ad'; id: string};
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
@@ -89,12 +94,38 @@ const HomeScreen: React.FC = () => {
     setSelectedUnits(prev => prev.filter(u => u !== unitKey));
   }, []);
 
-  const renderTeamCard = useCallback(
-    ({item}: {item: IComposition}) => (
-      <TeamCard composition={item} onPress={handleTeamPress} />
-    ),
+  // Chèn banner ads vào giữa các composition
+  const listData = useMemo<ListItem[]>(() => {
+    if (!compositions || compositions.length === 0) return [];
+    
+    const result: ListItem[] = [];
+    compositions.forEach((comp, index) => {
+      result.push({type: 'composition', data: comp});
+      
+      // Chèn ad tại vị trí 1, 5, 9, 13... (index 0, 4, 8, 12...)
+      if (index % 4 === 0) {
+        result.push({type: 'ad', id: `ad-${index}`});
+      }
+    });
+    
+    return result;
+  }, [compositions]);
+
+  const renderItem = useCallback(
+    ({item}: {item: ListItem}) => {
+      if (item.type === 'ad') {
+        return <BannerAdItem height={ITEM_HEIGHT} />;
+      }
+      
+      return <TeamCard composition={item.data} onPress={handleTeamPress} />;
+    },
     [handleTeamPress],
   );
+
+  const keyExtractor = useCallback((item: ListItem) => {
+    if (item.type === 'ad') return item.id;
+    return item.data.id.toString();
+  }, []);
 
   // Memoize Header để tránh re-render không cần thiết
   // Tách phần cover (tĩnh) và filter section (dynamic)
@@ -187,9 +218,9 @@ const HomeScreen: React.FC = () => {
   return (
     <>
         <FlatList
-          data={compositions}
-          renderItem={renderTeamCard}
-          keyExtractor={item => item.id.toString()}
+          data={listData}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
           // Performance props
           initialNumToRender={7}
@@ -205,7 +236,6 @@ const HomeScreen: React.FC = () => {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.3}
           showsVerticalScrollIndicator={false}
-          getItemLayout={getItemLayout}
         />
         <UnitFilterModal
           visible={isFilterModalVisible}

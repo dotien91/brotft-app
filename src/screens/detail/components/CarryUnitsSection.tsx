@@ -105,10 +105,11 @@ const ItemsGrid: React.FC<{items: TeamUnitItem[]}> = ({items}) => {
   }, [items]);
 
   const handleItemPress = (item: TeamUnitItem, itemDetail: any) => {
+    console.log("object1111", item, itemDetail);
     // Try to get itemId from itemDetail.data first, then from item.id
-    const itemId = itemDetail?.data?.id || item.id;
+    const itemId = item?.apiName
     if (itemId) {
-      NavigationService.push(SCREENS.ITEM_DETAIL, {itemId: String(itemId)});
+      NavigationService.push(SCREENS.ITEM_DETAIL, {apiName: String(itemId)});
     }
   };
 
@@ -293,16 +294,17 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
   if (unitsWithItems.length === 0) {
     return null;
   }
-
+console.log("unitsWithItems", unitsWithItems);
   return (
     <View style={styles.carryCard}>
       <Text style={styles.sectionLabel}>{translations.carryUnitsSection}</Text>
       {unitsWithItems.map((unit, unitIndex) => {
         const unitTraits = getUnitTraits(unit);
         const isLast = unitIndex === unitsWithItems.length - 1;
-        
         const handleUnitPress = () => {
-          const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
+          const championKey = unit?.championKey
+        console.log("unit====", unit?.championKey);
+
           if (championKey) {
             NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: championKey});
           } else if ('id' in unit && unit.id) {

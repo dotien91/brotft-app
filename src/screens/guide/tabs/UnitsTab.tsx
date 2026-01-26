@@ -71,18 +71,13 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   // Ensure units is always an array
   const unitsList = units || [];
 
-  const handleItemPress = useCallback((unitId?: string | number) => {
-    NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unitId)});
-  }, []);
-
   const renderItem = useCallback(
     ({item}: {item: typeof unitsList[0]}) => (
       <GuideUnitItem
         data={item}
-        onPress={() => handleItemPress(item.id)}
       />
     ),
-    [handleItemPress],
+    [],
   );
 
   const keyExtractor = useCallback((item: typeof unitsList[0]) => String(item.id), []);

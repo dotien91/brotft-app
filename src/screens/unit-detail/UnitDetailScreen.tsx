@@ -84,7 +84,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     error: errorById,
     refetch: refetchById,
   } = useTftUnitById(unitId || '');
-
+console.log("unitById" , unitApiName, unitId);
   const {
     data: unitByApiName,
     isLoading: isLoadingByApiName,

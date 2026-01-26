@@ -62,6 +62,7 @@ export interface ITftUnitsSort {
 export interface ITftUnitsQueryParams {
   page?: number;
   limit?: number;
+  minimal?: boolean;
   filters?: ITftUnitsFilters;
   sort?: ITftUnitsSort[];
 }

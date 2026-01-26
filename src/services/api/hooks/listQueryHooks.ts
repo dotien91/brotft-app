@@ -388,6 +388,7 @@ export const useTftUnitsWithPagination = (
     const params: ITftUnitsQueryParams = {
       page,
       limit,
+      minimal: true,
       filters: filters
         ? {
             name: filters.name || undefined,

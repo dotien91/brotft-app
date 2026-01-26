@@ -140,11 +140,12 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
   const renderTierColumn = (tier: number, title: string) => {
     const filtered = augments.filter((a) => a.tier === tier);
     if (filtered.length === 0) return null;
+    const limited = filtered.slice(0, 3);
 
     return (
       <View style={styles.augmentsColumn}>
         <Text style={styles.augmentsColumnTitle}>{title}</Text>
-        {filtered.map((augment, index) => {
+        {limited.map((augment, index) => {
           const augmentIconUrl = getAugmentIcon(augment.name);
 
           return (

@@ -1,45 +1,24 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {View, ScrollView, Switch, useWindowDimensions, ActivityIndicator, Image} from 'react-native';
+import {View, ScrollView, useWindowDimensions, ActivityIndicator, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
 import RNBounceable from '@freakycoder/react-native-bounceable';
-import * as NavigationService from 'react-navigation-helpers';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import Hexagon from './components/Hexagon';
 import TraitsSection from './components/TraitsSection';
-import UnitCostBadge from './components/UnitCostBadge';
 import AugmentsSection from './components/AugmentsSection';
 import CarryUnitsSection from './components/CarryUnitsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getTraitIconUrl} from '../../utils/metatft';
 import {getUnitAvatarImageSource} from '../../utils/champion-images';
 import {getItemIconImageSource} from '../../utils/item-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
-import {getTftItemByApiName} from '@services/api/tft-items';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
-import {SCREENS} from '@shared-constants';
 import {translations} from '../../shared/localization';
 import BackButton from '@shared-components/back-button/BackButton';
-
-const TFT_IMAGE_VERSION = '14.15.1';
-const CHAMPION_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-champion/`;
-const ITEM_BASE = `https://ddragon.leagueoflegends.com/cdn/${TFT_IMAGE_VERSION}/img/tft-item/`;
-
-const COST_COLORS: Record<number, string> = {
-  1: '#a5b4fc',
-  2: '#38bdf8',
-  3: '#f97316',
-  4: '#facc15',
-  5: '#c084fc',
-};
-
-const championIcon = (fileName: string) => `${CHAMPION_BASE}${fileName}`;
-const itemIcon = (fileName: string) => `${ITEM_BASE}${fileName}`;
 
 type TeamUnitItem = {
   id?: string;
@@ -420,22 +399,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
       }),
     );
   }, [team, currentPhaseUnits]);
-
-
-  const renderSynergy = (synergy: TeamSynergy) => (
-    <View key={synergy.id} style={styles.synergyCard}>
-      <Hexagon
-        size={44}
-        backgroundColor={synergy.color + '20'}
-        borderColor={synergy.color + '66'}
-        borderWidth={2}>
-        <Text style={[styles.synergyIconText, {color: synergy.color}]}>
-          {synergy.abbreviation}
-        </Text>
-      </Hexagon>
-      <Text style={styles.synergyCount}>{synergy.count}</Text>
-    </View>
-  );
 
 
   const renderUnit = (_unit: TeamUnit) => {

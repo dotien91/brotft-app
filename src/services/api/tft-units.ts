@@ -19,6 +19,9 @@ export const getTftUnits = async (
   if (params?.limit) {
     queryParams.append('limit', params.limit.toString());
   }
+  if (params?.minimal !== undefined) {
+    queryParams.append('minimal', params.minimal ? 'true' : 'false');
+  }
   if (params?.filters) {
     const {filters} = params;
     if (filters.name) {
@@ -43,7 +46,6 @@ export const getTftUnits = async (
     queryParams.append('orderBy', sortItem.orderBy);
     queryParams.append('order', sortItem.order.toLowerCase());
   }
-
   const response = await axiosInstance.get<ITftUnitsResponse>(
     `/tft-units?${queryParams.toString()}`,
   );

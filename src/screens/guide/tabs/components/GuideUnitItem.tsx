@@ -1,5 +1,7 @@
 import React, {useMemo, useEffect, useState} from 'react';
 import {View, TouchableOpacity, Image} from 'react-native';
+import * as NavigationService from 'react-navigation-helpers';
+import {SCREENS} from '@shared-constants';
 import {useTheme} from '@react-navigation/native';
 import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
@@ -17,11 +19,11 @@ import UnitTraitsDisplay from '@screens/unit-detail/components/UnitTraitsDisplay
 
 interface GuideUnitItemProps {
   data: ITftUnit;
-  onPress: () => void;
+  onPress?: () => void;
   compact?: boolean; // If true, only show avatar, name and cost (hide traits)
 }
 
-const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = false}) => {
+const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onPress}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -29,7 +31,23 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
   const language = useStore((state) => state.language);
   const [localizedName, setLocalizedName] = useState<string | null>(null);
 
+  
+
   const {name, cost, icon, squareIcon, apiName} = data;
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+      return;
+    }
+
+    // Prefer apiName when available, fallback to id
+    if (apiName) {
+      NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: String(apiName)});
+    } else if (data?.id) {
+      NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(data.id)});
+    }
+  };
   // Get localized name from storage
   useEffect(() => {
     if (!data || !language) {
@@ -133,7 +151,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
   if (compact) {
     // Compact mode: vertical layout like in composition detail
     return (
-      <TouchableOpacity style={styles.compactContainer} onPress={onPress} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.compactContainer} onPress={handlePress} activeOpacity={0.7}>
         <View style={styles.compactHexagonWrapper}>
           <View style={styles.compactHexagonBorderWrapper}>
             <View style={styles.compactHexagonBorder}>
@@ -191,7 +209,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, onPress, compact = f
   // Full mode: horizontal layout with traits
   const borderColor = getUnitCostBorderColor(cost);
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.7}>
       {/* Hexagon Avatar */}
       <View style={styles.avatarContainer}>
         <View style={styles.hexagonWrapper}>

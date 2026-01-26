@@ -193,8 +193,7 @@ const HomeScreen: React.FC = () => {
           contentContainerStyle={styles.listContent}
           // Performance props
           initialNumToRender={7}
-          maxToRenderPerBatch={5}
-          windowSize={5}
+          maxToRenderPerBatch={10}
           removeClippedSubviews={true} // Giải phóng bộ nhớ cho item ngoài màn hình
           // Components
           ListHeaderComponent={ListHeader}

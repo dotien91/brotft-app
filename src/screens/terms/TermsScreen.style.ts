@@ -1,11 +1,11 @@
-import {StyleSheet, ViewStyle, TextStyle} from 'react-native';
+import {StyleSheet, ViewStyle} from 'react-native';
 import {ExtendedTheme} from '@react-navigation/native';
 
 interface Style {
   container: ViewStyle;
-  scrollView: ViewStyle;
-  contentContainer: ViewStyle;
-  content: TextStyle;
+  safeArea: ViewStyle;
+  webView: ViewStyle;
+  loadingContainer: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -15,17 +15,22 @@ export default (theme: ExtendedTheme) => {
       flex: 1,
       backgroundColor: colors.background,
     },
-    scrollView: {
+    safeArea: {
       flex: 1,
     },
-    contentContainer: {
-      padding: 20,
-      paddingBottom: 40,
+    webView: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    content: {
-      fontSize: 14,
-      lineHeight: 22,
-      letterSpacing: 0.2,
+    loadingContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
     },
   });
 };

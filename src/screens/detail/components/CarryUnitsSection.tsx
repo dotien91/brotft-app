@@ -346,7 +346,7 @@ console.log("unitsWithItems", unitsWithItems);
                     borderColor={getUnitCostBorderColor(unitCost)}
                     borderWidth={2}
                     imageUri={unitImageUri}
-                    imageSource={imageSource.local}
+                    imageSource={avatar.local}
                   />
                 </View>
                 {/* Champion name at bottom absolute */}

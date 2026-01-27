@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import {isReadyRef, navigationRef} from 'react-navigation-helpers';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer, NavigationState} from '@react-navigation/native';
@@ -112,26 +112,27 @@ const Navigation = () => {
     size: number,
   ) => {
     let iconName = 'home';
+    let weight: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' = focused ? 'fill' : 'regular';
     switch (route.name) {
       case SCREENS.HOME:
-        iconName = focused ? 'home' : 'home-outline';
+        iconName = 'home';
         break;
       case SCREENS.GUIDE:
-        iconName = focused ? 'book' : 'book-outline';
+        iconName = 'book';
         break;
       case SCREENS.SETTINGS:
-        iconName = focused ? 'settings' : 'settings-outline';
+        iconName = 'settings';
         break;
       default:
-        iconName = focused ? 'home' : 'home-outline';
+        iconName = 'home';
         break;
     }
     return (
       <Icon
         name={iconName}
-        type={IconType.Ionicons}
         size={size}
         color={color}
+        weight={weight}
       />
     );
   };

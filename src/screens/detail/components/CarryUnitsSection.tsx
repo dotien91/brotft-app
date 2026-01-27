@@ -160,53 +160,17 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore((state) => state.language);
 
-  // Use carryItems from API if available, otherwise fallback to filtering units with items
+  // Filter units that have items
   const unitsWithItems = useMemo(() => {
-    if (!team) return [];
+    if (!team || !team.units) return [];
     
-    if (team.carryItems && team.carryItems.length > 0) {
-      // Convert TeamCarry to TeamUnit format for rendering
-      return team.carryItems.map(carryItem => {
-        // Find corresponding unit from team.units to get full unit data
-        const unit = team.units.find(u => 
-          u.championKey === carryItem.championId || 
-          u.championKey === carryItem.championName ||
-          u.id === carryItem.championId
-        );
-        
-        if (unit) {
-          // Use unit data but with items from carryItem
-          return {
-            ...unit,
-            items: carryItem.items,
-          };
-        }
-        
-        // Fallback: create a minimal unit from carryItem
-        return {
-          id: carryItem.championId,
-          name: carryItem.championName,
-          cost: 0,
-          star: 2,
-          carry: true,
-          need3Star: false,
-          needUnlock: false,
-          position: {row: 0, col: 0},
-          image: carryItem.image,
-          items: carryItem.items,
-          championKey: carryItem.championId,
-        };
-      });
-    } else {
-      // Fallback: filter units that have items
-      return team.units.filter(unit => unit.items && unit.items.length > 0);
-    }
+    return team.units.filter(unit => unit.items && unit.items.length > 0);
   }, [team]);
 
   // Get traits for each unit from LocalStorage
-  const getUnitTraits = (unit: TeamUnit | TeamCarry): Array<{name: string; apiName?: string}> => {
-    const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
-    const unitName = 'name' in unit ? unit.name : ('championName' in unit ? unit.championName : null);
+  const getUnitTraits = (unit: TeamUnit): Array<{name: string; apiName?: string}> => {
+    const championKey = unit.championKey;
+    const unitName = unit.name;
     
     if (!championKey || !language) {
       return [];
@@ -302,20 +266,15 @@ console.log("unitsWithItems", unitsWithItems);
         const unitTraits = getUnitTraits(unit);
         const isLast = unitIndex === unitsWithItems.length - 1;
         const handleUnitPress = () => {
-          const championKey = unit?.championKey
-        console.log("unit====", unit?.championKey);
-
-          if (championKey) {
-            NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: championKey});
-          } else if ('id' in unit && unit.id) {
+          if (unit.championKey) {
+            NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.championKey});
+          } else if (unit.id) {
             NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: unit.id});
           }
         };
 
-        const unitName = 'name' in unit 
-          ? (unit as TeamUnit).name 
-          : ('championName' in unit ? (unit as TeamCarry).championName : translations.unknown || 'Unknown');
-        const unitCost = 'cost' in unit ? (unit as TeamUnit).cost : 0;
+        const unitName = unit.name;
+        const unitCost = unit.cost;
 
         // Get local image source for unit
         const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);

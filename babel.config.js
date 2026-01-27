@@ -28,7 +28,6 @@ module.exports = {
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       }
     ],
-      ['react-native-worklets/plugin', workletsPluginOptions],
     // Remove console logs in production (keep console.error and console.warn)
     ...(process.env.NODE_ENV === 'production'
       ? [
@@ -39,6 +38,7 @@ module.exports = {
             },
           ],
         ]
-      : [])
+      : []),
+      ['react-native-worklets/plugin', workletsPluginOptions],
   ],
 };

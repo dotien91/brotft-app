@@ -1,5 +1,7 @@
 import axiosInstance from './axios';
 
+const isDev = (global as any).__DEV__ === true || process.env.NODE_ENV === 'development';
+
 export interface IScreenTrackingRequest {
   screenName: string;
 }
@@ -16,6 +18,13 @@ export interface IScreenTrackingResponse {
 export const trackScreen = async (
   screenName: string,
 ): Promise<IScreenTrackingResponse> => {
+  if (isDev) {
+    // Skip tracking in development to avoid polluting analytics
+    return {
+      success: true,
+      message: 'Skipped tracking in development',
+    };
+  }
   try {
     const response = await axiosInstance.post<IScreenTrackingResponse>(
       '/screen-trackings',

@@ -2,7 +2,7 @@ import React, {useMemo, useEffect, useState, useRef} from 'react';
 import {View, ScrollView, Modal, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import createStyles from './ProfileScreen.style';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import useStore, {StoreState} from '@services/zustand/store';

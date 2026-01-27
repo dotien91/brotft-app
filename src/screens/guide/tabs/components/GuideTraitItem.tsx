@@ -1,7 +1,7 @@
 import React, {useMemo, useState, useEffect} from 'react';
 import {View, TouchableOpacity, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import type {ITftTrait} from '@services/models/tft-trait';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getTraitIconUrl} from '../../../../utils/metatft';

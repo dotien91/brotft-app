@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideAugmentItem from './components/GuideAugmentItem';
 import FilterModal from './components/FilterModal';

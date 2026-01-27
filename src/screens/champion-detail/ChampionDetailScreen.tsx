@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import {View, ScrollView, ActivityIndicator, Image} from 'react-native';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './ChampionDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';

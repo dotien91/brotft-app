@@ -6,7 +6,7 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import {TabView, TabBar} from 'react-native-tab-view';

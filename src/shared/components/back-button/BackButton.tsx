@@ -1,7 +1,7 @@
 import React from 'react';
 import {ViewStyle} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import * as NavigationService from 'react-navigation-helpers';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import createStyles from './BackButton.style';

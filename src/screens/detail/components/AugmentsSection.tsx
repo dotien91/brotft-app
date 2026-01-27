@@ -1,7 +1,7 @@
 import React, {useMemo} from 'react';
 import {View, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getAugmentIconUrlFromPath} from '../../../utils/metatft';
 import LocalStorage from '@services/local-storage';

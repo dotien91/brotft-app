@@ -1,3 +1,6 @@
+ const workletsPluginOptions = {
+    // Your custom options.
+  }
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
   plugins: [
@@ -23,8 +26,9 @@ module.exports = {
           '@zustand': './src/services/zustand/store',
         },
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
+      }
     ],
+      ['react-native-worklets/plugin', workletsPluginOptions],
     // Remove console logs in production (keep console.error and console.warn)
     ...(process.env.NODE_ENV === 'production'
       ? [
@@ -35,7 +39,6 @@ module.exports = {
             },
           ],
         ]
-      : []),
-    'react-native-reanimated/plugin',
+      : [])
   ],
 };

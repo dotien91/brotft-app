@@ -1,7 +1,7 @@
 import React, {useMemo} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, { IconType } from '../../../../shared/components/icon/Icon';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {translations} from '../../../../shared/localization';

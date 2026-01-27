@@ -1,7 +1,7 @@
 import React, {useMemo, useCallback} from 'react';
 import {View, TouchableOpacity} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import type {IChampion} from '@services/models/champion';
 import type {ITrait} from '@services/models/trait';
 import Text from '@shared-components/text-wrapper/TextWrapper';

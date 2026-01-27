@@ -2,7 +2,7 @@ import React, {useMemo, useCallback, useState, useEffect} from 'react';
 import {View, ScrollView} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
-import Icon, {IconType} from 'react-native-dynamic-vector-icons';
+import Icon, {IconType} from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import UnitAvatar from '@shared-components/unit-avatar';
 import {translations} from '../../../../shared/localization';

@@ -301,7 +301,7 @@ export const translations = new LocalizedStrings({
     vietnamese: "Tiếng Việt",
     chinese: "Tiếng Trung",
     home: "Trang chủ",
-    guide: "Hướng dẫn",
+    guide: "Sách Mở",
     units: "Tướng",
     traits: "Tộc/Hệ",
     items: "Trang bị",

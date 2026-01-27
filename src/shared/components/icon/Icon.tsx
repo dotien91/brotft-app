@@ -19,7 +19,8 @@ const iconMapping: Record<string, string> = {
 	home: 'House',
 	'home-outline': 'House',
 	book: 'Book',
-	'book-outline': 'BookOpen',
+	'book-open': 'BookOpen',
+	books: 'Books',
 	settings: 'Gear',
 	'settings-outline': 'Gear',
 	// Common icons

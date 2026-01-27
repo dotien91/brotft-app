@@ -118,7 +118,7 @@ const Navigation = () => {
         iconName = 'home';
         break;
       case SCREENS.GUIDE:
-        iconName = 'book';
+        iconName = 'books';
         break;
       case SCREENS.SETTINGS:
         iconName = 'settings';

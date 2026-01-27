@@ -64,7 +64,6 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
   }, [searchQuery]);
 
   const {data: units, isLoading} = useTftUnitsWithPagination(100, filters);
-console.log("units", units);
   // Group units by tier
   const unitsByTier = useMemo(() => {
     if (!units || units.length === 0) return [];

@@ -20,7 +20,7 @@ target 'rnTypescriptZustandBoilerplate' do
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => true,
-    :new_arch_enabled => false,      # Tắt New Arch
+    :new_arch_enabled => true,      # Tắt New Arch
 
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."

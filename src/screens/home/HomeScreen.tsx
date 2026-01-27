@@ -1,5 +1,5 @@
 import React, {useMemo, useCallback, useState} from 'react';
-import {FlatList, View, ActivityIndicator} from 'react-native';
+import {View, ActivityIndicator} from 'react-native'; // Bỏ FlatList
 import {SafeAreaView} from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './HomeScreen.style';
@@ -19,11 +19,13 @@ import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
 import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
 import SelectedUnitsFilter from './components/selected-units-filter/SelectedUnitsFilter';
 import BannerAdItem from './components/banner-ad-item/BannerAdItem';
-import {translations} from '../../shared/localization'; 
-const ITEM_HEIGHT = 190; // Giả sử card của bạn cao 120px, hãy điều chỉnh cho đúng
-const AD_INTERVAL = 4; // Hiển thị quảng cáo sau mỗi 4 đội hình
+import {translations} from '../../shared/localization';
+import {FlashList} from '@shopify/flash-list'; // 1. Import FlashList
 
-type ListItem = 
+const ITEM_HEIGHT = 190;
+const AD_INTERVAL = 4;
+
+type ListItem =
   | {type: 'composition'; data: IComposition}
   | {type: 'ad'; id: string};
 
@@ -40,14 +42,13 @@ const HomeScreen: React.FC = () => {
     if (selectedUnits.length === 0) {
       return null;
     }
-    const dto = {
+    return {
       units: selectedUnits,
       searchInAllArrays: true,
     };
-    return dto;
   }, [selectedUnits]);
 
-  // Fetch compositions from API or search by units
+  // Fetch compositions logic (Giữ nguyên)
   const {
     data: allCompositions,
     isLoading: isLoadingAll,
@@ -60,7 +61,7 @@ const HomeScreen: React.FC = () => {
     isNoData,
     loadMore,
   } = useCompositionsWithPagination(10);
-  console.log('searchDto', searchDto);
+
   const {
     data: searchCompositions,
     isLoading: isLoadingSearch,
@@ -69,7 +70,7 @@ const HomeScreen: React.FC = () => {
     refresh: refreshSearch,
     isRefetching: isRefetchingSearch,
   } = useSearchCompositionsByUnits(searchDto, 10);
-  // Use search results if filtering, otherwise use all compositions
+
   const compositions = searchDto ? searchCompositions : allCompositions;
   const isLoading = searchDto ? isLoadingSearch : isLoadingAll;
   const isError = searchDto ? isErrorSearch : isErrorAll;
@@ -77,7 +78,6 @@ const HomeScreen: React.FC = () => {
   const refresh = searchDto ? refreshSearch : refreshAll;
   const isRefetching = searchDto ? isRefetchingSearch : isRefetchingAll;
 
-  
   const handleTeamPress = useCallback((comp: IComposition) => {
     NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
   }, []);
@@ -94,20 +94,17 @@ const HomeScreen: React.FC = () => {
     setSelectedUnits(prev => prev.filter(u => u !== unitKey));
   }, []);
 
-  // Chèn banner ads vào giữa các composition
   const listData = useMemo<ListItem[]>(() => {
     if (!compositions || compositions.length === 0) return [];
-    
+
     const result: ListItem[] = [];
     compositions.forEach((comp, index) => {
       result.push({type: 'composition', data: comp});
-      
-      // Chèn ad tại vị trí 1, 5, 9, 13... (index 0, 4, 8, 12...)
       if (index % 4 === 0) {
         result.push({type: 'ad', id: `ad-${index}`});
       }
     });
-    
+
     return result;
   }, [compositions]);
 
@@ -116,7 +113,6 @@ const HomeScreen: React.FC = () => {
       if (item.type === 'ad') {
         return <BannerAdItem height={ITEM_HEIGHT} />;
       }
-      
       return <TeamCard composition={item.data} onPress={handleTeamPress} />;
     },
     [handleTeamPress],
@@ -124,41 +120,51 @@ const HomeScreen: React.FC = () => {
 
   const keyExtractor = useCallback((item: ListItem) => {
     if (item.type === 'ad') return item.id;
-    return item.data.id.toString();
+    return item.data.name.toString();
   }, []);
 
-  // Memoize Header để tránh re-render không cần thiết
-  // Tách phần cover (tĩnh) và filter section (dynamic)
-  const ListHeader = useMemo(() => (
-    <View>
-      <HomeHeaderCover />
-      <View style={styles.sectionTitleContainer}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>{translations.compositionsSection}</Text>
-          <View style={styles.filterContainer}>
-            <RNBounceable
-              onPress={() => setIsFilterModalVisible(true)}
-              style={styles.filterButton}>
-              <Icon
-                name="filter"
-                type={IconType.Ionicons}
-                color={colors.text}
-                size={20}
-              />
-              <Text style={styles.filterButtonText}>
-                {translations.filterByUnits}
-              </Text>
-            </RNBounceable>
+  const ListHeader = useMemo(
+    () => (
+      <View>
+        <HomeHeaderCover />
+        <View style={styles.sectionTitleContainer}>
+          <View style={styles.sectionTitleRow}>
+            <Text style={styles.sectionTitle}>
+              {translations.compositionsSection}
+            </Text>
+            <View style={styles.filterContainer}>
+              <RNBounceable
+                onPress={() => setIsFilterModalVisible(true)}
+                style={styles.filterButton}>
+                <Icon
+                  name="filter"
+                  type={IconType.Ionicons}
+                  color={colors.text}
+                  size={20}
+                />
+                <Text style={styles.filterButtonText}>
+                  {translations.filterByUnits}
+                </Text>
+              </RNBounceable>
+            </View>
           </View>
+          <SelectedUnitsFilter
+            selectedUnits={selectedUnits}
+            onRemoveUnit={handleRemoveUnit}
+            onClearAll={handleClearFilter}
+          />
         </View>
-        <SelectedUnitsFilter
-          selectedUnits={selectedUnits}
-          onRemoveUnit={handleRemoveUnit}
-          onClearAll={handleClearFilter}
-        />
       </View>
-    </View>
-  ), [styles, selectedUnits, colors.text, handleClearFilter, handleRemoveUnit]);
+    ),
+    [
+      styles,
+      selectedUnits,
+      colors.text,
+      handleClearFilter,
+      handleRemoveUnit,
+      translations,
+    ],
+  );
 
   const ListFooter = useCallback(() => {
     if (!isLoadingMore) return null;
@@ -170,34 +176,43 @@ const HomeScreen: React.FC = () => {
   }, [isLoadingMore, colors.primary]);
 
   const ListEmpty = useCallback(() => {
-    if (isLoading) return <ActivityIndicator size="large" color={colors.primary} style={{marginTop: 50}} />;
-    if (isNoData) return <EmptyList message={translations.noCompositionsFound} />;
+    if (isLoading)
+      return (
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={{marginTop: 50}}
+        />
+      );
+    if (isNoData)
+      return <EmptyList message={translations.noCompositionsFound} />;
     return null;
-  }, [isLoading, isNoData, colors.primary]);
+  }, [isLoading, isNoData, colors.primary, translations]);
 
-  // Handler load more tối ưu
   const handleLoadMore = useCallback(() => {
     if (hasMore && !isLoadingMore && !isLoading) {
       loadMore();
     }
   }, [hasMore, isLoadingMore, isLoading, loadMore]);
 
-  const getItemLayout = useCallback(
-    (_data: any, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: ITEM_HEIGHT * index,
-      index,
-    }),
-    [],
-  );
-
+  // Error State Render
   if (isError) {
     return (
       <SafeAreaView style={styles.container}>
         {ListHeader}
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20}}>
-          <Text h4 color={colors.danger}>{translations.errorLoadingCompositions}</Text>
-          <Text color={colors.placeholder} style={{marginTop: 8, marginBottom: 16}}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+          }}>
+          <Text h4 color={colors.danger}>
+            {translations.errorLoadingCompositions}
+          </Text>
+          <Text
+            color={colors.placeholder}
+            style={{marginTop: 8, marginBottom: 16}}>
             {error?.message || translations.somethingWentWrong}
           </Text>
           <RNBounceable
@@ -208,42 +223,46 @@ const HomeScreen: React.FC = () => {
               backgroundColor: colors.primary,
               borderRadius: 8,
             }}>
-            <Text color="#fff" style={{fontWeight: '600'}}>{translations.retry}</Text>
+            <Text color="#fff" style={{fontWeight: '600'}}>
+              {translations.retry}
+            </Text>
           </RNBounceable>
         </View>
       </SafeAreaView>
     );
   }
 
+  // 4. Render FlashList
   return (
     <>
-        <FlatList
-          data={listData}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          contentContainerStyle={styles.listContent}
-          // Performance props
-          initialNumToRender={7}
-          maxToRenderPerBatch={10}
-          removeClippedSubviews={true} // Giải phóng bộ nhớ cho item ngoài màn hình
-          // Components
-          ListHeaderComponent={ListHeader}
-          ListFooterComponent={ListFooter}
-          ListEmptyComponent={ListEmpty}
-          // Actions
-          refreshing={isRefetching}
-          onRefresh={refresh}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.3}
-          showsVerticalScrollIndicator={false}
-        />
-        <UnitFilterModal
-          visible={isFilterModalVisible}
-          onClose={() => setIsFilterModalVisible(false)}
-          onApply={handleApplyFilter}
-          selectedUnits={selectedUnits}
-        />
-        </>
+      <FlashList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        contentContainerStyle={styles.listContent}
+        
+        // --- FlashList Props quan trọng ---
+        estimatedItemSize={ITEM_HEIGHT} // Giúp FlashList tính toán scroll mượt mà
+        
+        // Components
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        ListEmptyComponent={ListEmpty}
+        
+        // Actions
+        refreshing={isRefetching}
+        onRefresh={refresh}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.3}
+        showsVerticalScrollIndicator={false}
+      />
+      <UnitFilterModal
+        visible={isFilterModalVisible}
+        onClose={() => setIsFilterModalVisible(false)}
+        onApply={handleApplyFilter}
+        selectedUnits={selectedUnits}
+      />
+    </>
   );
 };
 

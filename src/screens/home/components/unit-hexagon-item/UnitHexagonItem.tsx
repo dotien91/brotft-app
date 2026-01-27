@@ -5,6 +5,7 @@ import Hexagon from '@screens/detail/components/Hexagon';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import type {ICompositionUnit} from '@services/models/composition';
 import {getUnitAvatarImageSource} from '../../../../utils/champion-images';
+import getUnitAvatar from '../../../../utils/unit-avatar';
 import {getItemIconImageSource} from '../../../../utils/item-images';
 import {getUnitCostBorderColor} from '../../../../utils/unitCost';
 import createStyles from './UnitHexagonItem.style';
@@ -19,8 +20,10 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const imageSource = getUnitAvatarImageSource(unit.championKey, 64);
-  const unitImage = imageSource.local ? undefined : (imageSource.uri || unit.image || '');
+  // Prefer local image; fallback to CDN URL via getUnitAvatar
+  const avatar = getUnitAvatar(unit.championKey, 64);
+  const imageSource = { local: avatar.local };
+  const unitImage = avatar.local ? undefined : (avatar.uri || unit.image || '');
 
   const getItemIcon = (apiName: string) => {
     const imageSource = getItemIconImageSource(null, apiName, 48);

@@ -10,7 +10,7 @@ import TraitsSection from './components/TraitsSection';
 import AugmentsSection from './components/AugmentsSection';
 import CarryUnitsSection from './components/CarryUnitsSection';
 import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
-import {getUnitAvatarImageSource} from '../../utils/champion-images';
+import getUnitAvatar from '../../utils/unit-avatar';
 import {getItemIconImageSource} from '../../utils/item-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
@@ -154,7 +154,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         });
       }
 
-      const imageSource = getUnitAvatarImageSource(unit.championKey, 64);
+      const avatar = getUnitAvatar(unit.championKey, 64);
       return {
         ...unit,
         id: unit.championId || unit.championKey,
@@ -168,8 +168,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
           row: (unit.position?.row || 0) + 1,
           col: (unit.position?.col || 0) + 1,
         },
-        image: '', // Use local image via imageSource instead
-        imageSource: imageSource.local, // Add local image source
+        image: avatar.uri || '', // Use URL when no local image
+        imageSource: avatar.local, // Add local image source
         items: mappedItems,
         championKey: unit.championKey,
       };
@@ -262,7 +262,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         championName: carryItem.championName || carryItem.name,
         role: carryItem.role || 'Carry',
         image: '', // Use local image via imageSource instead
-        imageSource: getUnitAvatarImageSource(carryItem.championKey, 64).local, // Add local image source
+        imageSource: getUnitAvatar(carryItem.championKey, 64).local, // Add local image source
         items: mappedItems,
       };
     });

@@ -7,7 +7,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from './Hexagon';
 import UnitCostBadge from './UnitCostBadge';
 import {getTraitIconUrl} from '../../../utils/metatft';
-import {getUnitAvatarImageSource} from '../../../utils/champion-images';
+import getUnitAvatar from '../../../utils/unit-avatar';
 import {getItemIconImageSource} from '../../../utils/item-images';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
@@ -320,8 +320,8 @@ console.log("unitsWithItems", unitsWithItems);
         // Get local image source for unit
         const championKey = 'championKey' in unit ? unit.championKey : ('championId' in unit ? unit.championId : null);
         const championKeyString = championKey ? String(championKey) : '';
-        const imageSource = getUnitAvatarImageSource(championKeyString, 64);
-        const unitImageUri = imageSource.local ? undefined : imageSource.uri;
+        const avatar = getUnitAvatar(championKeyString, 64);
+        const unitImageUri = avatar.local ? undefined : avatar.uri;
 
         return (
           <RNBounceable 

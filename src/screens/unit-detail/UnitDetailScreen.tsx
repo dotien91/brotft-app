@@ -10,7 +10,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitSplashUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
-import {getUnitAvatarImageSource} from '../../utils/champion-images';
+import getUnitAvatar from '../../utils/unit-avatar';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
@@ -380,7 +380,7 @@ console.log("unitById" , unitApiName, unitId);
       
       // Use local image only
       const apiName = unit?.apiName || unit?.name || '';
-      return getUnitAvatarImageSource(apiName, 80);
+      return getUnitAvatar(apiName, 80);
     };
 
     const avatarSource = getTftUnitAvatarSource();

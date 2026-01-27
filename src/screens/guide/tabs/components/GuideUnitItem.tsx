@@ -7,7 +7,7 @@ import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
 import {getUnitAvatarUrl} from '../../../../utils/metatft';
-import {getUnitAvatarImageSource} from '../../../../utils/champion-images';
+import getUnitAvatar from '../../../../utils/unit-avatar';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../../../utils/unitCost';
 import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
@@ -135,7 +135,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
     
     // Use local image first, then fallback to metatft.com
     const unitKey = apiName || name || '';
-    return getUnitAvatarImageSource(unitKey, 64);
+    return getUnitAvatar(unitKey, 64);
   };
 
   const imageSource = getTftUnitAvatarSource();

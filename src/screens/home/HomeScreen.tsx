@@ -20,9 +20,6 @@ import BannerAdItem from './components/banner-ad-item/BannerAdItem';
 import {translations} from '../../shared/localization';
 import {FlashList} from '@shopify/flash-list'; // 1. Import FlashList
 
-const ITEM_HEIGHT = 190;
-const AD_INTERVAL = 4;
-
 type ListItem =
   | {type: 'composition'; data: IComposition}
   | {type: 'ad'; id: string};

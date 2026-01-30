@@ -1,17 +1,20 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {LogBox, StatusBar, View} from 'react-native';
 import LottieView from 'lottie-react-native';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {isAndroid} from '@freakycoder/react-native-helpers';
 import {getLocales} from 'react-native-localize';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Navigation from './src/navigation';
 import {queryClient} from '@services/api/react-query';
 import useStore from './src/services/zustand/store';
 import {translations} from './src/shared/localization';
 import {checkAndFetchDataByLocale} from './src/services/api/data';
 import LocalStorage from './src/services/local-storage';
+import {MobileAds} from 'react-native-google-mobile-ads';
 LogBox.ignoreAllLogs();
+import ReactNativeIdfaAaid, { AdvertisingInfoResponse } from '@sparkfabrik/react-native-idfa-aaid';
 
 /**
  * Map locale information to app language code
@@ -73,7 +76,31 @@ const App = () => {
   const language = useStore((state) => state.language);
   const setLanguage = useStore((state) => state.setLanguage);
   const [isLanguageReady, setIsLanguageReady] = React.useState(false);
-  const [isDataReady, setIsDataReady] = React.useState(false);
+
+  // Request App Tracking Transparency (iOS) when app opens, then init Mobile Ads
+  React.useEffect(() => {
+    const requestTrackingAndInitAds = async () => {
+      if (!isAndroid) {
+        try {
+          const result = await check(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
+          if (result === RESULTS.DENIED || result === RESULTS.UNAVAILABLE) {
+            await request(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
+          }
+        } catch (e) {
+          // Ignore on Android or if permission not available
+        }
+      }
+      try {
+        await MobileAds().setRequestConfiguration({
+          testDeviceIdentifiers: ['ad216163277472086cf1b66e9d39e7c9'],
+        });
+        await MobileAds().initialize();
+      } catch (error) {
+        console.error('AdMob Init Error:', error);
+      }
+      };
+      requestTrackingAndInitAds();
+    }, []);
 
   React.useEffect(() => {
     // Check if this is first time app launch (no language preference saved)
@@ -122,18 +149,7 @@ const App = () => {
       return;
     }
 
-    const fetchData = async () => {
-      try {
-        const success = await checkAndFetchDataByLocale(language);
-        setIsDataReady(success);
-      } catch (error) {
-        console.log('Error fetching data by locale:', error);
-        // Even if fetch fails, allow app to show (will use cached data if available)
-        setIsDataReady(true);
-      }
-    };
-
-    fetchData();
+    checkAndFetchDataByLocale(language);
   }, [language, isLanguageReady]);
 
   // Check app version on startup

@@ -2902,8 +2902,6 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
   - SocketRocket (0.7.1)
-  - sparkfabrik-react-native-idfa-aaid (1.2.0):
-    - React
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -3001,7 +2999,6 @@ DEPENDENCIES:
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
   - SocketRocket (~> 0.7.1)
-  - "sparkfabrik-react-native-idfa-aaid (from `../node_modules/@sparkfabrik/react-native-idfa-aaid`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -3201,8 +3198,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-vector-icons"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
-  sparkfabrik-react-native-idfa-aaid:
-    :path: "../node_modules/@sparkfabrik/react-native-idfa-aaid"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -3307,7 +3302,6 @@ SPEC CHECKSUMS:
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  sparkfabrik-react-native-idfa-aaid: a28bdc05864459e52c5398b11b9cab2b6c1ceb4b
   Yoga: 0c4b7d2aacc910a1f702694fa86be830386f4ceb
 
 PODFILE CHECKSUM: eaf8b27bb896b4b16e00251265188604f3cf403e

@@ -1071,7 +1071,7 @@
     "@babel/parser" "^7.28.6"
     "@babel/types" "^7.28.6"
 
-"@babel/traverse--for-generate-function-map@npm:@babel/traverse@^7.25.3":
+"@babel/traverse--for-generate-function-map@npm:@babel/traverse@^7.25.3", "@babel/traverse@^7.25.3", "@babel/traverse@^7.27.1", "@babel/traverse@^7.28.4", "@babel/traverse@^7.28.5", "@babel/traverse@^7.28.6":
   version "7.28.6"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.28.6.tgz#871ddc79a80599a5030c53b1cc48cbe3a5583c2e"
   integrity sha512-fgWX62k02qtjqdSNTAGxmKYY/7FSL9WAS1o2Hu5+I5m9T0yxZzr4cnrfXQ/MX0rIifthCSs6FKTlzYbJcPtMNg==
@@ -1099,19 +1099,6 @@
     "@babel/types" "^7.23.0"
     debug "^4.1.0"
     globals "^11.1.0"
-
-"@babel/traverse@^7.25.3", "@babel/traverse@^7.27.1", "@babel/traverse@^7.28.4", "@babel/traverse@^7.28.5", "@babel/traverse@^7.28.6":
-  version "7.28.6"
-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.28.6.tgz#871ddc79a80599a5030c53b1cc48cbe3a5583c2e"
-  integrity sha512-fgWX62k02qtjqdSNTAGxmKYY/7FSL9WAS1o2Hu5+I5m9T0yxZzr4cnrfXQ/MX0rIifthCSs6FKTlzYbJcPtMNg==
-  dependencies:
-    "@babel/code-frame" "^7.28.6"
-    "@babel/generator" "^7.28.6"
-    "@babel/helper-globals" "^7.28.0"
-    "@babel/parser" "^7.28.6"
-    "@babel/template" "^7.28.6"
-    "@babel/types" "^7.28.6"
-    debug "^4.3.1"
 
 "@babel/types@7.17.0":
   version "7.17.0"
@@ -2023,11 +2010,6 @@
   integrity sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==
   dependencies:
     "@sinonjs/commons" "^3.0.0"
-
-"@sparkfabrik/react-native-idfa-aaid@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@sparkfabrik/react-native-idfa-aaid/-/react-native-idfa-aaid-1.2.0.tgz#d0f6d56698f874051db522201ec936a741b0f777"
-  integrity sha512-Cczob0A4FsX/kZ6YK23YnrkmsFYfhYcTRXPNnnnbAbbhngHw7MJ1N6RTwVr0/vYQMiY12TYgbeShFYExjY2bUA==
 
 "@tanstack/query-core@5.90.16":
   version "5.90.16"

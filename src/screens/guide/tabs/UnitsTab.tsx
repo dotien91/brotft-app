@@ -100,7 +100,7 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
 
   const keyExtractor = useCallback((item: ListItem) => {
     if (item.type === 'ad') return item.id;
-    return String(item.data.id);
+    return String(item.data?.id || item.data?._id || item.data?.apiName);
   }, []);
 
   const handleLoadMore = useCallback(() => {

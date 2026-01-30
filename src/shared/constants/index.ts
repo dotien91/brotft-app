@@ -4,6 +4,13 @@ export const API_BASE_URL = __DEV__
   // ? 'http://localhost:3900'
   : 'https://api.apporastudio.com';
 
+// ? AdMob
+export const AD_UNIT_IDS = {
+  BANNER: __DEV__
+    ? 'ca-app-pub-3940256099942544/6300978111' // Test ID
+    : 'ca-app-pub-9275414127217585/2913687226', // Production Banner ID
+};
+
 // ? Screens
 export const SCREENS = {
   HOME_ROOT: 'HomeRoot',

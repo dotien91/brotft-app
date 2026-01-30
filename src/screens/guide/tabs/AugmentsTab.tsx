@@ -17,6 +17,7 @@ import type {ITftAugmentsFilters, ITftAugmentsSort} from '@services/models/tft-a
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
+import BannerAdItem from '../../home/components/banner-ad-item/BannerAdItem';
 
 interface AugmentsTabProps {
   enabled?: boolean;
@@ -93,17 +94,41 @@ const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
     // TODO: Navigate to augment detail screen when available
   }, []);
 
+  // Create list items with banner ad as first item
+  type ListItem = {type: 'augment'; data: typeof augmentsList[0]} | {type: 'ad'; id: string};
+  
+  const listItems = useMemo<ListItem[]>(() => {
+    const result: ListItem[] = [];
+    // Add banner ad as first item
+    if (augmentsList.length > 0) {
+      result.push({type: 'ad', id: 'ad-first'});
+    }
+    // Add all augments
+    augmentsList.forEach((augment) => {
+      result.push({type: 'augment', data: augment});
+    });
+    return result;
+  }, [augmentsList]);
+
   const renderItem = useCallback(
-    ({item}: {item: typeof augmentsList[0]}) => (
-      <GuideAugmentItem
-        data={item}
-        onPress={handleItemPress}
-      />
-    ),
+    ({item}: {item: ListItem}) => {
+      if (item.type === 'ad') {
+        return <BannerAdItem />;
+      }
+      return (
+        <GuideAugmentItem
+          data={item.data}
+          onPress={handleItemPress}
+        />
+      );
+    },
     [handleItemPress],
   );
 
-  const keyExtractor = useCallback((item: typeof augmentsList[0]) => String(item.id), []);
+  const keyExtractor = useCallback((item: ListItem) => {
+    if (item.type === 'ad') return item.id;
+    return String(item.data.id);
+  }, []);
 
   const handleLoadMore = useCallback(() => {
     if (hasMore && !isLoadingMore && !isLoading) {
@@ -347,7 +372,7 @@ const AugmentsTab: React.FC<AugmentsTabProps> = ({enabled = true}) => {
         />
       ) : (
         <FlatList
-          data={augmentsList}
+          data={listItems}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}

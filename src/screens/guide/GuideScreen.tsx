@@ -1,5 +1,5 @@
 import React, {useState, useMemo, useCallback} from 'react';
-import {useWindowDimensions} from 'react-native';
+import {useWindowDimensions, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
 import {TabView, TabBar, Route} from 'react-native-tab-view';
@@ -11,6 +11,7 @@ import AugmentsTab from './tabs/AugmentsTab';
 import {translations} from '../../shared/localization';
 import useStore from '@services/zustand/store';
 import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
+import LoadingList from '@shared-components/loading.list.component';
 
 const GuideScreen: React.FC = () => {
   const theme = useTheme();
@@ -37,6 +38,14 @@ const GuideScreen: React.FC = () => {
   const renderScene = useCallback(({route}: {route: Route}) => {
     const routeIndex = routes.findIndex(r => r.key === route.key);
     const isEnabled = visitedTabs.has(routeIndex);
+
+    if (!isEnabled) {
+      return (
+        <View style={{flex: 1}}>
+          <LoadingList numberItem={3} />
+        </View>
+      );
+    }
 
     switch (route.key) {
       case 'units':

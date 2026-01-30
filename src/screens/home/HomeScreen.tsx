@@ -1,13 +1,11 @@
 import React, {useMemo, useCallback, useState} from 'react';
 import {View, ActivityIndicator} from 'react-native'; // Bỏ FlatList
 import {SafeAreaView} from 'react-native-safe-area-context';
-import * as NavigationService from 'react-navigation-helpers';
 import createStyles from './HomeScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {SCREENS} from '@shared-constants';
 import {
   useCompositionsWithPagination,
   useSearchCompositionsByUnits,
@@ -78,10 +76,6 @@ const HomeScreen: React.FC = () => {
   const refresh = searchDto ? refreshSearch : refreshAll;
   const isRefetching = searchDto ? isRefetchingSearch : isRefetchingAll;
 
-  const handleTeamPress = useCallback((comp: IComposition) => {
-    NavigationService.push(SCREENS.DETAIL, {compId: comp.compId});
-  }, []);
-
   const handleApplyFilter = useCallback((units: string[]) => {
     setSelectedUnits(units);
   }, []);
@@ -100,7 +94,8 @@ const HomeScreen: React.FC = () => {
     const result: ListItem[] = [];
     compositions.forEach((comp, index) => {
       result.push({type: 'composition', data: comp});
-      if (index % 4 === 0) {
+      // Show ad at positions 2, 9, 16, 23... (every 7 items starting from 2nd)
+      if ((index + 1) % 7 === 1) {
         result.push({type: 'ad', id: `ad-${index}`});
       }
     });
@@ -111,11 +106,11 @@ const HomeScreen: React.FC = () => {
   const renderItem = useCallback(
     ({item}: {item: ListItem}) => {
       if (item.type === 'ad') {
-        return <BannerAdItem height={ITEM_HEIGHT} />;
+        return <BannerAdItem />;
       }
-      return <TeamCard composition={item.data} onPress={handleTeamPress} />;
+      return <TeamCard composition={item.data} />;
     },
-    [handleTeamPress],
+    [],
   );
 
   const keyExtractor = useCallback((item: ListItem) => {
@@ -241,8 +236,6 @@ const HomeScreen: React.FC = () => {
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}
         
-        // --- FlashList Props quan trọng ---
-        estimatedItemSize={ITEM_HEIGHT} // Giúp FlashList tính toán scroll mượt mà
         
         // Components
         ListHeaderComponent={ListHeader}
@@ -255,6 +248,7 @@ const HomeScreen: React.FC = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={false}
       />
       <UnitFilterModal
         visible={isFilterModalVisible}

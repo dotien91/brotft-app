@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useCallback} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
@@ -6,6 +6,8 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import type {IComposition} from '@services/models/composition';
 import UnitHexagonItem from '../unit-hexagon-item/UnitHexagonItem';
 import createStyles from './TeamCard.style';
+import * as NavigationService from 'react-navigation-helpers';
+import {SCREENS} from '@shared-constants';
 
 // Get rank color based on tier
 const getRankColor = (rankOrTier: string, primaryColor: string): string => {
@@ -67,13 +69,16 @@ const getDifficultyColor = (difficulty: string): {text: string; background: stri
 
 interface TeamCardProps {
   composition: IComposition;
-  onPress: (composition: IComposition) => void;
 }
 
-const TeamCard: React.FC<TeamCardProps> = ({composition, onPress}) => {
+const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const handlePress = useCallback(() => {
+    NavigationService.push(SCREENS.DETAIL, {compId: composition.compId});
+  }, [composition.compId]);
 
   const displayTier = composition.tier || 'S';
   const backgroundColor = getRankColor(displayTier, colors.primary);
@@ -84,7 +89,7 @@ const TeamCard: React.FC<TeamCardProps> = ({composition, onPress}) => {
   const planBackgroundColor = 'rgba(0, 0, 0, 0.5)';
 
   return (
-    <RNBounceable style={styles.teamCard} onPress={() => onPress(composition)}>
+    <RNBounceable style={styles.teamCard} onPress={handlePress}>
       <View style={styles.teamHeader}>
         <View style={styles.teamNameContainer}>
           <Text style={styles.teamName}>{composition.name}</Text>

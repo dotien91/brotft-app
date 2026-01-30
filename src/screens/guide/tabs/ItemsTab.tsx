@@ -13,6 +13,7 @@ import {SCREENS} from '@shared-constants';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
+import BannerAdItem from '../../home/components/banner-ad-item/BannerAdItem';
 
 interface ItemsTabProps {
   enabled?: boolean;
@@ -40,17 +41,41 @@ const ItemsTab: React.FC<ItemsTabProps> = ({enabled = true}) => {
     NavigationService.push(SCREENS.ITEM_DETAIL, {itemId: String(itemId)});
   }, []);
 
+  // Create list items with banner ad as first item
+  type ListItem = {type: 'item'; data: typeof itemsList[0]} | {type: 'ad'; id: string};
+  
+  const listItems = useMemo<ListItem[]>(() => {
+    const result: ListItem[] = [];
+    // Add banner ad as first item
+    if (itemsList.length > 0) {
+      result.push({type: 'ad', id: 'ad-first'});
+    }
+    // Add all items
+    itemsList.forEach((item) => {
+      result.push({type: 'item', data: item});
+    });
+    return result;
+  }, [itemsList]);
+
   const renderItem = useCallback(
-    ({item}: {item: typeof itemsList[0]}) => (
-      <GuideItemItem
-        data={item}
-        onPress={() => handleItemPress(item.id)}
-      />
-    ),
+    ({item}: {item: ListItem}) => {
+      if (item.type === 'ad') {
+        return <BannerAdItem />;
+      }
+      return (
+        <GuideItemItem
+          data={item.data}
+          onPress={() => handleItemPress(item.data.id)}
+        />
+      );
+    },
     [handleItemPress],
   );
 
-  const keyExtractor = useCallback((item: typeof itemsList[0]) => String(item.id), []);
+  const keyExtractor = useCallback((item: ListItem) => {
+    if (item.type === 'ad') return item.id;
+    return String(item.data.id);
+  }, []);
 
   const handleLoadMore = useCallback(() => {
     if (hasMore && !isLoadingMore && !isLoading) {
@@ -109,7 +134,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({enabled = true}) => {
 
   return (
     <FlatList
-      data={itemsList}
+      data={listItems}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
       contentContainerStyle={styles.listContent}

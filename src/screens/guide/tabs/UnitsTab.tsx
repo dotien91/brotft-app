@@ -19,6 +19,7 @@ import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';
 import {getUnitCostBorderColor} from '../../../utils/unitCost';
 import CostIcon from '@shared-components/cost-icon/CostIcon';
+import BannerAdItem from '../../home/components/banner-ad-item/BannerAdItem';
 
 interface UnitsTabProps {
   enabled?: boolean;
@@ -71,16 +72,36 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
   // Ensure units is always an array
   const unitsList = units || [];
 
+  // Create list items with banner ad as first item
+  type ListItem = {type: 'unit'; data: typeof unitsList[0]} | {type: 'ad'; id: string};
+  
+  const listItems = useMemo<ListItem[]>(() => {
+    const result: ListItem[] = [];
+    // Add banner ad as first item
+    if (unitsList.length > 0) {
+      result.push({type: 'ad', id: 'ad-first'});
+    }
+    // Add all units
+    unitsList.forEach((unit) => {
+      result.push({type: 'unit', data: unit});
+    });
+    return result;
+  }, [unitsList]);
+
   const renderItem = useCallback(
-    ({item}: {item: typeof unitsList[0]}) => (
-      <GuideUnitItem
-        data={item}
-      />
-    ),
+    ({item}: {item: ListItem}) => {
+      if (item.type === 'ad') {
+        return <BannerAdItem />;
+      }
+      return <GuideUnitItem data={item.data} />;
+    },
     [],
   );
 
-  const keyExtractor = useCallback((item: typeof unitsList[0]) => String(item.id), []);
+  const keyExtractor = useCallback((item: ListItem) => {
+    if (item.type === 'ad') return item.id;
+    return String(item.data.id);
+  }, []);
 
   const handleLoadMore = useCallback(() => {
     if (hasMore && !isLoadingMore && !isLoading) {
@@ -223,7 +244,7 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
         />
       ) : (
         <FlatList
-          data={unitsList}
+          data={listItems}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {useTheme} from '@react-navigation/native';
-import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
+import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
+import {AD_UNIT_IDS} from '@shared-constants';
+import LoadingList from '@shared-components/loading.list.component';
 
 interface BannerAdItemProps {
   height?: number;
@@ -10,16 +12,33 @@ interface BannerAdItemProps {
 const BannerAdItem: React.FC<BannerAdItemProps> = ({height = 190}) => {
   const theme = useTheme();
   const {colors} = theme;
-return null
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const handleAdLoaded = () => {
+    setIsLoading(false);
+    setHasError(false);
+  };
+
+  const handleAdFailedToLoad = () => {
+    setIsLoading(false);
+    setHasError(true);
+  };
+
   return (
-    <View style={[styles.container, {height, backgroundColor: colors.card, borderColor: colors.border}]}>
-      <BannerAd
-        unitId={TestIds.BANNER}
-        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{
-          requestNonPersonalizedAdsOnly: true,
-        }}
-      />
+    <View style={styles.container}>
+      {isLoading && !hasError && <LoadingList numberItem={1} />}
+      {!hasError && (
+        <BannerAd
+          unitId={AD_UNIT_IDS.BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+          onAdLoaded={handleAdLoaded}
+          onAdFailedToLoad={handleAdFailedToLoad}
+        />
+      )}
     </View>
   );
 };
@@ -27,11 +46,8 @@ return null
 const styles = StyleSheet.create({
   container: {
     borderRadius: 16,
-    padding: 8,
     marginBottom: 16,
-    borderWidth: 1,
     justifyContent: 'center',
-    paddingVertical: 10,
   },
 });
 

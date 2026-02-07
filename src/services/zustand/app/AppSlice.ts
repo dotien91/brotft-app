@@ -7,6 +7,12 @@ export interface AppState {
   setDarkMode: (value: boolean) => void;
   language: string;
   setLanguage: (value: string) => void;
+  adsSdkInitialized: boolean;
+  setAdsSdkInitialized: (value: boolean) => void;
+  adsSdkInitAttempted: boolean;
+  setAdsSdkInitAttempted: (value: boolean) => void;
+  hasTrackingPermission: boolean;
+  setHasTrackingPermission: (value: boolean) => void;
 }
 
 const createAppSlice: StoreSlice<AppState> = set => ({
@@ -16,6 +22,12 @@ const createAppSlice: StoreSlice<AppState> = set => ({
   setDarkMode: (value: boolean) => set({isDarkMode: value}),
   language: 'en',
   setLanguage: (value: string) => set({language: value}),
+  adsSdkInitialized: false,
+  setAdsSdkInitialized: (value: boolean) => set({adsSdkInitialized: value}),
+  adsSdkInitAttempted: false,
+  setAdsSdkInitAttempted: (value: boolean) => set({adsSdkInitAttempted: value}),
+  hasTrackingPermission: false,
+  setHasTrackingPermission: (value: boolean) => set({hasTrackingPermission: value}),
 });
 
 export default createAppSlice;

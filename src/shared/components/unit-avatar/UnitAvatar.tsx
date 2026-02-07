@@ -20,7 +20,6 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const {data: unit, isLoading} = useTftUnitByApiName(apiName);
-
   if (isLoading || !unit) {
     return (
       <View style={styles.container}>
@@ -30,7 +29,7 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
               size={hexSize + 4}
               backgroundColor="transparent"
               borderColor={colors.border}
-              borderWidth={1}
+              borderWidth={2}
             />
           </View>
           <View style={styles.hexagonInner}>
@@ -38,7 +37,7 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
               size={hexSize}
               backgroundColor={colors.card}
               borderColor={colors.border}
-              borderWidth={2}
+              borderWidth={3}
             />
           </View>
         </View>
@@ -48,8 +47,9 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
 
   const avatar = getUnitAvatar(unit.apiName || apiName, 64);
   const imageSource = {local: avatar.local};
-  const unitImage = avatar.local ? undefined : avatar.uri;
+  const unitImage = avatar.local;
   const borderColor = getUnitCostBorderColor(unit.cost ?? undefined, colors.primary);
+
   const unitName = unit.name || '';
   return (
     <View style={styles.container}>
@@ -60,7 +60,7 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
             size={hexSize + 4}
             backgroundColor="transparent"
             borderColor={borderColor}
-            borderWidth={1}
+            borderWidth={2}
           />
         </View>
         {/* Main hexagon with image */}
@@ -69,7 +69,7 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
             size={hexSize}
             backgroundColor={colors.card}
             borderColor={colors.border}
-            borderWidth={2}
+            borderWidth={3}
             imageUri={unitImage}
             imageSource={imageSource.local}
           />

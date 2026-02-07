@@ -40,7 +40,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             size={50}
             backgroundColor="transparent"
             borderColor={getUnitCostBorderColor(unit.cost, colors.primary || '#94a3b8')}
-            borderWidth={1}
+            borderWidth={2}
           />
         </View>
         {/* Main hexagon with image */}
@@ -49,7 +49,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({unit, index}) => {
             size={46}
             backgroundColor={colors.card}
             borderColor={colors.border}
-            borderWidth={2}
+            borderWidth={3}
             imageUri={unitImage}
             imageSource={imageSource.local}>
             {/* Items inside hexagon */}

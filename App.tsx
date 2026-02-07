@@ -75,6 +75,10 @@ const App = () => {
   const isDarkMode = useStore((state) => state.isDarkMode);
   const language = useStore((state) => state.language);
   const setLanguage = useStore((state) => state.setLanguage);
+  const setAdsSdkInitialized = useStore((state) => state.setAdsSdkInitialized);
+  const setAdsSdkInitAttempted = useStore((state) => state.setAdsSdkInitAttempted);
+  const setHasTrackingPermission = useStore((state) => state.setHasTrackingPermission);
+  const adsSdkInitAttempted = useStore((state) => state.adsSdkInitAttempted);
   const [isLanguageReady, setIsLanguageReady] = React.useState(false);
 
   // Request App Tracking Transparency (iOS) when app opens, then init Mobile Ads
@@ -82,25 +86,27 @@ const App = () => {
     const requestTrackingAndInitAds = async () => {
       if (!isAndroid) {
         try {
-          const result = await check(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
+          let result = await check(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
           if (result === RESULTS.DENIED || result === RESULTS.UNAVAILABLE) {
-            await request(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
+            result = await request(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY);
           }
+          setHasTrackingPermission(result === RESULTS.GRANTED);
         } catch (e) {
-          // Ignore on Android or if permission not available
+          setHasTrackingPermission(false);
         }
       }
       try {
-        await MobileAds().setRequestConfiguration({
-          testDeviceIdentifiers: ['ad216163277472086cf1b66e9d39e7c9'],
-        });
         await MobileAds().initialize();
+        setAdsSdkInitialized(true);
       } catch (error) {
         console.error('AdMob Init Error:', error);
+        setAdsSdkInitialized(true);
+      } finally {
+        setAdsSdkInitAttempted(true);
       }
-      };
-      requestTrackingAndInitAds();
-    }, []);
+    };
+    requestTrackingAndInitAds();
+  }, [setAdsSdkInitialized, setAdsSdkInitAttempted, setHasTrackingPermission]);
 
   React.useEffect(() => {
     // Check if this is first time app launch (no language preference saved)
@@ -170,8 +176,8 @@ const App = () => {
     }
   }, [isDarkMode]);
   
-  // Only render Navigation after language and data are ready
-  if (!isLanguageReady) {
+  // Only render Navigation after language is ready and ad SDK init has completed
+  if (!isLanguageReady || !adsSdkInitAttempted) {
     // Show loading screen while initializing
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000'}}>

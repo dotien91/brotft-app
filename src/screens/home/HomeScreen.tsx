@@ -247,12 +247,12 @@ const HomeScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={false}
       />
-      <UnitFilterModal
+      {isFilterModalVisible && <UnitFilterModal
         visible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
         onApply={handleApplyFilter}
         selectedUnits={selectedUnits}
-      />
+      />}
     </>
   );
 };

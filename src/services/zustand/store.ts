@@ -32,6 +32,7 @@ const useStore = create<StoreState>()(
     {
       name: 'store',
       storage: createJSONStorage(() => ZustandMMKVStorage),
+      partialize: ({adsSdkInitialized: _a, adsSdkInitAttempted: _c, hasTrackingPermission: _b, ...rest}) => rest,
     },
   ),
 );

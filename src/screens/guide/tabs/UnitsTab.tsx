@@ -56,7 +56,6 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
 
     return filterObj;
   }, [appliedCost, appliedTrait, appliedRole]);
-
   // Use pagination hook with filters
   const {
     data: units,

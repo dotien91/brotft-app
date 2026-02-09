@@ -7,8 +7,9 @@ import {
   useWindowDimensions,
   StyleSheet,
   Animated,
-  FlatList, // <--- Import FlatList
+  FlatList,
   ListRenderItem,
+  InteractionManager, // <--- 1. Import quan trọng
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from '@shared-components/icon/Icon';
@@ -135,34 +136,45 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUnits, setSelectedUnits] = useState<string[]>(initialSelectedUnits);
+  
+  // 2. State kiểm soát animation hoàn tất
+  const [isReady, setIsReady] = useState(false);
 
   const COLS = 6;
   const GAP = 8;
-  const SECTION_PADDING_H = 16 * 2; // sectionContent paddingHorizontal = 32
+  const SECTION_PADDING_H = 32; // 16 * 2
 
   const hexSize = useMemo(() => {
-    const available = screenWidth - SECTION_PADDING_H; // chiều rộng trong sectionContent
+    const available = screenWidth - SECTION_PADDING_H;
     return Math.floor((available - GAP * (COLS - 1)) / COLS);
   }, [screenWidth]);
+
+  const {data: allUnits, isLoading: isDataLoading} = useTftUnitsWithPagination(200);
 
   useEffect(() => {
     if (visible) {
       setSelectedUnits(initialSelectedUnits);
       setSearchQuery('');
+      setIsReady(false); // Reset trạng thái khi mở
+
+      // Đợi animation của Modal chạy xong mới set isReady = true
+      const task = InteractionManager.runAfterInteractions(() => {
+        setIsReady(true);
+      });
+
+      return () => task.cancel();
     }
   }, [visible, initialSelectedUnits]);
 
-  const {data: allUnits, isLoading} = useTftUnitsWithPagination(200);
-
-  // --- OPTIMIZED DATA PROCESSING (Single Pass) ---
+  // --- OPTIMIZED DATA PROCESSING ---
   const unitsByTier = useMemo(() => {
-    if (!allUnits || allUnits.length === 0) return [];
+    // Nếu modal chưa mở xong hoặc đang load API, return mảng rỗng để nhẹ bộ nhớ
+    if (!isReady || isDataLoading || !allUnits || allUnits.length === 0) return [];
 
     const query = searchQuery.trim().toLowerCase();
     const groups: Record<string, ITftUnit[]> = {};
     const noTierLabel = (translations.noTier || 'No Tier').toUpperCase();
 
-    // Loop 1 lần duy nhất
     for (const unit of allUnits) {
       if (query) {
         const name = unit.name?.toLowerCase() || '';
@@ -187,7 +199,7 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
         tier: tierKey,
         data: groups[tierKey],
       }));
-  }, [allUnits, searchQuery]);
+  }, [allUnits, searchQuery, isReady, isDataLoading]); // Thêm deps isReady
 
   // --- HANDLERS ---
   const toggleUnit = useCallback((apiName: string) => {
@@ -237,13 +249,16 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
         </View>
       </View>
     );
-  }, [colors, hexSize, selectedUnits, toggleUnit]); // Deps quan trọng để re-render khi selection thay đổi
+  }, [colors, hexSize, selectedUnits, toggleUnit]);
 
   const dynamicStyles = useMemo(() => createStyles(colors), [colors]);
 
+  // Điều kiện hiển thị Skeleton
+  const showSkeleton = !isReady || isDataLoading || unitsByTier.length === 0;
+
   return (
     <Modal
-      visible={true}
+      visible={visible}
       transparent
       animationType="slide"
       onRequestClose={onClose}>
@@ -287,8 +302,8 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
             </View>
           )}
 
-          {/* CONTENT: FLATLIST */}
-          {(isLoading || unitsByTier.length === 0) ? (
+          {/* CONTENT: FLATLIST or SKELETON */}
+          {showSkeleton ? (
              <UnitListSkeleton hexSize={hexSize} colors={colors} />
           ) : (
             <FlatList
@@ -299,9 +314,11 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
               showsVerticalScrollIndicator={false}
               keyboardDismissMode="on-drag"
               keyboardShouldPersistTaps="handled"
-              initialNumToRender={1} // Render 3 tier đầu tiên trước
+              // 3. Tối ưu FlatList Props
+              initialNumToRender={2}
               maxToRenderPerBatch={2}
-              windowSize={5}
+              windowSize={3}
+              removeClippedSubviews={true}
             />
           )}
 

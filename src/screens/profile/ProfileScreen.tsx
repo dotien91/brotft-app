@@ -30,14 +30,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const isDarkMode = useStore((state: StoreState) => state.isDarkMode);
-  const setDarkMode = useStore((state: StoreState) => state.setDarkMode);
   const language = useStore((state: StoreState) => state.language);
   const setLanguage = useStore((state: StoreState) => state.setLanguage);
 
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const languageOptionRef = useRef<View>(null);
   const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0});
+  const isChangingLanguageRef = useRef(false);
 
   // Update translations when language changes
   useEffect(() => {
@@ -46,27 +45,28 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     }
   }, [language]);
 
-  const handleThemeToggle = () => {
-    setDarkMode(!isDarkMode);
-  };
-
   const handleLanguageChange = async (lang: string) => {
-    setLanguage(lang);
-    translations.setLanguage(lang);
+    if (lang === language) {
+      setIsLanguageDropdownOpen(false);
+      return;
+    }
+    if (isChangingLanguageRef.current) return;
+    isChangingLanguageRef.current = true;
     setIsLanguageDropdownOpen(false);
 
-    // Mark that user has manually set language preference
+    setLanguage(lang);
+    translations.setLanguage(lang);
+
     const LANGUAGE_FIRST_LAUNCH_KEY = 'language_first_launch_set';
     LocalStorage.set(LANGUAGE_FIRST_LAUNCH_KEY, true);
 
-    // Check and fetch data by locale in background
     try {
       await checkAndFetchDataByLocale(lang);
-      
-      // Invalidate all queries to refetch with new locale
       await queryClient.invalidateQueries();
     } catch (error) {
       // Don't block UI if API calls fail
+    } finally {
+      isChangingLanguageRef.current = false;
     }
   };
 

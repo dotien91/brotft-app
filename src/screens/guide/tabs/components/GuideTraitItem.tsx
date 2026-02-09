@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {View, TouchableOpacity, Image} from 'react-native';
+import {View, Image} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from '@shared-components/icon/Icon';
 import type {ITftTrait} from '@services/models/tft-trait';
@@ -19,26 +19,24 @@ interface GuideTraitItemProps {
   onPress: () => void;
 }
 
-const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
+const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data}) => { // Removed onPress if not used, or keep if needed for parent
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore((state) => state.language);
+  
+  // Local state for localized data
   const [localizedName, setLocalizedName] = useState<string | null>(null);
   const [localizedDesc, setLocalizedDesc] = useState<string | null>(null);
   const [localizedEffects, setLocalizedEffects] = useState<any[] | null>(null);
   const [localizedType, setLocalizedType] = useState<'origin' | 'class' | null>(null);
 
   const {name, desc, icon, apiName, effects, enName} = data;
-  // Ưu tiên type từ API, không có thì dùng type từ LocalStorage (data_traits thường có từ Riot CDN)
-  const traitType =
-    (data as {type?: 'origin' | 'class'}).type ??
-    localizedType ??
-    null;
 
-  // Get localized trait name, description and type from storage (data_traits_xxx có thể chứa type)
+  // --- LOGIC MỚI: Truy vấn O(1) từ Object Map ---
   useEffect(() => {
-    if (!name || !apiName || !language) {
+    // Reset state nếu thiếu key định danh
+    if ((!apiName && !name) || !language) {
       setLocalizedName(null);
       setLocalizedDesc(null);
       setLocalizedEffects(null);
@@ -52,49 +50,42 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
       const traitsDataString = LocalStorage.getString(traitsKey);
 
       if (!traitsDataString) {
-        setLocalizedName(null);
-        setLocalizedDesc(null);
-        setLocalizedEffects(null);
-        setLocalizedType(null);
-        return;
+        return; // Không có data cache thì giữ nguyên props gốc
       }
 
-      const traitsData = JSON.parse(traitsDataString);
-      let traitDetail: any = null;
-
-      if (traitsData) {
-        if (Array.isArray(traitsData)) {
-          traitDetail = traitsData.find((trait: any) =>
-            trait.name === name || trait.apiName === apiName || trait.apiName === name
-          );
-        } else if (typeof traitsData === 'object' && traitsData !== null) {
-          traitDetail = Object.values(traitsData).find((trait: any) =>
-            trait.name === name || trait.apiName === apiName || trait.apiName === name
-          );
-        }
-      }
+      const traitsMap = JSON.parse(traitsDataString);
+      
+      // OPTIMIZATION: Truy xuất trực tiếp theo apiName (O(1))
+      // Nếu không có apiName thì fallback sang name
+      const traitDetail = traitsMap[apiName] || (name ? traitsMap[name] : null);
 
       if (traitDetail) {
         setLocalizedName(traitDetail.name || null);
         setLocalizedDesc(traitDetail.desc || traitDetail.description || null);
         setLocalizedEffects(traitDetail.effects || null);
+        
         const t = traitDetail.type?.toLowerCase();
         setLocalizedType(
           t === 'origin' || t === 'class' ? t : null
         );
       } else {
+        // Fallback: Nếu không tìm thấy trong cache map, clear localized data để dùng data gốc từ props
         setLocalizedName(null);
         setLocalizedDesc(null);
         setLocalizedEffects(null);
         setLocalizedType(null);
       }
     } catch (error) {
+      console.warn('Error parsing trait localized data:', error);
       setLocalizedName(null);
       setLocalizedDesc(null);
       setLocalizedEffects(null);
       setLocalizedType(null);
     }
   }, [name, apiName, language]);
+
+  // Ưu tiên type từ API, sau đó đến LocalStorage
+  const traitType = (data as {type?: 'origin' | 'class'}).type ?? localizedType ?? null;
 
   const traitIconUrl = useMemo(() => {
     if (icon && icon.startsWith('http')) return icon;
@@ -104,7 +95,9 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
   const displayDescription = useMemo(() => {
     const description = localizedDesc || desc;
     const traitEffects = localizedEffects || effects;
+    
     if (!description) return null;
+    
     if (traitEffects && traitEffects.length > 0) {
       return parseTraitDescription(description, traitEffects);
     }
@@ -113,24 +106,25 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
 
   const displayName = localizedName || name;
 
-  // Fetch units có trait này (giống TraitDetailScreen)
+  // Fetch units có trait này
   const {
     data: unitsData,
     isLoading: isLoadingUnits,
     isError: isErrorUnits,
   } = useTftUnits(
     {
-      filters: {trait: name},
+      filters: {trait: name}, // API thường lọc theo English name hoặc ID gốc
       limit: 100,
     },
     {enabled: !!name},
   );
+  
   const units = unitsData?.data ?? [];
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Header - giống TraitDetailScreen TraitHeader */}
+        {/* Header Section */}
         <View style={styles.headerSection}>
           <View style={[styles.typeIndicator, {backgroundColor: colors.primary + '15'}]}>
             {traitIconUrl ? (
@@ -151,10 +145,12 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
             )}
           </View>
           <View style={styles.titleSection}>
-            <Text><Text style={styles.title}>{displayName}{'   '}</Text>
-            {enName && enName !== displayName && (
-              <Text style={styles.enName}>{enName}</Text>
-            )}</Text>
+            <Text>
+              <Text style={styles.title}>{displayName}{'   '}</Text>
+              {enName && enName !== displayName && (
+                <Text style={styles.enName}>{enName}</Text>
+              )}
+            </Text>
             {traitType && (
               <View
                 style={[
@@ -185,14 +181,14 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
           </View>
         </View>
 
-        {/* Description - full như trang detail */}
+        {/* Description Section */}
         {displayDescription ? (
           <View style={styles.section}>
             <Text style={styles.description}>{displayDescription}</Text>
           </View>
         ) : null}
 
-        {/* Units - giống TraitDetailScreen TraitUnits */}
+        {/* Units Section */}
         <TraitUnits
           units={units}
           isLoading={isLoadingUnits}
@@ -204,5 +200,9 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data, onPress}) => {
 };
 
 export default React.memo(GuideTraitItem, (prevProps, nextProps) => {
-  return prevProps.data?.id === nextProps.data?.id;
+  // So sánh kỹ hơn để tránh re-render không cần thiết
+  return (
+    prevProps.data?.apiName === nextProps.data?.apiName &&
+    prevProps.data?.name === nextProps.data?.name
+  );
 });

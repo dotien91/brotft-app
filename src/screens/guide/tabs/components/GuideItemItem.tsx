@@ -8,7 +8,6 @@ import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
 import {getItemIconImageSource} from '../../../../utils/item-images';
-import {translations} from '../../../../shared/localization';
 
 interface GuideItemItemProps {
   data: ITftItem;
@@ -23,12 +22,15 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
   const [localizedName, setLocalizedName] = useState<string | null>(null);
   const [localizedComposition, setLocalizedComposition] = useState<string[] | null>(null);
 
-  const {name, icon, composition} = data;
+  const {name, icon, composition, apiName} = data;
 
-  // Get localized name from storage
+  // --- LOGIC MỚI: Truy vấn O(1) từ Object Map ---
   useEffect(() => {
-    if (!data || !language) {
+    console.log('GuideItemItem: useEffect', apiName, name, language);
+    // Safety check: Cần ít nhất apiName hoặc name để làm key tra cứu
+    if ((!apiName && !name) || !language) {
       setLocalizedName(null);
+      setLocalizedComposition(null);
       return;
     }
 
@@ -36,80 +38,41 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
       const locale = getLocaleFromLanguage(language);
       const itemsKey = `data_items_${locale}`;
       const itemsDataString = LocalStorage.getString(itemsKey);
-      
+      console.log('itemsDataString', itemsDataString);
       if (!itemsDataString) {
+        // Nếu chưa có cache, giữ state null để dùng fallback từ props
         setLocalizedName(null);
+        setLocalizedComposition(null);
         return;
       }
 
-      const itemsData = JSON.parse(itemsDataString);
-      let localizedItem: any = null;
-
-      // Handle both array and object formats
-      if (Array.isArray(itemsData)) {
-        // If it's an array, find the item
-        localizedItem = itemsData.find((localItem: any) => {
-          // Try to match by apiName first
-          if (data.apiName && localItem.apiName === data.apiName) {
-            return true;
-          }
-          // Fallback to name matching (case insensitive)
-          if (data.name && localItem.name) {
-            return data.name.toLowerCase() === localItem.name.toLowerCase();
-          }
-          // Try enName matching
-          if (data.enName && localItem.enName) {
-            return data.enName.toLowerCase() === localItem.enName.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof itemsData === 'object' && itemsData !== null) {
-        // If it's an object, try to find by apiName as key first
-        if (data.apiName && itemsData[data.apiName]) {
-          localizedItem = itemsData[data.apiName];
-        } else {
-          // Otherwise, search through object values
-          const itemsArray = Object.values(itemsData) as any[];
-          localizedItem = itemsArray.find((localItem: any) => {
-            // Try to match by apiName first
-            if (data.apiName && localItem.apiName === data.apiName) {
-              return true;
-            }
-            // Fallback to name matching (case insensitive)
-            if (data.name && localItem.name) {
-              return data.name.toLowerCase() === localItem.name.toLowerCase();
-            }
-            // Try enName matching
-            if (data.enName && localItem.enName) {
-              return data.enName.toLowerCase() === localItem.enName.toLowerCase();
-            }
-            return false;
-          });
-        }
-      }
+      const itemsMap = JSON.parse(itemsDataString);
+      console.log('itemsMap', itemsMap);
+      // OPTIMIZATION: Truy xuất trực tiếp (Direct Access)
+      // Ưu tiên tìm theo apiName (duy nhất), fallback sang name nếu cần
+      const localizedItem = itemsMap[apiName] || (name ? itemsMap[name] : null);
 
       if (localizedItem) {
         setLocalizedName(localizedItem.name || null);
         setLocalizedComposition(
-          localizedItem.composition && Array.isArray(localizedItem.composition)
-            ? localizedItem.composition
-            : null
+          Array.isArray(localizedItem.composition) ? localizedItem.composition : null
         );
       } else {
+        // Không tìm thấy trong map -> reset về null
         setLocalizedName(null);
         setLocalizedComposition(null);
       }
     } catch (error) {
-      console.error('Error loading localized name:', error);
+      console.warn('[GuideItemItem] Error parsing localized data:', error);
       setLocalizedName(null);
       setLocalizedComposition(null);
     }
-  }, [data, language]);
+  }, [apiName, name, language]);
 
   const displayComponents = localizedComposition ?? composition ?? [];
 
-  // Get item image source (local only)
-  const imageSource = getItemIconImageSource(icon, data.apiName, 48);
+  // Get item image source (local only logic)
+  const imageSource = getItemIconImageSource(icon, apiName, 48);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
@@ -120,13 +83,7 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
             source={imageSource.local}
             style={styles.icon}
             resizeMode="cover"
-            onError={() => {
-              try {
-                // await deleteTftItem(String(data.id));
-              } catch (error) {
-                console.error(`[GuideItemItem] Error deleting item ${data.id}:`, error);
-              }
-            }}
+            // onError handler cũ có thể giữ hoặc bỏ tùy logic deleteTftItem của bạn
           />
         ) : null}
       </View>
@@ -136,6 +93,7 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
         <Text style={styles.itemName} numberOfLines={1}>
           {localizedName || name || '---'}
         </Text>
+        
         {displayComponents.length >= 1 && (
           <View style={styles.recipeSection}>
             <View style={styles.recipeRow}>
@@ -167,7 +125,9 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
 };
 
 export default React.memo(GuideItemItem, (prevProps, nextProps) => {
-  // Only re-render if data.id changes, ignore onPress changes
-  return prevProps.data?.id === nextProps.data?.id;
+  // So sánh apiName/name thay vì id để ổn định hơn
+  return (
+    prevProps.data?.apiName === nextProps.data?.apiName &&
+    prevProps.data?.name === nextProps.data?.name
+  );
 });
-

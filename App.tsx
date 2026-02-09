@@ -79,6 +79,7 @@ const App = () => {
   const setAdsSdkInitAttempted = useStore((state) => state.setAdsSdkInitAttempted);
   const setHasTrackingPermission = useStore((state) => state.setHasTrackingPermission);
   const [isLanguageReady, setIsLanguageReady] = React.useState(false);
+  const lastFetchedLocaleRef = React.useRef<string | null>(null);
 
   // Request App Tracking Transparency (iOS) when app opens, then init Mobile Ads
   React.useEffect(() => {
@@ -147,13 +148,11 @@ const App = () => {
     }
   }, []);
 
-  // Check and fetch data by locale on app startup
-  // Only run after language is ready
+  // Check and fetch data by locale on app startup (chỉ gọi 1 lần cho mỗi locale, tránh Strict Mode gọi 2 lần)
   React.useEffect(() => {
-    if (!isLanguageReady || !language) {
-      return;
-    }
-
+    if (!isLanguageReady || !language) return;
+    if (lastFetchedLocaleRef.current === language) return;
+    lastFetchedLocaleRef.current = language;
     checkAndFetchDataByLocale(language);
   }, [language, isLanguageReady]);
 

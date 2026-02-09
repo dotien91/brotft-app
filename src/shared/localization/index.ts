@@ -142,6 +142,9 @@ export const translations = new LocalizedStrings({
     feedbackSubmitError: "Geri bildirim gönderilemedi. Lütfen tekrar deneyin.",
     ok: "Tamam",
     copySuccess: "Panoya kopyalandı",
+    difficultyEasy: "Kolay",
+    difficultyNormal: "Normal",
+    difficultyHard: "Zor",
   },
   en: {
     noLocationService: "Location Service Not Available",
@@ -285,6 +288,9 @@ export const translations = new LocalizedStrings({
     feedbackSubmitError: "Failed to submit feedback. Please try again.",
     ok: "OK",
     copySuccess: "Copied",
+    difficultyEasy: "Easy",
+    difficultyNormal: "Normal",
+    difficultyHard: "Hard",
   },
   vi: {
     noLocationService: "Dịch vụ vị trí không khả dụng",
@@ -428,6 +434,9 @@ export const translations = new LocalizedStrings({
     feedbackSubmitError: "Gửi phản hồi thất bại. Vui lòng thử lại.",
     ok: "OK",
     copySuccess: "Sao chép thành công",
+    difficultyEasy: "Dễ",
+    difficultyNormal: "Bình thường",
+    difficultyHard: "Khó",
   },
   "zh-CN": {
     noLocationService: "位置服务不可用",
@@ -571,6 +580,9 @@ export const translations = new LocalizedStrings({
     feedbackSubmitError: "提交反馈失败。请重试。",
     ok: "确定",
     copySuccess: "复制成功",
+    difficultyEasy: "简单",
+    difficultyNormal: "普通",
+    difficultyHard: "困难",
   },
   "ja-JP": {
     noLocationService: "位置情報サービスが利用できません",
@@ -715,6 +727,9 @@ export const translations = new LocalizedStrings({
     feedbackSubmitError: "フィードバックの送信に失敗しました。もう一度お試しください。",
     ok: "OK",
     copySuccess: "コピーしました",
+    difficultyEasy: "簡単",
+    difficultyNormal: "普通",
+    difficultyHard: "難しい",
   },
   "es-ES": {
     noLocationService: "Servicio de ubicación no disponible",
@@ -860,6 +875,9 @@ export const translations = new LocalizedStrings({
     feedbackSubmitError: "Error al enviar comentarios. Por favor intenta de nuevo.",
     ok: "OK",
     copySuccess: "Copiado correctamente",
+    difficultyEasy: "Fácil",
+    difficultyNormal: "Normal",
+    difficultyHard: "Difícil",
   },
 });
 

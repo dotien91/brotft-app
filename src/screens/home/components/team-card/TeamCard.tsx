@@ -5,10 +5,11 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import type {IComposition} from '@services/models/composition';
 import UnitHexagonItem from '../unit-hexagon-item/UnitHexagonItem';
-import CopyTeamcodeButton from '@shared-components/copy-teamcode-button'; // Giả sử component này đã được tạo
+import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
 import createStyles from './TeamCard.style';
 import * as NavigationService from 'react-navigation-helpers';
 import {SCREENS} from '@shared-constants';
+import {translations} from '../../../../shared/localization';
 
 interface TeamCardProps {
   composition: IComposition;
@@ -31,9 +32,17 @@ const getRankColor = (rankOrTier: string, primaryColor: string): string => {
 const getDifficultyColor = (diff: string) => {
   const d = diff?.toLowerCase() || '';
   if (d.includes('easy')) return {bg: 'rgba(74, 222, 128, 0.2)', text: '#4ade80'};
-  if (d.includes('medium')) return {bg: 'rgba(251, 191, 36, 0.2)', text: '#fbbf24'};
+  if (d.includes('medium') || d.includes('normal')) return {bg: 'rgba(251, 191, 36, 0.2)', text: '#fbbf24'};
   if (d.includes('hard')) return {bg: 'rgba(249, 115, 22, 0.2)', text: '#f97316'};
   return {bg: 'rgba(148, 163, 184, 0.2)', text: '#94a3b8'};
+};
+
+const getDifficultyLabel = (diff: string): string => {
+  const d = diff?.toLowerCase() || '';
+  if (d.includes('easy')) return translations.difficultyEasy;
+  if (d.includes('medium') || d.includes('normal')) return translations.difficultyNormal;
+  if (d.includes('hard')) return translations.difficultyHard;
+  return diff || '';
 };
 
 // -----------------------------------------------------------
@@ -93,7 +102,7 @@ const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
               {composition.difficulty && (
                 <View style={[styles.difficultyBadge, {backgroundColor: difficultyStyle.bg}]}>
                   <Text style={[styles.difficultyText, {color: difficultyStyle.text}]}>
-                    {composition.difficulty}
+                    {getDifficultyLabel(composition.difficulty)}
                   </Text>
                 </View>
               )}

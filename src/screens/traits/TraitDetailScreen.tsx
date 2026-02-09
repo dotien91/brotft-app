@@ -5,8 +5,7 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import createStyles from './TraitDetailScreen.style';
 import {DetailHeader} from '@shared-components/detail-header';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedTraits} from '@services/api/data';
 import {useTftTraitById, useTftUnits} from '@services/api/hooks/listQueryHooks';
 import {
   TraitHeader,
@@ -76,7 +75,6 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
 
   const units = unitsData?.data || [];
 
-  // Get localized data from LocalStorage
   useEffect(() => {
     if (!trait || !language) {
       setLocalizedName(null);
@@ -87,43 +85,14 @@ const TraitDetailScreen: React.FC<TraitDetailScreenProps> = ({
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const traitsKey = `data_traits_${locale}`;
-      const traitsDataString = LocalStorage.getString(traitsKey);
-      
-      if (!traitsDataString) {
-        // Fallback to API data
-        setLocalizedName(trait.name || null);
-        setLocalizedDesc(trait.desc || null);
-        setLocalizedIcon(trait.icon || null);
-        setLocalizedEffects(trait.effects || null);
-        return;
-      }
-
-      const traitsData = JSON.parse(traitsDataString);
-      let localizedTrait: any = null;
-
-      // Find trait from local storage
-      if (traitsData) {
-        if (Array.isArray(traitsData)) {
-          localizedTrait = traitsData.find((t: any) => 
+      const traitsData = getCachedTraits(language);
+      const localizedTrait =
+        (trait.apiName && traitsData[trait.apiName]) ||
+        Object.values(traitsData).find(
+          (t: any) =>
             (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
             (trait.name && t.name === trait.name)
-          );
-        } else if (typeof traitsData === 'object' && traitsData !== null) {
-          // Try by apiName first
-          if (trait.apiName && traitsData[trait.apiName]) {
-            localizedTrait = traitsData[trait.apiName];
-          } else {
-            // Search through values
-            const traitsArray = Object.values(traitsData) as any[];
-            localizedTrait = traitsArray.find((t: any) => 
-              (trait.apiName && (t.apiName === trait.apiName || t.apiName === trait.name)) ||
-              (trait.name && t.name === trait.name)
-            );
-          }
-        }
-      }
+        );
 
       if (localizedTrait) {
         setLocalizedName(localizedTrait.name || trait.name || null);

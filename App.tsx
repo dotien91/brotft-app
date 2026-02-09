@@ -10,7 +10,7 @@ import Navigation from './src/navigation';
 import {queryClient} from '@services/api/react-query';
 import useStore from './src/services/zustand/store';
 import {translations} from './src/shared/localization';
-import {checkAndFetchDataByLocale} from './src/services/api/data';
+import {checkAndFetchDataByLocale, initDataCache} from './src/services/api/data';
 import LocalStorage from './src/services/local-storage';
 import {MobileAds} from 'react-native-google-mobile-ads';
 LogBox.ignoreAllLogs();
@@ -148,11 +148,12 @@ const App = () => {
     }
   }, []);
 
-  // Check and fetch data by locale on app startup (chỉ gọi 1 lần cho mỗi locale, tránh Strict Mode gọi 2 lần)
+  // Khởi tạo cache + fetch data theo locale khi app start
   React.useEffect(() => {
     if (!isLanguageReady || !language) return;
     if (lastFetchedLocaleRef.current === language) return;
     lastFetchedLocaleRef.current = language;
+    initDataCache(language);
     checkAndFetchDataByLocale(language);
   }, [language, isLanguageReady]);
 
@@ -191,7 +192,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Navigation />
+      <Navigation key={language} />
     </QueryClientProvider>
   );
 };

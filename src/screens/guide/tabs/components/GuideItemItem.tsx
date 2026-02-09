@@ -5,8 +5,7 @@ import type {ITftItem} from '@services/models/tft-item';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './GuideItemItem.style';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedItems} from '@services/api/data';
 import {getItemIconImageSource} from '../../../../utils/item-images';
 
 interface GuideItemItemProps {
@@ -35,23 +34,15 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const itemsKey = `data_items_${locale}`;
-      const itemsDataString = LocalStorage.getString(itemsKey);
-      console.log('itemsDataString', itemsDataString);
-      if (!itemsDataString) {
-        // Nếu chưa có cache, giữ state null để dùng fallback từ props
+      const itemsMap = getCachedItems(language);
+      console.log('itemsMap', itemsMap);
+      if (Object.keys(itemsMap).length === 0) {
         setLocalizedName(null);
         setLocalizedComposition(null);
         return;
       }
-
-      const itemsMap = JSON.parse(itemsDataString);
-      console.log('itemsMap', itemsMap);
-      // OPTIMIZATION: Truy xuất trực tiếp (Direct Access)
-      // Ưu tiên tìm theo apiName (duy nhất), fallback sang name nếu cần
       const localizedItem = itemsMap[apiName] || (name ? itemsMap[name] : null);
-
+console.log('localizedItem', localizedItem);
       if (localizedItem) {
         setLocalizedName(localizedItem.name || null);
         setLocalizedComposition(

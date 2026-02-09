@@ -9,8 +9,7 @@ import UnitCostBadge from './UnitCostBadge';
 import {getTraitIconUrl} from '../../../utils/metatft';
 import getUnitAvatar from '../../../utils/unit-avatar';
 import {getItemIconImageSource} from '../../../utils/item-images';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedUnits, getCachedTraits} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import {SCREENS} from '@shared-constants';
 import {translations} from '../../../shared/localization';
@@ -177,75 +176,27 @@ const CarryUnitsSection: React.FC<CarryUnitsSectionProps> = ({team, getUnitCostB
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
-      
-      if (!unitsDataString) {
-        return [];
-      }
+      const unitsData = getCachedUnits(language);
+      const traitsData = getCachedTraits(language);
+      if (Object.keys(unitsData).length === 0) return [];
 
-      const unitsData = JSON.parse(unitsDataString);
-      let localizedUnit: any = null;
-
-      // Handle both array and object formats
-      if (Array.isArray(unitsData)) {
-        localizedUnit = unitsData.find((localUnit: any) => {
-          if (championKey && localUnit.apiName === championKey) {
-            return true;
-          }
-          if (unitName && localUnit.name) {
-            return unitName.toLowerCase() === localUnit.name.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof unitsData === 'object' && unitsData !== null) {
-        if (championKey && unitsData[championKey]) {
-          localizedUnit = unitsData[championKey];
-        } else {
-          const unitsArray = Object.values(unitsData) as any[];
-          localizedUnit = unitsArray.find((localUnit: any) => {
-            if (championKey && localUnit.apiName === championKey) {
-              return true;
-            }
-            if (unitName && localUnit.name) {
-              return unitName.toLowerCase() === localUnit.name.toLowerCase();
-            }
-            return false;
-          });
-        }
-      }
+      const localizedUnit =
+        unitsData[championKey] ??
+        Object.values(unitsData).find(
+          (localUnit: any) =>
+            unitName && localUnit.name && unitName.toLowerCase() === localUnit.name.toLowerCase()
+        );
 
       if (localizedUnit && localizedUnit.traits) {
         const traits = Array.isArray(localizedUnit.traits) ? localizedUnit.traits : [];
-        
-        // Get trait details from local storage to get apiName
-        const traitsKey = `data_traits_${locale}`;
-        const traitsDataString = LocalStorage.getString(traitsKey);
-        let traitsData: any = null;
-        if (traitsDataString) {
-          traitsData = JSON.parse(traitsDataString);
-        }
-
         return traits.map((traitName: string) => {
-          let traitDetail: any = null;
-          
-          // Find trait detail from local storage
-          if (traitsData) {
-            if (Array.isArray(traitsData)) {
-              traitDetail = traitsData.find((trait: any) => 
-                trait.name === traitName || trait.apiName === traitName
-              );
-            } else if (typeof traitsData === 'object' && traitsData !== null) {
-              traitDetail = Object.values(traitsData).find((trait: any) => 
-                trait.name === traitName || trait.apiName === traitName
-              );
-            }
-          }
-
+          const traitDetail =
+            Object.values(traitsData).find(
+              (t: any) => t.name === traitName || t.apiName === traitName
+            ) ?? null;
           return {
             name: traitName,
-            apiName: traitDetail?.apiName || traitName,
+            apiName: traitDetail?.apiName ?? traitName,
           };
         });
       }

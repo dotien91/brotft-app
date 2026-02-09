@@ -11,8 +11,7 @@ import getUnitAvatar from '../../../../utils/unit-avatar';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../../../utils/unitCost';
 import createStyles from './GuideUnitItem.style';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedUnits} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import UnitTraitsDisplay from '@screens/unit-detail/components/UnitTraitsDisplay';
@@ -56,62 +55,17 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
-      
-      if (!unitsDataString) {
-        setLocalizedName(null);
-        return;
-      }
+      const unitsData = getCachedUnits(language);
+      const localizedUnit =
+        (data.apiName && unitsData[data.apiName]) ||
+        Object.values(unitsData).find(
+          (localUnit: any) =>
+            (data.apiName && localUnit.apiName === data.apiName) ||
+            (data.name && localUnit.name && data.name.toLowerCase() === localUnit.name.toLowerCase()) ||
+            (data.characterName && localUnit.characterName && data.characterName.toLowerCase() === localUnit.characterName.toLowerCase())
+        );
 
-      const unitsData = JSON.parse(unitsDataString);
-      let localizedUnit: any = null;
-
-      // Handle both array and object formats
-      if (Array.isArray(unitsData)) {
-        // If it's an array, find the unit
-        localizedUnit = unitsData.find((localUnit: any) => {
-          // Try to match by apiName first
-          if (data.apiName && localUnit.apiName === data.apiName) {
-            return true;
-          }
-          // Fallback to name matching (case insensitive)
-          if (data.name && localUnit.name) {
-            return data.name.toLowerCase() === localUnit.name.toLowerCase();
-          }
-          // Try characterName matching
-          if (data.characterName && localUnit.characterName) {
-            return data.characterName.toLowerCase() === localUnit.characterName.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof unitsData === 'object' && unitsData !== null) {
-        // If it's an object, try to find by apiName as key first
-        if (data.apiName && unitsData[data.apiName]) {
-          localizedUnit = unitsData[data.apiName];
-        } else {
-          // Otherwise, search through object values
-          const unitsArray = Object.values(unitsData) as any[];
-          localizedUnit = unitsArray.find((localUnit: any) => {
-            // Try to match by apiName first
-            if (data.apiName && localUnit.apiName === data.apiName) {
-              return true;
-            }
-            // Fallback to name matching (case insensitive)
-            if (data.name && localUnit.name) {
-              return data.name.toLowerCase() === localUnit.name.toLowerCase();
-            }
-            // Try characterName matching
-            if (data.characterName && localUnit.characterName) {
-              return data.characterName.toLowerCase() === localUnit.characterName.toLowerCase();
-            }
-            return false;
-          });
-        }
-      }
-
-      if (localizedUnit && localizedUnit.name) {
+      if (localizedUnit?.name) {
         setLocalizedName(localizedUnit.name);
       } else {
         setLocalizedName(null);

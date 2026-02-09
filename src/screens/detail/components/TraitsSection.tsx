@@ -2,8 +2,7 @@ import React, {useMemo} from 'react';
 import {View} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedUnits, getCachedTraits} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import createStyles from '../DetailScreen.style';
 import TraitItem from './TraitItem';
@@ -26,17 +25,14 @@ const TraitsSection: React.FC<{units: any[]}> = ({units}) => {
     if (!units?.length || !language) return [];
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsData = JSON.parse(LocalStorage.getString(`data_units_${locale}`) || '[]');
-      const traitsData = JSON.parse(LocalStorage.getString(`data_traits_${locale}`) || '[]');
+      const unitsData = getCachedUnits(language);
+      const traitsData = getCachedTraits(language);
 
       const unitsMap = new Map();
-      const rawUnits = Array.isArray(unitsData) ? unitsData : Object.values(unitsData);
-      rawUnits.forEach((u: any) => u.apiName && unitsMap.set(u.apiName, u));
+      Object.values(unitsData).forEach((u: any) => u.apiName && unitsMap.set(u.apiName, u));
 
       const traitsMap = new Map();
-      const rawTraits = Array.isArray(traitsData) ? traitsData : Object.values(traitsData);
-      rawTraits.forEach((t: any) => t.apiName && traitsMap.set(t.apiName, t));
+      Object.values(traitsData).forEach((t: any) => t.apiName && traitsMap.set(t.apiName, t));
 
       const traitCountMap: Record<string, number> = {};
       const processedKeys = new Set<string>();

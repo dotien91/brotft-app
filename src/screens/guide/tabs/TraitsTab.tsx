@@ -27,8 +27,8 @@ const TraitsTab: React.FC<TraitsTabProps> = ({enabled = true}) => {
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // Applied filters (used for API calls)
-  const [appliedType, setAppliedType] = useState<'origin' | 'class' | undefined>(undefined);
+  // Applied filters (used for API calls). Mặc định show tộc (origin) trước
+  const [appliedType, setAppliedType] = useState<'origin' | 'class' | undefined>('origin');
 
   const handleTypeToggle = useCallback((type: 'origin' | 'class') => {
     // If clicking the same type, clear it (toggle off)

@@ -8,8 +8,7 @@ import {getTraitIconUrl} from '../../../../utils/metatft';
 import {parseTraitDescription} from '../../../../utils/traitParser';
 import createStyles from './GuideTraitItem.style';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedTraits} from '@services/api/data';
 import {translations} from '../../../../shared/localization';
 import {useTftUnits} from '@services/api/hooks/listQueryHooks';
 import {TraitUnits} from '../../../traits/components/trait-detail';
@@ -45,18 +44,9 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data}) => { // Removed o
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const traitsKey = `data_traits_${locale}`;
-      const traitsDataString = LocalStorage.getString(traitsKey);
+      const traitsMap = getCachedTraits(language);
+      if (Object.keys(traitsMap).length === 0) return;
 
-      if (!traitsDataString) {
-        return; // Không có data cache thì giữ nguyên props gốc
-      }
-
-      const traitsMap = JSON.parse(traitsDataString);
-      
-      // OPTIMIZATION: Truy xuất trực tiếp theo apiName (O(1))
-      // Nếu không có apiName thì fallback sang name
       const traitDetail = traitsMap[apiName] || (name ? traitsMap[name] : null);
 
       if (traitDetail) {

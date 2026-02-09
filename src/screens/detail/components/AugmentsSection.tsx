@@ -4,8 +4,7 @@ import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getAugmentIconUrlFromPath} from '../../../utils/metatft';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedAugments} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import {translations} from '../../../shared/localization';
 import createStyles from '../DetailScreen.style';
@@ -21,102 +20,36 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const language = useStore((state) => state.language);
 
-  // Get localized augments data from LocalStorage (same as GuideAugmentItem)
   const augmentsData = useMemo(() => {
-    if (!language) return null;
-    try {
-      const locale = getLocaleFromLanguage(language);
-      const augmentsKey = `data_augments_${locale}`;
-      const augmentsDataString = LocalStorage.getString(augmentsKey);
-      if (augmentsDataString) {
-        return JSON.parse(augmentsDataString);
-      }
-    } catch (error) {
-      // Ignore error
-    }
-    return null;
+    if (!language) return {};
+    return getCachedAugments(language);
   }, [language]);
 
-  // Helper function to get augment icon URL (same logic as GuideAugmentItem)
   const getAugmentIcon = (augmentName: string): string | null => {
-    if (!augmentsData) {
-      return null;
-    }
+    if (!augmentsData || Object.keys(augmentsData).length === 0) return null;
 
-    // Normalize augment name for search
-    // Example: "backup-bows" -> "backupbows" (lowercase, remove hyphens/underscores)
     const normalizedName = augmentName.toLowerCase()
-      .replace(/-/g, '') // Remove hyphens: "backup-bows" -> "backupbows"
-      .replace(/_/g, ''); // Remove underscores
-    
-    // Also try with "augment_" prefix
+      .replace(/-/g, '')
+      .replace(/_/g, '');
     const searchPattern1 = `augment_${normalizedName}`;
     const searchPattern2 = normalizedName;
 
-    // Find augment in LocalStorage data
-    let localizedAugment: any = null;
-    if (Array.isArray(augmentsData)) {
-      localizedAugment = augmentsData.find((a: any) => {
+    const augmentKey = Object.keys(augmentsData).find(key => {
+      const keyLower = key.toLowerCase();
+      if (keyLower === augmentName.toLowerCase()) return true;
+      if (keyLower.includes(searchPattern1) || keyLower.includes(searchPattern2)) return true;
+      return false;
+    });
+    let localizedAugment: any = augmentKey ? augmentsData[augmentKey] : null;
+    if (!localizedAugment) {
+      localizedAugment = Object.values(augmentsData).find((a: any) => {
         const aName = a.name?.toLowerCase() || '';
         const aApiName = a.apiName?.toLowerCase() || '';
-        
-        // Exact match
-        if (aName === augmentName.toLowerCase() || aApiName === augmentName.toLowerCase()) {
-          return true;
-        }
-        
-        // Include match: check if apiName includes the normalized pattern
-        if (aApiName.includes(searchPattern1) || aApiName.includes(searchPattern2)) {
-          return true;
-        }
-        
-        // Also check name field
-        if (aName.includes(searchPattern1) || aName.includes(searchPattern2)) {
-          return true;
-        }
-        
+        if (aName === augmentName.toLowerCase() || aApiName === augmentName.toLowerCase()) return true;
+        if (aApiName.includes(searchPattern1) || aApiName.includes(searchPattern2)) return true;
+        if (aName.includes(searchPattern1) || aName.includes(searchPattern2)) return true;
         return false;
       });
-    } else if (typeof augmentsData === 'object' && augmentsData !== null) {
-      // Try by apiName as key (exact match)
-      const augmentKey = Object.keys(augmentsData).find(key => {
-        const keyLower = key.toLowerCase();
-        if (keyLower === augmentName.toLowerCase()) {
-          return true;
-        }
-        // Include match
-        if (keyLower.includes(searchPattern1) || keyLower.includes(searchPattern2)) {
-          return true;
-        }
-        return false;
-      });
-      if (augmentKey) {
-        localizedAugment = augmentsData[augmentKey];
-      } else {
-        // Search in values
-        const augmentsArray = Object.values(augmentsData) as any[];
-        localizedAugment = augmentsArray.find((a: any) => {
-          const aName = a.name?.toLowerCase() || '';
-          const aApiName = a.apiName?.toLowerCase() || '';
-          
-          // Exact match
-          if (aName === augmentName.toLowerCase() || aApiName === augmentName.toLowerCase()) {
-            return true;
-          }
-          
-          // Include match: check if apiName includes the normalized pattern
-          if (aApiName.includes(searchPattern1) || aApiName.includes(searchPattern2)) {
-            return true;
-          }
-          
-          // Also check name field
-          if (aName.includes(searchPattern1) || aName.includes(searchPattern2)) {
-            return true;
-          }
-          
-          return false;
-        });
-      }
     }
 
     // Get augment image URL - same logic as GuideAugmentItem

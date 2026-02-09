@@ -9,8 +9,7 @@ import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {useTftItemById} from '@services/api/hooks/listQueryHooks';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedItems} from '@services/api/data';
 import BackButton from '@shared-components/back-button/BackButton';
 import {getItemIconImageSource} from '../../utils/item-images';
 import {translations} from '../../shared/localization';
@@ -59,78 +58,27 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     refetch,
   } = useTftItemById(itemId || '');
 
-  // Get localized name and description from storage
   useEffect(() => {
-      if (!item || !language) {
-        setLocalizedDesc(null);
-        setLocalizedName(null);
-        setLocalizedIcon(null);
-        setLocalizedComposition(null);
-        setLocalizedEffects(null);
-        setLocalizedUnits(null);
-        return;
-      }
+    if (!item || !language) {
+      setLocalizedDesc(null);
+      setLocalizedName(null);
+      setLocalizedIcon(null);
+      setLocalizedComposition(null);
+      setLocalizedEffects(null);
+      setLocalizedUnits(null);
+      return;
+    }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const itemsKey = `data_items_${locale}`;
-      const itemsDataString = LocalStorage.getString(itemsKey);
-      
-      if (!itemsDataString) {
-        setLocalizedDesc(null);
-        setLocalizedName(null);
-        setLocalizedIcon(null);
-        setLocalizedComposition(null);
-        setLocalizedEffects(null);
-        setLocalizedUnits(null);
-        return;
-      }
-
-      const itemsData = JSON.parse(itemsDataString);
-      let localizedItem: any = null;
-
-      // Handle both array and object formats
-      if (Array.isArray(itemsData)) {
-        // If it's an array, find the item
-        localizedItem = itemsData.find((localItem: any) => {
-          // Try to match by apiName first
-          if (item.apiName && localItem.apiName.toLowerCase() === item.apiName.toLowerCase()) {
-            return true;
-          }
-          // Fallback to name matching (case insensitive)
-          if (item.name && localItem.name) {
-            return item.name.toLowerCase() === localItem.name.toLowerCase();
-          }
-          // Try enName matching
-          if (item.enName && localItem.enName) {
-            return item.enName.toLowerCase() === localItem.enName.toLowerCase();
-          }
-          return false;
-        });
-      } else if (typeof itemsData === 'object' && itemsData !== null) {
-        // If it's an object, try to find by apiName as key first
-        if (item.apiName && itemsData[item.apiName]) {
-          localizedItem = itemsData[item.apiName];
-        } else {
-          // Otherwise, search through object values
-          const itemsArray = Object.values(itemsData) as any[];
-          localizedItem = itemsArray.find((localItem: any) => {
-            // Try to match by apiName first
-            if (item.apiName && localItem.apiName === item.apiName) {
-              return true;
-            }
-            // Fallback to name matching (case insensitive)
-            if (item.name && localItem.name) {
-              return item.name.toLowerCase() === localItem.name.toLowerCase();
-            }
-            // Try enName matching
-            if (item.enName && localItem.enName) {
-              return item.enName.toLowerCase() === localItem.enName.toLowerCase();
-            }
-            return false;
-          });
-        }
-      }
+      const itemsData = getCachedItems(language);
+      const localizedItem =
+        (item.apiName && itemsData[item.apiName]) ||
+        Object.values(itemsData).find(
+          (localItem: any) =>
+            (item.apiName && localItem.apiName?.toLowerCase() === item.apiName?.toLowerCase()) ||
+            (item.name && localItem.name && item.name.toLowerCase() === localItem.name.toLowerCase()) ||
+            (item.enName && localItem.enName && item.enName.toLowerCase() === localItem.enName.toLowerCase())
+        );
 
       if (localizedItem) {
         // Set localized name

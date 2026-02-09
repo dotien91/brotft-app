@@ -13,8 +13,7 @@ import getUnitAvatar from '../../utils/unit-avatar';
 import {getItemIconImageSource} from '../../utils/item-images';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedItems} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import {translations} from '../../shared/localization';
 import BackButton from '@shared-components/back-button/BackButton';
@@ -275,16 +274,11 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   // Map IComposition to TeamComposition format
   const team = useMemo<TeamComposition>(() => {
     if (compositionData) {
-      // Get localized items data
       let itemsData: any = null;
       if (language) {
         try {
-          const locale = getLocaleFromLanguage(language);
-          const itemsKey = `data_items_${locale}`;
-          const itemsDataString = LocalStorage.getString(itemsKey);
-          if (itemsDataString) {
-            itemsData = JSON.parse(itemsDataString);
-          }
+          itemsData = getCachedItems(language);
+          if (Object.keys(itemsData).length === 0) itemsData = null;
         } catch (error) {
           console.error('Error loading items data:', error);
         }

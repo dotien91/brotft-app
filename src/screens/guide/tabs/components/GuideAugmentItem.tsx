@@ -8,8 +8,7 @@ import {getAugmentIconUrlFromPath} from '../../../../utils/metatft';
 import {parseAugmentDescription} from '../../../../shared/utils/parseAugmentDescription';
 import {translations} from '../../../../shared/localization';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedAugments} from '@services/api/data';
 
 interface GuideAugmentItemProps {
   data: ITftAugment;
@@ -39,40 +38,13 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const augmentsKey = `data_augments_${locale}`;
-      const augmentsDataString = LocalStorage.getString(augmentsKey);
-      
-      if (!augmentsDataString) {
-        setLocalizedName(null);
-        setLocalizedDesc(null);
-        setLocalizedEffects(null);
-        setLocalizedVariableMatches(null);
-        return;
-      }
-
-      const augmentsData = JSON.parse(augmentsDataString);
-      let localizedAugment: any = null;
-
-      // Find augment by apiName from local storage
-      if (augmentsData) {
-        if (Array.isArray(augmentsData)) {
-          localizedAugment = augmentsData.find((augment: any) => 
+      const augmentsData = getCachedAugments(language);
+      const localizedAugment =
+        augmentsData[apiName] ||
+        Object.values(augmentsData).find(
+          (augment: any) =>
             augment.apiName === apiName || augment.apiName === name || augment.name === name
-          );
-        } else if (typeof augmentsData === 'object' && augmentsData !== null) {
-          // Try by apiName as key first
-          if (augmentsData[apiName]) {
-            localizedAugment = augmentsData[apiName];
-          } else {
-            // Search through object values
-            const augmentsArray = Object.values(augmentsData) as any[];
-            localizedAugment = augmentsArray.find((augment: any) => 
-              augment.apiName === apiName || augment.apiName === name || augment.name === name
-            );
-          }
-        }
-      }
+        );
 
       if (localizedAugment) {
         setLocalizedName(localizedAugment.name || null);

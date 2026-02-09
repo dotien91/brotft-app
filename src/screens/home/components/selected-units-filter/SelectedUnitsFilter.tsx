@@ -7,8 +7,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import UnitAvatar from '@shared-components/unit-avatar';
 import {translations} from '../../../../shared/localization';
 import createStyles from '../../HomeScreen.style';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedUnits} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import type {ITftUnit} from '@services/models/tft-unit';
 
@@ -36,7 +35,6 @@ const SelectedUnitsFilter: React.FC<SelectedUnitsFilterProps> = React.memo(({
     return normalized;
   }, []);
 
-  // Get units from LocalStorage
   useEffect(() => {
     if (!language) {
       setAllUnits([]);
@@ -44,26 +42,9 @@ const SelectedUnitsFilter: React.FC<SelectedUnitsFilterProps> = React.memo(({
     }
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const unitsDataString = LocalStorage.getString(unitsKey);
+      const unitsData = getCachedUnits(language);
+      const unitsArray = Object.values(unitsData);
 
-      if (!unitsDataString) {
-        setAllUnits([]);
-        return;
-      }
-
-      const unitsData = JSON.parse(unitsDataString);
-      let unitsArray: any[] = [];
-
-      // Handle both array and object formats
-      if (Array.isArray(unitsData)) {
-        unitsArray = unitsData;
-      } else if (typeof unitsData === 'object' && unitsData !== null) {
-        unitsArray = Object.values(unitsData);
-      }
-
-      // Convert to ITftUnit format
       const formattedUnits: ITftUnit[] = unitsArray.map((unit: any) => ({
         id: unit.id || unit.apiName || '',
         apiName: unit.apiName || '',
@@ -87,7 +68,7 @@ const SelectedUnitsFilter: React.FC<SelectedUnitsFilterProps> = React.memo(({
 
       setAllUnits(formattedUnits);
     } catch (error) {
-      console.warn('Error loading units from LocalStorage:', error);
+      console.warn('Error loading units:', error);
       setAllUnits([]);
     }
   }, [language]);

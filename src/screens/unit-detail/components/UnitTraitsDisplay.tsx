@@ -7,8 +7,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import {getTraitIconUrl} from '../../../utils/metatft';
 import {SCREENS} from '@shared-constants';
 import useStore from '@services/zustand/store';
-import LocalStorage from '@services/local-storage';
-import {getLocaleFromLanguage} from '@services/api/data';
+import {getCachedUnits, getCachedTraits} from '@services/api/data';
 import createStyles from '../UnitDetailScreen.style';
 
 interface TraitInfo {
@@ -38,20 +37,12 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
     if (!unit || !language) return;
 
     try {
-      const locale = getLocaleFromLanguage(language);
-      const unitsKey = `data_units_${locale}`;
-      const traitsKey = `data_traits_${locale}`;
-      
-      const unitsDataString = LocalStorage.getString(unitsKey);
-      const traitsDataString = LocalStorage.getString(traitsKey);
+      const unitsData = getCachedUnits(language);
+      const traitsData = getCachedTraits(language);
+      if (Object.keys(unitsData).length === 0 || Object.keys(traitsData).length === 0) return;
 
-      if (!unitsDataString || !traitsDataString) return;
-
-      const unitsData = JSON.parse(unitsDataString);
-      const traitsData = JSON.parse(traitsDataString);
-
-      const unitsArray = Array.isArray(unitsData) ? unitsData : Object.values(unitsData);
-      const localizedUnit: any = unitsArray.find((u: any) => 
+      const unitsArray = Object.values(unitsData);
+      const localizedUnit: any = unitsArray.find((u: any) =>
         u.apiName === unit.apiName || u.name === unit.name
       );
 
@@ -63,8 +54,7 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
       }
 
       const traitsMap = new Map();
-      const rawTraits = Array.isArray(traitsData) ? traitsData : Object.values(traitsData);
-      rawTraits.forEach((t: any) => {
+      Object.values(traitsData).forEach((t: any) => {
         if (t.apiName) traitsMap.set(t.apiName.toLowerCase(), t);
         if (t.name) traitsMap.set(t.name.toLowerCase(), t);
       });

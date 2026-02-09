@@ -111,22 +111,25 @@ const Navigation = () => {
     color: string,
     size: number,
   ) => {
-    let iconName = 'home';
+    let iconName = 'house';
+    // Phosphor supports weights: 'thin', 'light', 'regular', 'bold', 'fill', 'duotone'
     let weight: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' = focused ? 'fill' : 'regular';
+    
     switch (route.name) {
       case SCREENS.HOME:
-        iconName = 'home';
+        iconName = 'house'; // Phosphor: House
         break;
       case SCREENS.GUIDE:
-        iconName = 'books';
+        iconName = 'book-open'; // Phosphor: BookOpen (Quyển sách mở)
         break;
       case SCREENS.SETTINGS:
-        iconName = 'settings';
+        iconName = 'gear'; // Phosphor: Gear (Bánh răng)
         break;
       default:
-        iconName = 'home';
+        iconName = 'house';
         break;
     }
+    
     return (
       <Icon
         name={iconName}

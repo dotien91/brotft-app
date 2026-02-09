@@ -27,7 +27,7 @@ const BackButton: React.FC<BackButtonProps> = ({style, onPress}) => {
   return (
     <RNBounceable style={[styles.backButton, style]} onPress={handlePress}>
       <Icon
-        name="arrow-back"
+        name="chevron-back"
         type={IconType.Ionicons}
         color={colors.text}
         size={24}

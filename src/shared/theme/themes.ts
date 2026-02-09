@@ -13,7 +13,7 @@ export const palette = {
   borderColor: "#d0d7de",
   borderColorDark: "#333942",
   placeholder: "#a1a1a1",
-  danger: "rgb(208, 2, 27)",
+  danger: "#D0021B", // hex để nối alpha (vd: danger + '20') hoạt động cho badge Tộc/Hệ
   title: "rgb(102, 102, 102)",
   separator: "rgb(194, 194, 195)",
   highlight: "rgb(199, 198, 203)",
@@ -25,6 +25,9 @@ export const palette = {
   dynamicBackground: "#fff",
   transparent: "transparent",
   calpyse: "#2b7488",
+  green: "#008000",
+  /** Nền xám dùng chung cho hexagon (card, detail, guide...) */
+  hexagonBg: "#222222",
 };
 
 export const LightTheme: ExtendedTheme = {
@@ -57,6 +60,8 @@ export const LightTheme: ExtendedTheme = {
     dynamicBackground: '#ffffff',
     transparent: 'transparent',
     calpyse: palette.calpyse,
+    green: palette.green,
+    hexagonBg: palette.hexagonBg,
   },
 };
 
@@ -92,5 +97,7 @@ export const DarkTheme: ExtendedTheme = {
     calpyse: palette.calpyse,
     tabBar: '#1a1d29',
     foreground: '#ffffff',
+    green: palette.green,
+    hexagonBg: palette.hexagonBg,
   },
 };

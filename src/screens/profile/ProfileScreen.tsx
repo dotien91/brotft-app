@@ -218,7 +218,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                           <Icon
                             name="checkmark-circle"
                             type={IconType.Ionicons}
-                            color={colors.primary}
+                            color={colors.green}
                             size={24}
                           />
                         )}

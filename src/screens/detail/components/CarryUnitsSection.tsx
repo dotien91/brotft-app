@@ -301,7 +301,6 @@ console.log("unitsWithItems", unitsWithItems);
                 <View style={styles.carryHexagonInner}>
                   <Hexagon
                     size={48}
-                    backgroundColor={colors.card}
                     borderColor={getUnitCostBorderColor(unitCost)}
                     borderWidth={2}
                     imageUri={unitImageUri}

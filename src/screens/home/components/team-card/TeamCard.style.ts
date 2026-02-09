@@ -22,32 +22,36 @@ export default (theme: ExtendedTheme) => {
     teamCard: {
       backgroundColor: colors.card,
       borderRadius: 16,
-      padding: 8,
-      marginBottom: 16,
+      padding: 12, // Tăng padding một chút cho thoáng
+      marginBottom: 12,
       borderWidth: 1,
       borderColor: colors.border,
-      height: 190,
+      minHeight: 140, 
     },
     teamHeader: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'center', // Canh giữa theo chiều dọc
       marginBottom: 12,
       justifyContent: 'space-between',
     },
+    // --- Rank Badge (Left) ---
     rankBadge: {
-      width: 36,
-      height: 36,
-      borderRadius: 8,
+      width: 40,
+      height: 40,
+      borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
+      marginRight: 12, // Tạo khoảng cách với tên team
     },
     rankText: {
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: '800',
-      letterSpacing: 0.5,
+      color: '#000', // Rank color background sáng nên text màu đen
     },
+    // --- Name Container (Middle) ---
     teamNameContainer: {
-      flex: 1,
+      flex: 1, // Chiếm hết khoảng trống ở giữa
+      justifyContent: 'center',
     },
     teamName: {
       fontSize: 16,
@@ -55,35 +59,37 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
       marginBottom: 4,
     },
+    // --- Info Badges ---
     planAndDifficultyRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 2,
-      flexWrap: 'wrap',
       gap: 6,
     },
     planBadge: {
       paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingVertical: 2,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      borderRadius: 4,
     },
     planText: {
-      fontSize: 11,
-      fontWeight: '400',
-      color: colors.text,
+      fontSize: 10,
+      fontWeight: '600',
+      color: '#fff',
     },
     difficultyBadge: {
       paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingVertical: 2,
+      borderRadius: 4,
     },
     difficultyText: {
-      fontSize: 11,
-      fontWeight: '400',
+      fontSize: 10,
+      fontWeight: '600',
     },
     championsRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',
       flexWrap: 'wrap',
+      marginTop: 4,
     },
   });
 };
-

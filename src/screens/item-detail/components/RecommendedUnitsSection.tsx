@@ -101,7 +101,6 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
         <View style={styles.hexagonContainer}>
           <Hexagon
             size={56}
-            backgroundColor={colors.card}
             borderColor={borderColor}
             borderWidth={2}
             imageUri={unitAvatar}
@@ -120,7 +119,6 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
         <View style={styles.hexagonContainer}>
           <Hexagon
             size={56}
-            backgroundColor={colors.card}
             borderColor={borderColor}
             borderWidth={2}
             imageUri={unitAvatar}

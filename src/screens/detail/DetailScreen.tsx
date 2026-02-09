@@ -1,7 +1,6 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import {View, ScrollView, useWindowDimensions, ActivityIndicator, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTheme, useRoute} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
@@ -19,6 +18,10 @@ import {getLocaleFromLanguage} from '@services/api/data';
 import useStore from '@services/zustand/store';
 import {translations} from '../../shared/localization';
 import BackButton from '@shared-components/back-button/BackButton';
+import RNBounceable from '@freakycoder/react-native-bounceable';
+import Icon, {IconType} from '@shared-components/icon/Icon';
+import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
+import DescriptionSection from './components/DescriptionSection';
 
 type TeamUnitItem = {
   id?: string;
@@ -85,6 +88,7 @@ type TeamComposition = {
     tier: number;
   }>;
   notes: string[];
+  teamcode?: string;
 };
 
 
@@ -303,6 +307,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         carryItems: mapCarryItems(compositionData.carryItems || [], itemsData),
         augments: compositionData.augments || [],
         notes: compositionData.notes || [],
+        teamcode: compositionData.teamcode || (compositionData as any).teamCode,
       };
     }
 
@@ -364,6 +369,15 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   // Always return black text color
   const getContrastTextColor = (): string => {
     return '#000000';
+  };
+
+  // Difficulty badge colors (same as TeamCard)
+  const getDifficultyColor = (diff: string): {bg: string; text: string} => {
+    const d = diff?.toLowerCase() || '';
+    if (d.includes('easy')) return {bg: 'rgba(74, 222, 128, 0.2)', text: '#4ade80'};
+    if (d.includes('medium')) return {bg: 'rgba(251, 191, 36, 0.2)', text: '#fbbf24'};
+    if (d.includes('hard')) return {bg: 'rgba(249, 115, 22, 0.2)', text: '#f97316'};
+    return {bg: 'rgba(148, 163, 184, 0.2)', text: '#94a3b8'};
   };
 
   // Calculate hex size to fit 7 hexagons in a row
@@ -435,7 +449,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                       <View style={styles.hexagonInner}>
                         <Hexagon
                           size={hexSize}
-                          backgroundColor={colors.card}
                           borderColor={getUnitCostBorderColor(unit.cost)}
                           borderWidth={2}
                           imageUri={unit.image}
@@ -495,7 +508,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
                 ) : (
                   <Hexagon
                     size={hexSize}
-                    backgroundColor={colors.background}
                     borderColor={colors.borderColor}
                     borderWidth={2}
                   />
@@ -544,29 +556,56 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.topHeader}>
+          <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         <BackButton />
-        <Text h2 bold style={styles.compositionName}>
-          {team.name}
-        </Text>
-        {team.tier && (
+
+      <View style={styles.topHeader}>
+
+        {/* 1. TIER (LEFT) */}
+        {team.tier ? (
           <View style={[styles.tierBadge, {backgroundColor: getRankColor(team.tier)}]}>
             <Text style={[styles.tierBadgeText, {color: getContrastTextColor()}]}>
               {team.tier}
             </Text>
           </View>
-        )}
+        ) : null}
+
+        {/* 2. INFO (MIDDLE) */}
+        <View style={styles.detailHeaderInfo}>
+          <Text h2 bold style={styles.compositionName} numberOfLines={1}>
+            {team.name}
+          </Text>
+          {(team.plan || team.difficulty) && (
+            <View style={styles.planAndDifficultyRow}>
+              {team.plan ? (
+                <View style={styles.planBadge}>
+                  <Text style={styles.planText}>{team.plan}</Text>
+                </View>
+              ) : null}
+              {team.difficulty ? (
+                <View style={[styles.difficultyBadge, {backgroundColor: getDifficultyColor(team.difficulty).bg}]}>
+                  <Text style={[styles.difficultyText, {color: getDifficultyColor(team.difficulty).text}]}>
+                    {team.difficulty}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          )}
+        </View>
+
+        {/* 3. COPY BUTTON (RIGHT) */}
+        <CopyTeamcodeButton teamcode={team.teamcode} />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+  
         {/* Description Section */}
         {team.metaDescription && (
-          <View style={styles.descriptionSection}>
-            <Text style={styles.descriptionText}>{team.metaDescription}</Text>
-          </View>
+          <DescriptionSection 
+            description={team.metaDescription}
+          />
         )}
         <TraitsSection units={currentPhaseUnits} />
 

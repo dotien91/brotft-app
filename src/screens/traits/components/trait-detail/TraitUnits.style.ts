@@ -5,7 +5,6 @@ const createStyles = (theme: Theme) => {
   const {colors} = theme;
   return StyleSheet.create({
     section: {
-      marginBottom: 24,
     },
     sectionTitle: {
       fontSize: 18,
@@ -16,7 +15,8 @@ const createStyles = (theme: Theme) => {
     unitsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 12,
+      gap: 2,
+      overflow: 'hidden',
     },
     loadingContainer: {
       padding: 20,

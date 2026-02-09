@@ -14,6 +14,12 @@ interface Style {
   componentBadge: ViewStyle;
   componentText: TextStyle;
   componentMoreText: TextStyle;
+  recipeSection: ViewStyle;
+  recipeLabel: TextStyle;
+  recipeRow: ViewStyle;
+  componentIconWrap: ViewStyle;
+  componentIcon: ImageStyle;
+  recipePlus: TextStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -94,6 +100,38 @@ export default (theme: ExtendedTheme) => {
     componentMoreText: {
       fontSize: 10,
       fontWeight: '600',
+      color: colors.placeholder,
+    },
+    recipeSection: {
+      marginTop: 6,
+      gap: 4,
+    },
+    recipeLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.placeholder,
+    },
+    recipeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    componentIconWrap: {
+      width: 22,
+      height: 22,
+      borderRadius: 4,
+      overflow: 'hidden',
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.borderColor,
+    },
+    componentIcon: {
+      width: '100%',
+      height: '100%',
+    },
+    recipePlus: {
+      fontSize: 12,
+      fontWeight: '700',
       color: colors.placeholder,
     },
   });

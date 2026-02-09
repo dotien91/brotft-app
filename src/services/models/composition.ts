@@ -66,6 +66,7 @@ export interface IComposition {
     tier: number;
   }>;
   notes: string[];
+  teamcode?: string;
   createdAt?: string;
   updatedAt?: string;
 }

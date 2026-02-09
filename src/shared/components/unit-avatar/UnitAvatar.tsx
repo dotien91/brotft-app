@@ -35,7 +35,6 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
           <View style={styles.hexagonInner}>
             <Hexagon
               size={hexSize}
-              backgroundColor={colors.card}
               borderColor={colors.border}
               borderWidth={3}
             />
@@ -67,7 +66,6 @@ const UnitAvatar: React.FC<UnitAvatarProps> = ({
         <View style={styles.hexagonInner}>
           <Hexagon
             size={hexSize}
-            backgroundColor={colors.card}
             borderColor={colors.border}
             borderWidth={3}
             imageUri={unitImage}

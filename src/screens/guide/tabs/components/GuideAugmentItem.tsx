@@ -188,9 +188,8 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
     color: colors.text,
     fontSize: 11,
   }), [colors.text]);
-
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+    <View style={styles.container}>
       {/* Augment Icon */}
       <View style={styles.iconContainer}>
         {imageUri ? (
@@ -256,7 +255,7 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
           </Text>
         )}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 

@@ -302,7 +302,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                           <Icon
                             name="checkmark-circle"
                             type={IconType.Ionicons}
-                            color={colors.primary}
+                            color={colors.green }
                             size={section.compact ? 18 : 20}
                           />
                         )}
@@ -311,7 +311,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             <Icon
                               name="checkmark-circle"
                               type={IconType.Ionicons}
-                              color={colors.primary}
+                              color={colors.green}
                               size={20}
                             />
                           </View>

@@ -430,8 +430,7 @@ console.log("unitById" , unitApiName, unitId);
             <View style={styles.unitHeader}>
               <View style={styles.unitAvatarContainer}>
                 <Hexagon
-                  size={70} 
-                  backgroundColor={colors.card} 
+                  size={70}
                   borderColor={borderColor} 
                   borderWidth={2}
                   imageUri={avatarUri}

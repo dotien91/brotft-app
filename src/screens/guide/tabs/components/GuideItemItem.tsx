@@ -7,8 +7,8 @@ import createStyles from './GuideItemItem.style';
 import useStore from '@services/zustand/store';
 import LocalStorage from '@services/local-storage';
 import {getLocaleFromLanguage} from '@services/api/data';
-import {deleteTftItem} from '@services/api/tft-items';
 import {getItemIconImageSource} from '../../../../utils/item-images';
+import {translations} from '../../../../shared/localization';
 
 interface GuideItemItemProps {
   data: ITftItem;
@@ -17,13 +17,13 @@ interface GuideItemItemProps {
 
 const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
   const theme = useTheme();
-  const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const language = useStore((state) => state.language);
   const [localizedName, setLocalizedName] = useState<string | null>(null);
+  const [localizedComposition, setLocalizedComposition] = useState<string[] | null>(null);
 
-  const {name, icon} = data;
+  const {name, icon, composition} = data;
 
   // Get localized name from storage
   useEffect(() => {
@@ -88,16 +88,25 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
         }
       }
 
-      if (localizedItem && localizedItem.name) {
-        setLocalizedName(localizedItem.name);
+      if (localizedItem) {
+        setLocalizedName(localizedItem.name || null);
+        setLocalizedComposition(
+          localizedItem.composition && Array.isArray(localizedItem.composition)
+            ? localizedItem.composition
+            : null
+        );
       } else {
         setLocalizedName(null);
+        setLocalizedComposition(null);
       }
     } catch (error) {
       console.error('Error loading localized name:', error);
       setLocalizedName(null);
+      setLocalizedComposition(null);
     }
   }, [data, language]);
+
+  const displayComponents = localizedComposition ?? composition ?? [];
 
   // Get item image source (local only)
   const imageSource = getItemIconImageSource(icon, data.apiName, 48);
@@ -122,11 +131,36 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
         ) : null}
       </View>
 
-      {/* Item Name */}
+      {/* Item Name + Công thức ghép */}
       <View style={styles.infoContainer}>
         <Text style={styles.itemName} numberOfLines={1}>
           {localizedName || name || '---'}
         </Text>
+        {displayComponents.length >= 1 && (
+          <View style={styles.recipeSection}>
+            <View style={styles.recipeRow}>
+              {displayComponents.slice(0, 2).map((componentApiName, index) => {
+                const compSource = getItemIconImageSource(null, componentApiName, 24);
+                return (
+                  <React.Fragment key={`${componentApiName}-${index}`}>
+                    <View style={styles.componentIconWrap}>
+                      {compSource.local ? (
+                        <Image
+                          source={compSource.local}
+                          style={styles.componentIcon}
+                          resizeMode="cover"
+                        />
+                      ) : null}
+                    </View>
+                    {index === 0 && displayComponents.length > 1 && (
+                      <Text style={styles.recipePlus}>+</Text>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </View>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );

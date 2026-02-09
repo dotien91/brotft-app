@@ -184,8 +184,7 @@ const ChampionDetailScreen: React.FC<ChampionDetailScreenProps> = ({route: route
             <View style={styles.championHeader}>
               <View style={styles.championAvatarContainer}>
                 <Hexagon 
-                  size={70} 
-                  backgroundColor="#252836" 
+                  size={70}
                   borderColor="#3a3d4a" 
                   borderWidth={2}
                   imageUri={imageUri}

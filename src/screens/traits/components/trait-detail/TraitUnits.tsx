@@ -44,9 +44,6 @@ const TraitUnits: React.FC<TraitUnitsProps> = ({
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>
-        {translations.units} ({unitsCount})
-      </Text>
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color={colors.primary} />

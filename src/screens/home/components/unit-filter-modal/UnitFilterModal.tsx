@@ -101,12 +101,12 @@ interface UnitItemProps {
 
 const UnitItem = React.memo(({ item, isSelected, hexSize, primaryColor, onToggle, colors }: UnitItemProps) => {
   return (
-    <RNBounceable onPress={() => onToggle(item.apiName)}>
+    <RNBounceable onPress={() => onToggle(item.apiName)} style={[styles.unitItemCell, { width: hexSize }]}>
       <View style={styles.unitAvatarContainer}>
         <UnitAvatar apiName={item.apiName} hexSize={hexSize} />
         {isSelected && (
           <View style={[styles.selectedCheckmark, { backgroundColor: colors.card }]}>
-            <Icon name="checkmark-circle" type={IconType.Ionicons} color={primaryColor} size={24} />
+            <Icon name="checkmark-circle" type={IconType.Ionicons} color="#22c55e" size={24} />
           </View>
         )}
       </View>
@@ -136,10 +136,13 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUnits, setSelectedUnits] = useState<string[]>(initialSelectedUnits);
 
+  const COLS = 6;
+  const GAP = 8;
+  const SECTION_PADDING_H = 16 * 2; // sectionContent paddingHorizontal = 32
+
   const hexSize = useMemo(() => {
-    const paddingHorizontal = 32; 
-    const gap = 8;
-    return Math.floor((screenWidth - paddingHorizontal - gap * 6) / 5);
+    const available = screenWidth - SECTION_PADDING_H; // chiều rộng trong sectionContent
+    return Math.floor((available - GAP * (COLS - 1)) / COLS);
   }, [screenWidth]);
 
   useEffect(() => {
@@ -332,6 +335,10 @@ const UnitFilterModal: React.FC<UnitFilterModalProps> = ({
 // --- STYLES ---
 
 const styles = StyleSheet.create({
+  unitItemCell: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   unitAvatarContainer: {
     position: 'relative',
   },

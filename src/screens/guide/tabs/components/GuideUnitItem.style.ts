@@ -29,6 +29,7 @@ interface Style {
   compactNameRow: ViewStyle;
   compactUnitName: TextStyle;
   compactUnlockIconNextToName: ImageStyle;
+  compactUnlockIconAbsolute: ViewStyle;
   compactCostContainer: ViewStyle;
 }
 
@@ -38,13 +39,13 @@ export default (theme: ExtendedTheme) => {
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      borderBottomColor: colors.border,
+      padding: 12,
       borderBottomWidth: 1,
+      overflow: 'hidden',
     },
     avatarContainer: {
       marginRight: 12,
+      overflow: 'hidden',
     },
     hexagonWrapper: {
       position: 'relative',
@@ -149,18 +150,15 @@ export default (theme: ExtendedTheme) => {
       color: colors.placeholder,
     },
     compactContainer: {
+      width: 50,
+      overflow: 'visible',
       alignItems: 'center',
       justifyContent: 'flex-start',
-      paddingVertical: 8,
-      paddingHorizontal: 4,
-      width: 70,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.white,
+      position: 'relative',
     },
     compactHexagonWrapper: {
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 6,
     },
     compactHexagonBorderWrapper: {
       position: 'relative',
@@ -181,7 +179,6 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '600',
       color: colors.text,
       textAlign: 'center',
-      flexShrink: 1,
     },
     compactTier3Icon: {
       position: 'absolute',
@@ -205,6 +202,12 @@ export default (theme: ExtendedTheme) => {
     compactUnlockIconNextToName: {
       width: 12,
       height: 12,
+    },
+    compactUnlockIconAbsolute: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      zIndex: 10,
     },
     compactCostContainer: {
       marginTop: 4,

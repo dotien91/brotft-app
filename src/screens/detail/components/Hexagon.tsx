@@ -2,6 +2,7 @@ import React, {useMemo} from 'react';
 import {View, StyleSheet, Image} from 'react-native';
 import Svg, {Polygon, Defs, ClipPath, Image as SvgImage} from 'react-native-svg';
 import MaskedView from '@react-native-masked-view/masked-view';
+import {useTheme} from '@react-navigation/native';
 
 interface HexagonProps {
   size?: number;
@@ -16,14 +17,24 @@ interface HexagonProps {
 const Hexagon: React.FC<HexagonProps> = ({
   size = 64,
   borderColor = '#2a2d3a',
-  backgroundColor = '#1e2130',
+  backgroundColor,
   borderWidth = 2,
   children,
   imageUri,
   imageSource,
 }) => {
+  const {colors} = useTheme();
+  const themeHexagonBg = (colors as Record<string, string>).hexagonBg;
+  const defaultBg = themeHexagonBg ?? '#252836';
+
   const width = size;
   const height = size * 1.15; // Hexagon height ratio
+
+  // Luôn có background: ưu tiên prop có giá trị, còn lại dùng màu từ theme (hexagonBg)
+  const fillColor =
+    typeof backgroundColor === 'string' && backgroundColor.trim() !== ''
+      ? backgroundColor
+      : defaultBg;
   
   // Generate unique ID for clipPath
   const clipId = useMemo(() => `hexagon-clip-${Math.random().toString(36).substr(2, 9)}`, []);
@@ -49,10 +60,10 @@ const Hexagon: React.FC<HexagonProps> = ({
             <Polygon points={points} />
           </ClipPath>
         </Defs>
-        {/* Background hexagon */}
+        {/* Background hexagon - luôn vẽ, mặc định xám */}
         <Polygon
           points={points}
-          fill={backgroundColor}
+          fill={fillColor}
           stroke={borderColor}
           strokeWidth={borderWidth}
         />

@@ -10,6 +10,7 @@ interface BannerAdItemProps {
 }
 
 const BannerAdItem: React.FC<BannerAdItemProps> = () => {
+  const adsSdkInitAttempted = useStore((state) => state.adsSdkInitAttempted);
   const adsSdkInitialized = useStore((state) => state.adsSdkInitialized);
   const hasTrackingPermission = useStore((state) => state.hasTrackingPermission);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,8 @@ const BannerAdItem: React.FC<BannerAdItemProps> = () => {
     setHasError(true);
   };
 
-  if (!adsSdkInitialized) {
+  // Chỉ show banner khi đã attempt init và init thành công
+  if (!adsSdkInitAttempted || !adsSdkInitialized) {
     return null;
   }
   return (

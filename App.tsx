@@ -78,7 +78,6 @@ const App = () => {
   const setAdsSdkInitialized = useStore((state) => state.setAdsSdkInitialized);
   const setAdsSdkInitAttempted = useStore((state) => state.setAdsSdkInitAttempted);
   const setHasTrackingPermission = useStore((state) => state.setHasTrackingPermission);
-  const adsSdkInitAttempted = useStore((state) => state.adsSdkInitAttempted);
   const [isLanguageReady, setIsLanguageReady] = React.useState(false);
 
   // Request App Tracking Transparency (iOS) when app opens, then init Mobile Ads
@@ -100,7 +99,7 @@ const App = () => {
         setAdsSdkInitialized(true);
       } catch (error) {
         console.error('AdMob Init Error:', error);
-        setAdsSdkInitialized(true);
+        setAdsSdkInitialized(false);
       } finally {
         setAdsSdkInitAttempted(true);
       }
@@ -177,7 +176,7 @@ const App = () => {
   }, [isDarkMode]);
   
   // Only render Navigation after language is ready and ad SDK init has completed
-  if (!isLanguageReady || !adsSdkInitAttempted) {
+  if (!isLanguageReady) {
     // Show loading screen while initializing
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000'}}>

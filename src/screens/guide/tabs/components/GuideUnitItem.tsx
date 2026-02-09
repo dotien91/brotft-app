@@ -165,7 +165,6 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
             <View style={styles.compactHexagonInner}>
               <Hexagon
                 size={hexSize}
-                backgroundColor={colors.card}
                 borderColor={getUnitCostBorderColor(cost)}
                 borderWidth={2}
                 imageUri={imageUri}
@@ -183,25 +182,23 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
             </View>
           </View>
         </View>
-        {/* Name below hexagon with unlock icon */}
-        <View style={styles.compactNameRow}>
-          <Text style={styles.compactUnitName} numberOfLines={1}>
-            {localizedName || name}
-          </Text>
-          {data.needUnlock && (
+        {/* Unlock icon - absolute top right */}
+        {data.needUnlock && (
+          <View style={styles.compactUnlockIconAbsolute}>
             <Image
               source={require('@assets/icons/unlock.png')}
               style={styles.compactUnlockIconNextToName}
               resizeMode="contain"
             />
-          )}
-        </View>
-        {/* Cost below name */}
-        {cost !== null && cost !== undefined && (
-          <View style={styles.compactCostContainer}>
-            <UnitCostBadge cost={cost as number} />
           </View>
         )}
+        {/* Name below hexagon */}
+        <View style={styles.compactNameRow}>
+          <Text style={styles.compactUnitName} numberOfLines={1}>
+            {localizedName || name}
+          </Text>
+        </View>
+ 
       </TouchableOpacity>
     );
   }
@@ -226,7 +223,6 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
           <View style={styles.hexagonInner}>
             <Hexagon 
               size={56} 
-              backgroundColor={colors.card}
               borderColor={borderColor}
               borderWidth={2}
               imageUri={imageUri}

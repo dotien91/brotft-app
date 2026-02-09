@@ -8,7 +8,13 @@ interface Style {
   topHeader: ViewStyle;
   headerContent: ViewStyle;
   compositionHeader: ViewStyle;
+  detailHeaderInfo: ViewStyle;
   compositionName: TextStyle;
+  planAndDifficultyRow: ViewStyle;
+  planBadge: ViewStyle;
+  planText: TextStyle;
+  difficultyBadge: ViewStyle;
+  difficultyText: TextStyle;
   backButton: ViewStyle;
   sourceLabel: TextStyle;
   sourceLabelVertical: TextStyle;
@@ -178,12 +184,43 @@ export default (theme: ExtendedTheme) => {
       marginBottom: 16,
       paddingHorizontal: 12,
     },
+    detailHeaderInfo: {
+      flex: 1,
+      minWidth: 0,
+    },
     compositionName: {
       fontSize: 18,
       fontWeight: '800',
       letterSpacing: -0.5,
-      flex: 1,
       color: colors.text,
+      minWidth: 0,
+    },
+    planAndDifficultyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 4,
+      flexWrap: 'wrap',
+      gap: 6,
+    },
+    planBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 4,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    planText: {
+      fontSize: 11,
+      fontWeight: '400',
+      color: colors.text,
+    },
+    difficultyBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 4,
+    },
+    difficultyText: {
+      fontSize: 11,
+      fontWeight: '400',
     },
     backButton: {
       width: 44,
@@ -264,7 +301,6 @@ export default (theme: ExtendedTheme) => {
       borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 8,
     },
     tierBadgeText: {
       fontSize: 14,

@@ -141,6 +141,7 @@ export const translations = new LocalizedStrings({
     feedbackError: "Lütfen geri bildirim içeriğinizi girin",
     feedbackSubmitError: "Geri bildirim gönderilemedi. Lütfen tekrar deneyin.",
     ok: "Tamam",
+    copySuccess: "Panoya kopyalandı",
   },
   en: {
     noLocationService: "Location Service Not Available",
@@ -283,6 +284,7 @@ export const translations = new LocalizedStrings({
     feedbackError: "Please enter your feedback content",
     feedbackSubmitError: "Failed to submit feedback. Please try again.",
     ok: "OK",
+    copySuccess: "Copied",
   },
   vi: {
     noLocationService: "Dịch vụ vị trí không khả dụng",
@@ -425,6 +427,7 @@ export const translations = new LocalizedStrings({
     feedbackError: "Vui lòng nhập nội dung phản hồi",
     feedbackSubmitError: "Gửi phản hồi thất bại. Vui lòng thử lại.",
     ok: "OK",
+    copySuccess: "Sao chép thành công",
   },
   "zh-CN": {
     noLocationService: "位置服务不可用",
@@ -567,6 +570,7 @@ export const translations = new LocalizedStrings({
     feedbackError: "请输入您的反馈内容",
     feedbackSubmitError: "提交反馈失败。请重试。",
     ok: "确定",
+    copySuccess: "复制成功",
   },
   "ja-JP": {
     noLocationService: "位置情報サービスが利用できません",
@@ -710,6 +714,7 @@ export const translations = new LocalizedStrings({
     feedbackError: "フィードバックの内容を入力してください",
     feedbackSubmitError: "フィードバックの送信に失敗しました。もう一度お試しください。",
     ok: "OK",
+    copySuccess: "コピーしました",
   },
   "es-ES": {
     noLocationService: "Servicio de ubicación no disponible",
@@ -854,6 +859,7 @@ export const translations = new LocalizedStrings({
     feedbackError: "Por favor ingresa el contenido de tus comentarios",
     feedbackSubmitError: "Error al enviar comentarios. Por favor intenta de nuevo.",
     ok: "OK",
+    copySuccess: "Copiado correctamente",
   },
 });
 

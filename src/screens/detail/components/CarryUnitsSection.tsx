@@ -122,6 +122,7 @@ const ItemsGrid: React.FC<{items: TeamUnitItem[]}> = ({items}) => {
           <View key={idx} style={styles.itemsGridColumn}>
             {/* Main item */}
               <RNBounceable 
+              disabled={true}
               onPress={() => handleItemPress(item, itemDetail)}
               style={styles.itemsGridMainItem}>
               <Image 

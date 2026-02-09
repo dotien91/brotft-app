@@ -1,9 +1,11 @@
 import axiosInstance from './axios';
-
-const isDev = (global as any).__DEV__ === true || process.env.NODE_ENV === 'development';
+import {getDeviceId} from '../device-id';
+import {getCurrentVersion} from '../version-check';
 
 export interface IScreenTrackingRequest {
   screenName: string;
+  deviceId: string;
+  appVersion: string;
 }
 
 export interface IScreenTrackingResponse {
@@ -18,7 +20,7 @@ export interface IScreenTrackingResponse {
 export const trackScreen = async (
   screenName: string,
 ): Promise<IScreenTrackingResponse> => {
-  if (isDev) {
+  if (__DEV__) {
     // Skip tracking in development to avoid polluting analytics
     return {
       success: true,
@@ -30,6 +32,8 @@ export const trackScreen = async (
       '/screen-trackings',
       {
         screenName,
+        deviceId: getDeviceId(),
+        appVersion: getCurrentVersion() || '0.0.0',
       } as IScreenTrackingRequest,
     );
     return response.data;

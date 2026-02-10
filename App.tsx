@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {LogBox, StatusBar, View} from 'react-native';
 import LottieView from 'lottie-react-native';
 import {QueryClientProvider} from '@tanstack/react-query';
@@ -12,9 +12,9 @@ import useStore from './src/services/zustand/store';
 import {translations} from './src/shared/localization';
 import {checkAndFetchDataByLocale, initDataCache} from './src/services/api/data';
 import LocalStorage from './src/services/local-storage';
+import InitView from './src/InitView';
 import {MobileAds} from 'react-native-google-mobile-ads';
 LogBox.ignoreAllLogs();
-import ReactNativeIdfaAaid, { AdvertisingInfoResponse } from '@sparkfabrik/react-native-idfa-aaid';
 
 /**
  * Map locale information to app language code
@@ -157,16 +157,6 @@ const App = () => {
     checkAndFetchDataByLocale(language);
   }, [language, isLanguageReady]);
 
-  // Check app version on startup
-  // React.useEffect(() => {
-  //   // Check version sau khi app đã load xong
-  //   const timer = setTimeout(() => {
-  //     checkAndForceUpdate();
-  //   }, 1500); // Đợi 1.5 giây để app load xong
-
-  //   return () => clearTimeout(timer);
-  // }, []);
-
   React.useEffect(() => {
     StatusBar.setBarStyle('light-content');
     if (isAndroid) {
@@ -192,6 +182,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <InitView />
       <Navigation key={language} />
     </QueryClientProvider>
   );

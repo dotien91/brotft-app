@@ -4,8 +4,8 @@ import VersionCheck from 'react-native-version-check';
 import {isAndroid} from '@freakycoder/react-native-helpers';
 import {translations} from '../../shared/localization';
 
-// App Store ID và Play Store Package Name
-const APP_STORE_ID = '6757330447'; // Thay bằng App Store ID thật
+// App Store URL và Play Store Package Name
+const APP_STORE_URL = 'https://apps.apple.com/ca/app/chessbuddy-meta-comps-for-tft/id6757330447';
 const PLAY_STORE_ID = 'com.apporastudio.tftbuddy';
 
 let isUpdateAlertVisible = false;
@@ -70,8 +70,6 @@ export const checkAndForceUpdate = async () => {
       return;
     }
 
-    const {isNeeded} = updateInfo;
-
     const moveToStore = async () => {
       let urlString = '';
       try {
@@ -80,9 +78,7 @@ export const checkAndForceUpdate = async () => {
             packageName: PLAY_STORE_ID,
           });
         } else {
-          urlString = await VersionCheck.getAppStoreUrl({
-            appID: APP_STORE_ID,
-          });
+          urlString = APP_STORE_URL;
         }
         if (!urlString) {
           showDeviceNotSupportedAlert();
@@ -97,8 +93,8 @@ export const checkAndForceUpdate = async () => {
     };
 
     Alert.alert(
-      translations.updateRequired || 'Cập nhật bắt buộc',
-      translations.updateRequiredMessage || 'Phiên bản hiện tại của ứng dụng đã lỗi thời. Vui lòng cập nhật lên phiên bản mới nhất để tiếp tục sử dụng.',
+      translations.updateRequired || 'Có bản cập nhật mới',
+      translations.updateRequiredMessage || 'Đã có phiên bản mới với nhiều cải tiến. Bạn cập nhật để trải nghiệm tốt hơn nhé.',
       [
         {
           text: translations.updateNow || 'Cập nhật ngay',
@@ -122,11 +118,82 @@ export const checkAndForceUpdate = async () => {
   }
 };
 
+export type CheckVersionResult = {
+  needUpdate: boolean;
+  storeUrl: string | null;
+  currentVersion?: string;
+  latestVersion?: string;
+};
+
+/**
+ * Kiểm tra version và trả về kết quả (dùng cho InitView modal, không hiện Alert)
+ */
+export const checkVersionForModal = async (): Promise<CheckVersionResult> => {
+  const defaultResult: CheckVersionResult = { needUpdate: false, storeUrl: null };
+  try {
+    const currentVersion = VersionCheck.getCurrentVersion();
+    if (!currentVersion) return defaultResult;
+
+    const latestVersion = (await Promise.race([
+      VersionCheck.getLatestVersion({ packageName: PLAY_STORE_ID }),
+      new Promise<string>((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 5000),
+      ),
+    ])) as string;
+
+    if (!latestVersion) return defaultResult;
+
+    const updateInfo = await VersionCheck.needUpdate({
+      currentVersion,
+      latestVersion,
+    });
+
+    if (!updateInfo?.isNeeded) return defaultResult;
+
+    let storeUrl: string | null = null;
+    try {
+      if (isAndroid) {
+        storeUrl = await VersionCheck.getPlayStoreUrl({
+          packageName: PLAY_STORE_ID,
+        });
+      } else {
+        storeUrl = APP_STORE_URL;
+      }
+    } catch {
+      // ignore
+    }
+
+    return {
+      needUpdate: true,
+      storeUrl,
+      currentVersion,
+      latestVersion,
+    };
+  } catch (e) {
+    console.log('Version check error:', e);
+    return defaultResult;
+  }
+};
+
 /**
  * Lấy version hiện tại
  */
 export const getCurrentVersion = (): string => {
   return VersionCheck.getCurrentVersion();
+};
+
+/**
+ * Lấy URL store (App Store / Play Store) theo platform
+ */
+export const getStoreUrl = async (): Promise<string | null> => {
+  try {
+    if (isAndroid) {
+      return await VersionCheck.getPlayStoreUrl({ packageName: PLAY_STORE_ID });
+    }
+    return APP_STORE_URL;
+  } catch {
+    return null;
+  }
 };
 
 /**

@@ -5,7 +5,7 @@ import {isAndroid} from '@freakycoder/react-native-helpers';
 import {translations} from '../../shared/localization';
 
 // App Store URL và Play Store Package Name
-const APP_STORE_URL = 'https://apps.apple.com/ca/app/chessbuddy-meta-comps-for-tft/id6757330447';
+const APP_STORE_URL = 'https://apps.apple.com/ca/app/TFTBuddy-meta-comps-for-tft/id6757330447';
 const PLAY_STORE_ID = 'com.apporastudio.tftbuddy';
 
 let isUpdateAlertVisible = false;

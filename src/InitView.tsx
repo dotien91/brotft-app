@@ -14,7 +14,7 @@ import { translations } from './shared/localization';
 import { useTheme } from '@react-navigation/native';
 
 const DELAY_CHECK_MS = 1500;
-const APP_STORE_URL = 'https://apps.apple.com/us/app/chessbuddy-meta-comps-for-tft/id6757330447';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/TFTBuddy-meta-comps-for-tft/id6757330447';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.apporastudio.tftbuddy';
 
 const InitView: React.FC = () => {

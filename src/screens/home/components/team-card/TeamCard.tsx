@@ -10,6 +10,7 @@ import createStyles from './TeamCard.style';
 import * as NavigationService from 'react-navigation-helpers';
 import {SCREENS} from '@shared-constants';
 import {translations} from '../../../../shared/localization';
+import TierBadge from '@shared-components/tier-badge/TierBadge';
 
 interface TeamCardProps {
   composition: IComposition;
@@ -59,8 +60,9 @@ const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
     NavigationService.push(SCREENS.DETAIL, {compId: composition.compId});
   }, [composition.compId]);
 
-  const displayTier = composition.tier || 'S';
-  const rankBackgroundColor = getRankColor(displayTier, colors.primary);
+  const isOp = !!composition.isOp;
+  const displayTier = isOp ? 'OP' : (composition.tier || 'S');
+  const rankBackgroundColor = isOp ? '#a855f7' : getRankColor(displayTier, colors.primary);
   
   // Tính toán màu sắc ngay trong body function vì nó rất nhẹ, không cần memo cũng được,
   // hoặc dùng useMemo nếu muốn strict.
@@ -82,9 +84,7 @@ const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
     <RNBounceable style={styles.teamCard} onPress={handlePress}>
       <View style={styles.teamHeader}>
         {/* 1. TIER */}
-        <View style={[styles.rankBadge, {backgroundColor: rankBackgroundColor}]}>
-          <Text style={styles.rankText}>{displayTier}</Text>
-        </View>
+        <TierBadge style={styles.rankBadge} tier={displayTier} isOp={isOp} />
 
         {/* 2. INFO */}
         <View style={styles.teamNameContainer}>

@@ -1,7 +1,7 @@
 // ? API
 export const API_BASE_URL = __DEV__
-  ? 'https://api.apporastudio.com'
-  // ? 'http://localhost:3900'
+  // ? 'https://api.apporastudio.com'
+  ? 'http://localhost:3900'
   : 'https://api.apporastudio.com';
 
 // ? AdMob

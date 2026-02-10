@@ -48,6 +48,7 @@ export interface IComposition {
   plan: string;
   difficulty: string;
   tier?: string; // S, A, B, C, D, OP
+  isOp?: boolean;
   metaDescription: string;
   isLateGame: boolean;
   boardSize: {

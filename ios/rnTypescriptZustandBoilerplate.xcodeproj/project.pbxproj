@@ -509,6 +509,7 @@
 				DEVELOPMENT_TEAM = J8ML7H3GZN;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = rnTypescriptZustandBoilerplate/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TFTBuddy;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -537,6 +538,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J8ML7H3GZN;
 				INFOPLIST_FILE = rnTypescriptZustandBoilerplate/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TFTBuddy;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

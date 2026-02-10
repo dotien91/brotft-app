@@ -24,6 +24,7 @@ const InitView: React.FC = () => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    if (__DEV__) return;
     const timer = setTimeout(() => {
       checkVersion();
     }, DELAY_CHECK_MS);

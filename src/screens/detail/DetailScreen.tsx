@@ -21,6 +21,7 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import Icon, {IconType} from '@shared-components/icon/Icon';
 import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
 import DescriptionSection from './components/DescriptionSection';
+import TierBadge from '@shared-components/tier-badge/TierBadge';
 
 type TeamUnitItem = {
   id?: string;
@@ -122,6 +123,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   } = useCompositionByCompId(compIdFromParams || '', {
     enabled: !!compIdFromParams,
   });
+
+  console.log("compositionData", compositionData);
 
   // Helper function to map units with items
   const mapUnitsWithItems = (units: any[], itemsData: any): TeamUnit[] => {
@@ -559,13 +562,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
       <View style={styles.topHeader}>
 
         {/* 1. TIER (LEFT) */}
-        {team.tier ? (
-          <View style={[styles.tierBadge, {backgroundColor: getRankColor(team.tier)}]}>
-            <Text style={[styles.tierBadgeText, {color: getContrastTextColor()}]}>
-              {team.tier}
-            </Text>
-          </View>
-        ) : null}
+        <TierBadge style={styles.tierBadge} tier={team.tier} isOp={!!compositionData?.isOp} />
 
         {/* 2. INFO (MIDDLE) */}
         <View style={styles.detailHeaderInfo}>

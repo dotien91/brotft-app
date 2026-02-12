@@ -66,7 +66,7 @@ const TeamBoard: React.FC<TeamBoardProps> = ({ units, boardSize, colors, styles 
                 key={`cell-${rowIndex}-${colIndex}`}
                 style={[styles.hexCellContainer, { width: hexSize }]}>
                 {unit ? (
-                  <UnitHexagonItem unit={unit} size={hexSize} />
+                  <UnitHexagonItem borderWidth={4} unlockPosition='topLeft' unit={unit} size={hexSize} />
                 ) : (
                   <Hexagon
                     size={hexSize}

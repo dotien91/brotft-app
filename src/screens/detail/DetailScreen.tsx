@@ -18,6 +18,7 @@ import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
 import TierBadge from '@shared-components/tier-badge';
 import DescriptionSection from './components/DescriptionSection';
 import TeamBoard from './components/TeamBoard';
+import CoreChampion from './components/CoreChampion';
 
 type TeamUnitItem = {
   id?: string;
@@ -373,7 +374,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <BackButton />
-
         <View style={styles.topHeader}>
 
           {/* 1. TIER (LEFT) */}
@@ -410,7 +410,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
           {/* 3. COPY BUTTON (RIGHT) */}
           <CopyTeamcodeButton teamcode={team.teamcode} />
         </View>
-
 
         {/* Description Section */}
         {team.metaDescription && (
@@ -454,11 +453,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
             />
           </View>
         </View>
-
-        {/* <CarryUnitsSection
-          team={team}
-          getUnitCostBorderColor={getUnitCostBorderColor}
-        /> */}
+        <CoreChampion coreChampion={team.coreChampion} />
+   
       </ScrollView>
     </SafeAreaView>
   );

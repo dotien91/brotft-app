@@ -18,9 +18,8 @@ export default (theme: ExtendedTheme) => {
   const {colors} = theme;
   return StyleSheet.create<Style>({
     container: {
-      marginTop: 24,
+      marginTop: 12,
       marginBottom: 16,
-      paddingHorizontal: 16,
       paddingBottom: 16,
     },
     sectionTitle: {

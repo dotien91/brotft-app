@@ -17,7 +17,7 @@ import Text from '@shared-components/text-wrapper/TextWrapper';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnit} from '@services/models/tft-unit';
-import UnitAvatar from '@shared-components/unit-avatar';
+import UnitHexagonItem from '../unit-hexagon-item/UnitHexagonItem';
 import {translations} from '../../../../shared/localization';
 
 // --- CONSTANTS ---
@@ -104,7 +104,7 @@ const UnitItem = React.memo(({ item, isSelected, hexSize, primaryColor, onToggle
   return (
     <RNBounceable onPress={() => onToggle(item.apiName)} style={[styles.unitItemCell, { width: hexSize }]}>
       <View style={styles.unitAvatarContainer}>
-        <UnitAvatar apiName={item.apiName} hexSize={hexSize} />
+        <UnitHexagonItem borderWidth={2} unit={item} size={hexSize} shape="square" unlockPosition='topLeft' />
         {isSelected && (
           <View style={[styles.selectedCheckmark, { backgroundColor: colors.card }]}>
             <Icon name="checkmark-circle" type={IconType.Ionicons} color="#22c55e" size={24} />

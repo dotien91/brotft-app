@@ -316,7 +316,7 @@ export const getTraitIconUrls = (
   
   // Remove tft16_ prefix if present
   const cleanTrait = formattedTrait.replace(/^tft\d+_/, '');
-  
+  console.log("cleanTrait", cleanTrait);
   const primaryUrl = `https://cdn.metatft.com/file/metatft/traits/${cleanTrait}.png`;
   return getUrlsWithFallback(primaryUrl, 'traits', cleanTrait, 'png');
 };

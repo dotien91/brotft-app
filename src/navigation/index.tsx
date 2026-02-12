@@ -21,6 +21,7 @@ import ChampionDetailScreen from '@screens/champion-detail/ChampionDetailScreen'
 import PrivacyScreen from '@screens/privacy/PrivacyScreen';
 import TermsScreen from '@screens/terms/TermsScreen';
 import FeedbackScreen from '@screens/feedback/FeedbackScreen';
+import SmartTeamBuilderScreen from '@screens/smart-team-builder/SmartTeamBuilderScreen';
 
 // ? If you want to use stack or tab or both
 const Tab = createBottomTabNavigator();
@@ -57,6 +58,7 @@ const getTrackingScreenName = (routeName: string): string => {
     [SCREENS.PRIVACY]: 'privacy',
     [SCREENS.TERMS]: 'terms',
     [SCREENS.FEEDBACK]: 'feedback',
+    [SCREENS.SMART_TEAM_BUILDER]: 'smart-team-builder',
     [SCREENS.HOME_ROOT]: 'home', // HomeRoot maps to home
   };
 
@@ -117,13 +119,16 @@ const Navigation = () => {
     
     switch (route.name) {
       case SCREENS.HOME:
-        iconName = 'house'; // Phosphor: House
+        iconName = 'house';
+        break;
+      case SCREENS.SMART_TEAM_BUILDER:
+        iconName = 'lightning';
         break;
       case SCREENS.GUIDE:
-        iconName = 'book-open'; // Phosphor: BookOpen (Quyển sách mở)
+        iconName = 'book-open';
         break;
       case SCREENS.SETTINGS:
-        iconName = 'gear'; // Phosphor: Gear (Bánh răng)
+        iconName = 'gear';
         break;
       default:
         iconName = 'house';
@@ -160,6 +165,11 @@ const Navigation = () => {
           name={SCREENS.HOME} 
           component={HomeScreen}
           options={{tabBarLabel: translations.home}}
+        />
+        <Tab.Screen 
+          name={SCREENS.SMART_TEAM_BUILDER} 
+          component={SmartTeamBuilderScreen}
+          options={{tabBarLabel: (translations as {smartRecommendation?: string}).smartRecommendation ?? 'Smart Team'}}
         />
         <Tab.Screen 
           name={SCREENS.GUIDE} 

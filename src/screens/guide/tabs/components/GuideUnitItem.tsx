@@ -6,7 +6,6 @@ import {useTheme} from '@react-navigation/native';
 import type {ITftUnit} from '@services/models/tft-unit';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitAvatarUrl} from '../../../../utils/metatft';
 import getUnitAvatar from '../../../../utils/unit-avatar';
 import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../../../utils/unitCost';
 import createStyles from './GuideUnitItem.style';
@@ -15,6 +14,7 @@ import {getCachedUnits} from '@services/api/data';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import UnitTraitsDisplay from '@screens/unit-detail/components/UnitTraitsDisplay';
+import UnitHexagonItem from '@screens/home/components/unit-hexagon-item/UnitHexagonItem';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -49,6 +49,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
   };
   // Get localized name from storage
   useEffect(() => {
+    // 1. Guard clause: Thoát sớm nếu thiếu dữ liệu
     if (!data || !language) {
       setLocalizedName(null);
       return;
@@ -56,20 +57,28 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
 
     try {
       const unitsData = getCachedUnits(language);
-      const localizedUnit =
-        (data.apiName && unitsData[data.apiName]) ||
-        Object.values(unitsData).find(
-          (localUnit: any) =>
-            (data.apiName && localUnit.apiName === data.apiName) ||
-            (data.name && localUnit.name && data.name.toLowerCase() === localUnit.name.toLowerCase()) ||
-            (data.characterName && localUnit.characterName && data.characterName.toLowerCase() === localUnit.characterName.toLowerCase())
-        );
+      
+      // 2. Tối ưu truy cập: Ưu tiên tìm trực tiếp bằng Key (apiName hoặc characterName)
+      // Giả sử API thường dùng apiName làm key trong unitsData
+      let localizedUnit = (data.apiName ? unitsData[data.apiName] : null) 
+                       || (data.characterName ? unitsData[data.characterName] : null);
 
-      if (localizedUnit?.name) {
-        setLocalizedName(localizedUnit.name);
-      } else {
-        setLocalizedName(null);
+      // 3. Fallback: Chỉ dùng vòng lặp khi không tìm thấy bằng Key
+      // (Ví dụ: khi data truyền vào chỉ có name hiển thị thô)
+      if (!localizedUnit) {
+        const dataNameLower = data.name?.toLowerCase();
+        const dataCharLower = data.characterName?.toLowerCase();
+        const dataApiLower = data.apiName?.toLowerCase();
+
+        localizedUnit = Object.values(unitsData).find((localUnit: any) => {
+          return (dataApiLower && localUnit.apiName?.toLowerCase() === dataApiLower) ||
+                 (dataNameLower && localUnit.name?.toLowerCase() === dataNameLower) ||
+                 (dataCharLower && localUnit.characterName?.toLowerCase() === dataCharLower);
+        });
       }
+
+      setLocalizedName(localizedUnit?.name || null);
+
     } catch (error) {
       console.error('Error loading localized unit name:', error);
       setLocalizedName(null);
@@ -124,7 +133,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
                 imageUri={imageUri}
                 imageSource={imageSource.local}>
                 {/* 3 Stars icon */}
-                {((data as any).need3Star || (cost <= 3 && (data as any).carry)) && (
+                {((data as any).need3Star || ((cost ?? 0) <= 3 && (data as any).carry)) && (
                   <View style={[styles.compactTier3Icon, {
                     top: -8,
                     right: 5,
@@ -157,33 +166,12 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
     );
   }
 
-  // Full mode: horizontal layout with traits
-  const borderColor = getUnitCostBorderColor(cost);
+  // Full mode: horizontal layout with traits — avatar via UnitHexagonItem (square)
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.7}>
-      {/* Hexagon Avatar */}
+      {/* Avatar: UnitHexagonItem square */}
       <View style={styles.avatarContainer}>
-        <View style={styles.hexagonWrapper}>
-          {/* Border hexagon */}
-          <View style={styles.hexagonBorder}>
-            <Hexagon
-              size={60}
-              backgroundColor="transparent"
-              borderColor={borderColor}
-              borderWidth={1}
-            />
-          </View>
-          {/* Main hexagon with image */}
-          <View style={styles.hexagonInner}>
-            <Hexagon 
-              size={56} 
-              borderColor={borderColor}
-              borderWidth={2}
-              imageUri={imageUri}
-              imageSource={imageSource.local}
-            />
-          </View>
-        </View>
+        <UnitHexagonItem unit={data} size={56} shape="square" />
       </View>
 
       {/* Unit Info */}

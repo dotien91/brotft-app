@@ -110,7 +110,6 @@ const GuideTraitItem: React.FC<GuideTraitItemProps> = ({data}) => { // Removed o
   );
   
   const units = unitsData?.data ?? [];
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>

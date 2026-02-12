@@ -15,8 +15,19 @@ const createStyles = (theme: Theme) => {
     unitsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 2,
+      gap: 4,
       overflow: 'hidden',
+    },
+    unitCell: {
+      alignItems: 'center',
+      width: 56,
+      marginBottom: 4,
+    },
+    unitName: {
+      fontSize: 11,
+      color: colors.text,
+      marginTop: 4,
+      textAlign: 'center',
     },
     loadingContainer: {
       padding: 20,

@@ -28,6 +28,7 @@ export const palette = {
   green: "#008000",
   /** Nền xám dùng chung cho hexagon (card, detail, guide...) */
   hexagonBg: "#222222",
+  yellow: "#ffc107",
 };
 
 export const LightTheme: ExtendedTheme = {
@@ -62,6 +63,7 @@ export const LightTheme: ExtendedTheme = {
     calpyse: palette.calpyse,
     green: palette.green,
     hexagonBg: palette.hexagonBg,
+    yellow: palette.yellow,
   },
 };
 
@@ -99,5 +101,6 @@ export const DarkTheme: ExtendedTheme = {
     foreground: '#ffffff',
     green: palette.green,
     hexagonBg: palette.hexagonBg,
+    yellow: palette.yellow,
   },
 };

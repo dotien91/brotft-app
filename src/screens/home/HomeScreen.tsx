@@ -1,32 +1,34 @@
-import React, {useMemo, useCallback, useState} from 'react';
-import {View, ActivityIndicator} from 'react-native'; // Bỏ FlatList
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, { useMemo, useCallback, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native'; // Bỏ FlatList
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as NavigationService from 'react-navigation-helpers';
+import { SCREENS } from '@shared-constants';
 import createStyles from './HomeScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
-import {useTheme} from '@react-navigation/native';
-import Icon, {IconType} from '@shared-components/icon/Icon';
+import { useTheme } from '@react-navigation/native';
+import Icon, { IconType } from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import {
   useCompositionsWithPagination,
   useSearchCompositionsByUnits,
 } from '@services/api/hooks/listQueryHooks';
-import type {IComposition} from '@services/models/composition';
+import type { IComposition } from '@services/models/composition';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import TeamCard from './components/team-card/TeamCard';
 import UnitFilterModal from './components/unit-filter-modal/UnitFilterModal';
 import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
 import SelectedUnitsFilter from './components/selected-units-filter/SelectedUnitsFilter';
 import BannerAdItem from './components/banner-ad-item/BannerAdItem';
-import {translations} from '../../shared/localization';
-import {FlashList} from '@shopify/flash-list'; // 1. Import FlashList
+import { translations } from '../../shared/localization';
+import { FlashList } from '@shopify/flash-list'; // 1. Import FlashList
 
 type ListItem =
-  | {type: 'composition'; data: IComposition}
-  | {type: 'ad'; id: string};
+  | { type: 'composition'; data: IComposition }
+  | { type: 'ad'; id: string };
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
-  const {colors} = theme;
+  const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
@@ -90,10 +92,10 @@ const HomeScreen: React.FC = () => {
 
     const result: ListItem[] = [];
     compositions.forEach((comp, index) => {
-      result.push({type: 'composition', data: comp});
+      result.push({ type: 'composition', data: comp });
       // Show ad at positions 2, 9, 16, 23... (every 7 items starting from 2nd)
       if ((index + 1) % 7 === 1) {
-        result.push({type: 'ad', id: `ad-${index}`});
+        result.push({ type: 'ad', id: `ad-${index}` });
       }
     });
 
@@ -101,7 +103,7 @@ const HomeScreen: React.FC = () => {
   }, [compositions]);
 
   const renderItem = useCallback(
-    ({item}: {item: ListItem}) => {
+    ({ item }: { item: ListItem }) => {
       if (item.type === 'ad') {
         return <BannerAdItem />;
       }
@@ -126,16 +128,32 @@ const HomeScreen: React.FC = () => {
             </Text>
             <View style={styles.filterContainer}>
               <RNBounceable
-                onPress={() => setIsFilterModalVisible(true)}
-                style={styles.filterButton}>
-                <Icon
-                  name="filter"
-                  type={IconType.Ionicons}
-                  color={colors.text}
-                  size={20}
-                />
+                onPress={() => NavigationService.navigate(SCREENS.HOME_ROOT, {screen: SCREENS.SMART_TEAM_BUILDER})}
+                style={styles.filterButton}
+              >
+                {/* Wrapper để định vị icon Fire đè lên icon Lightbulb */}
+                <View style={styles.iconWrapper}>
+                  {/* Icon chính: Bóng đèn (Gợi ý) */}
+                  <Icon
+                    name="lightbulb"
+                    color={colors.yellow}
+                    size={20}
+                    weight="regular"
+                  />
+
+                  {/* Icon phụ: Lửa (Hot) ở góc trên phải */}
+              
+                </View>
+                <View style={styles.hotBadge}>
+                    <Icon
+                      name="fire"
+                      color="#ef4444" // Màu đỏ cam cháy bỏng
+                      size={20}
+                      weight="fill" // Dùng fill cho nổi bật
+                    />
+                  </View>
                 <Text style={styles.filterButtonText}>
-                  {translations.filterByUnits}
+                  {(translations as { smartRecommendation?: string }).smartRecommendation ?? 'Smart Team'}
                 </Text>
               </RNBounceable>
             </View>
@@ -161,7 +179,7 @@ const HomeScreen: React.FC = () => {
   const ListFooter = useCallback(() => {
     if (!isLoadingMore) return null;
     return (
-      <View style={{paddingVertical: 20, alignItems: 'center'}}>
+      <View style={{ paddingVertical: 20, alignItems: 'center' }}>
         <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
@@ -173,7 +191,7 @@ const HomeScreen: React.FC = () => {
         <ActivityIndicator
           size="large"
           color={colors.primary}
-          style={{marginTop: 50}}
+          style={{ marginTop: 50 }}
         />
       );
     if (isNoData)
@@ -204,7 +222,7 @@ const HomeScreen: React.FC = () => {
           </Text>
           <Text
             color={colors.placeholder}
-            style={{marginTop: 8, marginBottom: 16}}>
+            style={{ marginTop: 8, marginBottom: 16 }}>
             {error?.message || translations.somethingWentWrong}
           </Text>
           <RNBounceable
@@ -215,7 +233,7 @@ const HomeScreen: React.FC = () => {
               backgroundColor: colors.primary,
               borderRadius: 8,
             }}>
-            <Text color="#fff" style={{fontWeight: '600'}}>
+            <Text color="#fff" style={{ fontWeight: '600' }}>
               {translations.retry}
             </Text>
           </RNBounceable>
@@ -232,13 +250,13 @@ const HomeScreen: React.FC = () => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}
-        
-        
+
+
         // Components
         ListHeaderComponent={ListHeader}
         ListFooterComponent={ListFooter}
         ListEmptyComponent={ListEmpty}
-        
+
         // Actions
         refreshing={isRefetching}
         onRefresh={refresh}

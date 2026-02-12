@@ -39,7 +39,7 @@ const getDifficultyLabel = (diff?: string): string => {
 const UNITS_PER_ROW = 9;
 // Tổng padding ngang (ước lượng):
 // Margin màn hình (16*2) + Padding trong Card (12*2) + Gap giữa các items (2*6) ~= 60-70px
-const TOTAL_HORIZONTAL_PADDING = 32 + 24; 
+const TOTAL_HORIZONTAL_PADDING = 32 + 38; 
 
 const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
   const theme = useTheme();
@@ -51,7 +51,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
   // 2. Tính toán itemSize dựa trên màn hình
   const itemSize = useMemo(() => {
     const availableWidth = width - TOTAL_HORIZONTAL_PADDING;
-    return Math.floor(availableWidth / UNITS_PER_ROW);
+    return availableWidth / UNITS_PER_ROW;
   }, [width]);
 
   // Safe access teamcode
@@ -117,7 +117,10 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
       <View style={styles.championsRow}>
         {sortedUnits.map((unit, index) => (
           <UnitHexagonItem
-            borderWidth={2}
+            style={{
+              marginBottom: 3,
+            }}
+            borderWidth={1.5}
             shape='square'  
             // Sử dụng index làm fallback key nếu championId trùng lặp (trường hợp hiếm)
             key={`${unit.championId}-${index}`}
@@ -129,6 +132,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
             customStyleStar={{
               top: -8
             }}
+            unlockPosition='topLeft'
           />
         ))}
       </View>

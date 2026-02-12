@@ -129,10 +129,8 @@ interface Style {
   traitsColumnsContainer: ViewStyle;
   traitsColumn: ViewStyle;
   traitCardNew: ViewStyle;
-  traitCardIconContainer: ViewStyle;
   traitCardIconNew: ImageStyle;
   traitCardInfoContainer: ViewStyle;
-  traitBreakpointsRow: ViewStyle;
   traitBreakpoint: TextStyle;
   augmentsSection: ViewStyle;
   augmentsColumnsContainer: ViewStyle;
@@ -141,8 +139,6 @@ interface Style {
   augmentItem: ViewStyle;
   augmentIcon: ImageStyle;
   augmentIconPlaceholder: ViewStyle;
-  augmentInfo: ViewStyle;
-  augmentName: TextStyle;
   sectionTitle: TextStyle;
   descriptionSection: ViewStyle;
   descriptionText: TextStyle;
@@ -165,7 +161,7 @@ export default (theme: ExtendedTheme) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: 12,
+      paddingHorizontal: 6,
       paddingTop: 12,
       paddingBottom: 16,
       backgroundColor: colors.background,
@@ -182,7 +178,7 @@ export default (theme: ExtendedTheme) => {
       alignItems: 'center',
       gap: 12,
       marginBottom: 16,
-      paddingHorizontal: 12,
+      paddingHorizontal: 6,
     },
     detailHeaderInfo: {
       flex: 1,
@@ -276,7 +272,7 @@ export default (theme: ExtendedTheme) => {
       marginBottom: 16,
     },
     metaPill: {
-      paddingHorizontal: 16,
+      paddingHorizontal: 6,
       paddingVertical: 10,
       borderRadius: 20,
       borderWidth: 1,
@@ -332,14 +328,14 @@ export default (theme: ExtendedTheme) => {
     },
     mainLayout: {
       flexDirection: 'row',
-      paddingHorizontal: 8,
+      paddingHorizontal: 6,
       justifyContent: 'center',
       marginBottom: 24,
     },
     layoutCard: {
       borderRadius: 28,
       backgroundColor: colors.card,
-      padding: 20,
+      padding: 6,
       borderWidth: 1,
       borderColor: colors.borderColor + '60',
       shadowColor: colors.shadow,
@@ -361,7 +357,7 @@ export default (theme: ExtendedTheme) => {
     },
     synergyColumn: {
       width: 80,
-      paddingLeft: 12,
+      paddingLeft: 6,
       paddingRight: 8,
       alignItems: 'center',
     },
@@ -606,7 +602,7 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
     },
     carryCard: {
-      paddingHorizontal: 16,
+      paddingHorizontal: 6,
       marginBottom: 20,
       marginTop: 12
     },
@@ -854,8 +850,9 @@ export default (theme: ExtendedTheme) => {
     },
     phaseTabsContainer: {
       flexDirection: 'row',
-      marginHorizontal: 16,
+      marginHorizontal: 6,
       marginBottom: 16,
+      paddingHorizontal: 6,
       backgroundColor: colors.card,
       borderRadius: 12,
       padding: 4,
@@ -895,7 +892,7 @@ export default (theme: ExtendedTheme) => {
     },
     traitsSection: {
       marginBottom: 20,
-      paddingHorizontal: 16,
+      paddingHorizontal: 6,
     },
     traitsSectionTitle: {
       fontSize: 16,
@@ -924,26 +921,11 @@ export default (theme: ExtendedTheme) => {
       width: (Dimensions.get('window').width - 7*8) / 4,
       paddingVertical: 8,
     },
-    traitCardIcon: {
-      marginBottom: 8,
-    },
-    traitCardIconContainer: {
-    },
     traitCardIconNew: {
       width: 32,
       height: 32,
     },
     traitCardInfoContainer: {
-    },
-    traitBreakpointsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    traitCardNameRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 3,
     },
     traitBreakpoint: {
       fontSize: 14,
@@ -951,7 +933,7 @@ export default (theme: ExtendedTheme) => {
     },
     augmentsSection: {
       marginBottom: 16,
-      paddingHorizontal: 16,
+      paddingHorizontal: 6,
     },
     sectionTitle: {
       fontSize: 18,
@@ -966,7 +948,6 @@ export default (theme: ExtendedTheme) => {
     },
     augmentsColumn: {
       gap: 6,
-      marginRight: 6,
     },
     augmentsColumnTitle: {
       fontSize: 12,
@@ -998,15 +979,6 @@ export default (theme: ExtendedTheme) => {
       backgroundColor: colors.background,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    augmentInfo: {
-      flex: 1,
-      gap: 2,
-    },
-    augmentName: {
-      fontSize: 10,
-      fontWeight: '600',
-      color: colors.text,
     },
   });
 };

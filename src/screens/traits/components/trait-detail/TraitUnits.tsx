@@ -1,10 +1,10 @@
 import React, {useMemo} from 'react';
-import {View, ActivityIndicator} from 'react-native';
+import {View, ActivityIndicator, TouchableOpacity} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import * as NavigationService from 'react-navigation-helpers';
 import {SCREENS} from '@shared-constants';
-import GuideUnitItem from '../../../guide/tabs/components/GuideUnitItem';
+import UnitHexagonItem from '../../../home/components/unit-hexagon-item/UnitHexagonItem';
 import {translations} from '../../../../shared/localization';
 import createStyles from './TraitUnits.style';
 
@@ -31,14 +31,11 @@ const TraitUnits: React.FC<TraitUnitsProps> = ({
 
   const unitsCount = units.length;
 
-  const handleUnitPress = (unitId: string | number) => {
-    const unit = units.find(u => String(u.id) === String(unitId));
-    if (unit) {
-      if (unit.apiName) {
-        NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.apiName});
-      } else if (unit.id) {
-        NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unit.id)});
-      }
+  const handleUnitPress = (unit: Unit) => {
+    if (unit.apiName) {
+      NavigationService.push(SCREENS.UNIT_DETAIL, {unitApiName: unit.apiName});
+    } else if (unit.id != null) {
+      NavigationService.push(SCREENS.UNIT_DETAIL, {unitId: String(unit.id)});
     }
   };
 
@@ -63,12 +60,16 @@ const TraitUnits: React.FC<TraitUnitsProps> = ({
       ) : (
         <View style={styles.unitsContainer}>
           {units.map((unit) => (
-            <GuideUnitItem
+            <TouchableOpacity
               key={unit.id || unit.apiName}
-              data={unit}
-              onPress={() => handleUnitPress(unit.id)}
-              compact={true}
-            />
+              style={styles.unitCell}
+              onPress={() => handleUnitPress(unit)}
+              activeOpacity={0.7}>
+              <UnitHexagonItem unit={unit} size={48} shape="square" unlockPosition='topLeft' />
+              <Text style={styles.unitName} numberOfLines={1}>
+                {unit.name}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
       )}

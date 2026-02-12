@@ -25,7 +25,6 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
 
   // --- LOGIC MỚI: Truy vấn O(1) từ Object Map ---
   useEffect(() => {
-    console.log('GuideItemItem: useEffect', apiName, name, language);
     // Safety check: Cần ít nhất apiName hoặc name để làm key tra cứu
     if ((!apiName && !name) || !language) {
       setLocalizedName(null);
@@ -35,14 +34,12 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
 
     try {
       const itemsMap = getCachedItems(language);
-      console.log('itemsMap', itemsMap);
       if (Object.keys(itemsMap).length === 0) {
         setLocalizedName(null);
         setLocalizedComposition(null);
         return;
       }
       const localizedItem = itemsMap[apiName] || (name ? itemsMap[name] : null);
-console.log('localizedItem', localizedItem);
       if (localizedItem) {
         setLocalizedName(localizedItem.name || null);
         setLocalizedComposition(

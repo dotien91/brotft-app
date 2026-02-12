@@ -13,7 +13,7 @@ export default (theme: ExtendedTheme) => {
     container: {
       marginTop: 16,
       marginBottom: 8,
-      paddingHorizontal: 16, // Padding chuẩn theo design
+      paddingHorizontal: 6,
     },
     text: {
       fontSize: 14,

@@ -28,10 +28,9 @@ export default (theme: ExtendedTheme) => {
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      paddingHorizontal: 6,
+      marginBottom: 12,
+      
     },
     iconContainer: {
       marginRight: 12,

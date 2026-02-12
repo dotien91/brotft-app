@@ -42,6 +42,8 @@ interface Style {
   unlockIcon: ImageStyle;
   championItemsRow: ViewStyle;
   championItemIcon: ImageStyle;
+  iconWrapper: ViewStyle;
+  hotBadge: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -85,7 +87,6 @@ export default (theme: ExtendedTheme) => {
       textAlign: 'center',
     },
     sectionTitleContainer: {
-      paddingHorizontal: 12,
       paddingTop: 24,
       paddingBottom: 16,
       overflow: 'visible',
@@ -121,11 +122,6 @@ export default (theme: ExtendedTheme) => {
     filterButtonActive: {
       borderColor: colors.primary,
       backgroundColor: colors.primary + '15',
-    },
-    filterButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
     },
     filterButtonTextActive: {
       color: colors.primary,
@@ -190,6 +186,7 @@ export default (theme: ExtendedTheme) => {
     },
     listContent: {
       paddingBottom: 200,
+      paddingHorizontal: 6,
     },
     teamCard: {
       backgroundColor: colors.card,
@@ -301,5 +298,36 @@ export default (theme: ExtendedTheme) => {
       borderRadius: 3,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
+    filterButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      backgroundColor: colors.card, // Hoặc màu nền button của bạn
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 8, // Khoảng cách giữa icon và text
+    },
+    filterButtonText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    // Style mới cho wrapper icon
+    iconWrapper: {
+      position: 'relative', // Quan trọng để icon Fire bám theo
+      width: 20,
+      height: 20,
+    },
+    // Style cho icon Fire
+    hotBadge: {
+      position: 'absolute',
+      top: -12,    // Đẩy lên trên một chút
+      right: -8,  // Đẩy sang phải một chút
+      backgroundColor: colors.card, // Trùng màu nền button để tạo viền cắt
+      borderRadius: 6,
+      padding: 1, // Tạo khoảng cách nhỏ quanh lửa
+    }
   });
 };

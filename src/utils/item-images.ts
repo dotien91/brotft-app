@@ -171,7 +171,6 @@ const itemImages: Record<string, any> = {
  * @returns Formatted key (e.g., "tft_item_bfsword", "tft5_item_quicksilverradiant")
  */
 export const formatItemApiNameForLocal = (apiName?: string | null): string => {
-  console.log("apiName", apiName);
   if (apiName == null || apiName === '') return '';
   // Ensure string (API may return number or other type)
   let formatted = String(apiName).toLowerCase();
@@ -210,7 +209,6 @@ export const getItemIconImageSource = (
   apiName?: string | null,
   _size: number = 48,
 ): {local: any; uri: string} => {
-  // Try apiName first (most reliable)
   if (apiName) {
     const localImage = getItemLocalImage(apiName);
     if (localImage) {

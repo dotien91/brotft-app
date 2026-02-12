@@ -39,7 +39,8 @@ export default (theme: ExtendedTheme) => {
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 12,
+      paddingHorizontal: 6,
+      marginVertical: 6,
       borderBottomWidth: 1,
       overflow: 'hidden',
     },

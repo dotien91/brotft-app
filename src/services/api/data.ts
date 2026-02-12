@@ -170,31 +170,20 @@ export const checkAndFetchDataByLocale = async (language: string): Promise<boole
 // 4. PUBLIC ACCESSORS (GETTERS)
 // ==========================================
 
-export const getCachedUnits = (language: string) => {
-  if (!language) return {};
-  const locale = getLocaleFromLanguage(language);
-  ensureCacheIsWarm(locale); 
+export const getCachedUnits = () => {
   return MEMORY_CACHE.units;
 };
 
-export const getCachedItems = (language: string) => {
-  if (!language) return {};
-  const locale = getLocaleFromLanguage(language);
-  ensureCacheIsWarm(locale);
+export const getCachedItems = () => {
   return MEMORY_CACHE.items;
 };
 
-export const getCachedTraits = (language: string) => {
-  if (!language) return {};
-  const locale = getLocaleFromLanguage(language);
-  ensureCacheIsWarm(locale);
+export const getCachedTraits = () => {
+  console.log("MEMORY_CACHEMEMORY_CACHE", MEMORY_CACHE);
   return MEMORY_CACHE.traits;
 };
 
-export const getCachedAugments = (language: string) => {
-  if (!language) return {};
-  const locale = getLocaleFromLanguage(language);
-  ensureCacheIsWarm(locale);
+export const getCachedAugments = () => {
   return MEMORY_CACHE.augments;
 };
 

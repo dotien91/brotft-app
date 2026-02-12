@@ -89,3 +89,35 @@ console.log('queryParams',  `/compositions?${queryParams.toString()}`);
   }
 };
 
+// Định nghĩa DTO cho Search V2
+export interface ISearchV2Dto {
+  units?: string[];
+  items?: string[];
+  augments?: string[];
+  searchInAllArrays?: boolean;
+}
+
+/**
+ * Advanced Search V2 (POST method)
+ */
+export const searchCompositionsV2 = async (
+  searchData: ISearchV2Dto,
+  params?: { page?: number; limit?: number }
+): Promise<ICompositionsResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+  const url = `/compositions/search-v2?${queryParams.toString()}`;
+  
+  try {
+    // Sử dụng phương thức POST và gửi searchData trong body
+    const response = await axiosInstance.post<ICompositionsResponse>(url, searchData);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ ========== SEARCH V2 ERROR ==========');
+    console.error('Data gửi đi:', searchData);
+    console.error('Error:', error?.response?.data || error.message);
+    throw error;
+  }
+};

@@ -1,23 +1,22 @@
-import React, {useMemo, useEffect, useState} from 'react';
-import {View, ScrollView, ActivityIndicator} from 'react-native';
+import React, { useMemo, useEffect, useState } from 'react';
+import { View, ScrollView, ActivityIndicator } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import Icon, {IconType} from '@shared-components/icon/Icon';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon, { IconType } from '@shared-components/icon/Icon';
 import createStyles from './UnitDetailScreen.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
-import {useTheme, useRoute} from '@react-navigation/native';
+import { useTheme, useRoute } from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import {useTftUnitById, useTftUnitByApiName} from '@services/api/hooks/listQueryHooks';
-import Hexagon from '@screens/detail/components/Hexagon';
-import {getUnitSplashUrl, getUnitAbilityIconUrlFromPath} from '../../utils/metatft';
+import { useTftUnitById, useTftUnitByApiName } from '@services/api/hooks/listQueryHooks';
+import { getUnitSplashUrl, getUnitAbilityIconUrlFromPath } from '../../utils/metatft';
+import UnitHexagonItem from '@screens/home/components/unit-hexagon-item/UnitHexagonItem';
 import getUnitAvatar from '../../utils/unit-avatar';
-import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
 import useStore from '@services/zustand/store';
-import {getCachedUnits} from '@services/api/data';
+import { getCachedUnits } from '@services/api/data';
 import AbilityDescription from '../../shared/components/ability-description/AbilityDescription';
 import TooltipElements from '../../shared/components/tooltip-elements/TooltipElements';
-import {parseTextWithVariables} from '../../shared/utils/parseTextWithVariables';
-import {translations} from '../../shared/localization';
+import { parseTextWithVariables } from '../../shared/utils/parseTextWithVariables';
+import { translations } from '../../shared/localization';
 import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import BackButton from '@shared-components/back-button/BackButton';
 import UnitTraitsDisplay from './components/UnitTraitsDisplay';
@@ -47,10 +46,10 @@ interface UnitDetailScreenProps {
   };
 }
 
-const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) => {
+const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({ route: routeProp }) => {
   const theme = useTheme();
   const route = useRoute();
-  const {colors} = theme;
+  const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const language = useStore((state) => state.language);
@@ -83,7 +82,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({route: routeProp}) =
     error: errorById,
     refetch: refetchById,
   } = useTftUnitById(unitId || '');
-console.log("unitById" , unitApiName, unitId);
+  console.log("unitById", unitApiName, unitId);
   const {
     data: unitByApiName,
     isLoading: isLoadingByApiName,
@@ -102,88 +101,72 @@ console.log("unitById" , unitApiName, unitId);
   const needUnlock = !!(unit && (unit as any).needUnlock);
   // Get localized name, ability & unlock info from storage (per language)
   useEffect(() => {
-    if (!unit || !language) {
-      setLocalizedName(null);
-      setLocalizedUnlockText(null);
-      return;
-    }
-
-    try {
-      const unitsData = getCachedUnits(language);
-      const localizedUnit =
-        (unit.apiName && unitsData[unit.apiName]) ||
-        Object.values(unitsData).find(
-          (localUnit: any) =>
-            (unit.apiName && localUnit.apiName === unit.apiName) ||
-            (unit.name && localUnit.name && unit.name.toLowerCase() === localUnit.name.toLowerCase()) ||
-            (unit.characterName && localUnit.characterName && unit.characterName.toLowerCase() === localUnit.characterName.toLowerCase())
-        );
-
-      if (localizedUnit) {
-        // Set localized name
-        if (localizedUnit.name) {
-          setLocalizedName(localizedUnit.name);
-        } else {
-          setLocalizedName(null);
-        }
-
-        // Set localized unlock info (from local data)
-        if (
-          localizedUnit.unlockInfo ||
-          localizedUnit.unlock ||
-          localizedUnit.unlock_text
-        ) {
-          setLocalizedUnlockText(
-            localizedUnit.unlockInfo ||
-              localizedUnit.unlock ||
-              localizedUnit.unlock_text,
-          );
-        } else {
-          setLocalizedUnlockText(null);
-        }
-        
-        // Set localized ability name and description
-        if (localizedUnit.ability) {
-          if (localizedUnit.ability.name) {
-            setLocalizedAbilityName(localizedUnit.ability.name);
-          } else {
-            setLocalizedAbilityName(null);
-          }
-          
-          if (localizedUnit.ability.desc || localizedUnit.ability.description) {
-            setLocalizedAbilityDesc(localizedUnit.ability.desc || localizedUnit.ability.description);
-          } else {
-            setLocalizedAbilityDesc(null);
-          }
-          
-          // Set localized tooltipElements
-          if (localizedUnit.ability.tooltipElements && Array.isArray(localizedUnit.ability.tooltipElements)) {
-            setLocalizedTooltipElements(localizedUnit.ability.tooltipElements);
-          } else {
-            setLocalizedTooltipElements(null);
-          }
-        } else {
-          setLocalizedAbilityName(null);
-          setLocalizedAbilityDesc(null);
-          setLocalizedTooltipElements(null);
-        }
-      } else {
-        setLocalizedName(null);
-        setLocalizedUnlockText(null);
-        setLocalizedAbilityName(null);
-        setLocalizedAbilityDesc(null);
-        setLocalizedTooltipElements(null);
-      }
-    } catch (error) {
-      console.error('Error loading localized unit data:', error);
+    // Helper để reset toàn bộ state về null
+    const resetLocalizedData = () => {
       setLocalizedName(null);
       setLocalizedUnlockText(null);
       setLocalizedAbilityName(null);
       setLocalizedAbilityDesc(null);
       setLocalizedTooltipElements(null);
+    };
+
+    if (!unit || !language) {
+      resetLocalizedData();
+      return;
+    }
+
+    try {
+      const unitsData = getCachedUnits(language);
+      let localizedUnit = null;
+
+      // 1. Ưu tiên tìm trực tiếp qua Key (Nhanh nhất - O(1))
+      if (unit.apiName && unitsData[unit.apiName]) {
+        localizedUnit = unitsData[unit.apiName];
+      }
+
+      // 2. Fallback: Chỉ tìm trong mảng nếu không tìm thấy key (Chậm hơn - O(n))
+      if (!localizedUnit) {
+        const uApi = unit.apiName?.toLowerCase();
+        const uName = unit.name?.toLowerCase();
+        const uChar = unit.characterName?.toLowerCase();
+
+        localizedUnit = Object.values(unitsData).find((localUnit: any) => {
+          return (
+            (uApi && localUnit.apiName?.toLowerCase() === uApi) ||
+            (uName && localUnit.name?.toLowerCase() === uName) ||
+            (uChar && localUnit.characterName?.toLowerCase() === uChar)
+          );
+        });
+      }
+
+      if (localizedUnit) {
+        // 3. Set State gọn gàng hơn
+        setLocalizedName(localizedUnit.name || null);
+
+        setLocalizedUnlockText(
+          localizedUnit.unlockInfo ||
+          localizedUnit.unlock ||
+          localizedUnit.unlock_text ||
+          null
+        );
+
+        // Xử lý Ability an toàn với Optional Chaining (?.)
+        const ability = localizedUnit.ability;
+        setLocalizedAbilityName(ability?.name || null);
+        setLocalizedAbilityDesc(ability?.desc || ability?.description || null);
+        setLocalizedTooltipElements(
+          Array.isArray(ability?.tooltipElements) ? ability.tooltipElements : null
+        );
+
+      } else {
+        resetLocalizedData();
+      }
+
+    } catch (error) {
+      console.error('Error loading localized unit data:', error);
+      resetLocalizedData();
     }
   }, [unit, language]);
-
 
   // Unlock info ưu tiên lấy từ data local theo ngôn ngữ,
   // fallback nhẹ sang field từ API nếu local không có.
@@ -220,7 +203,7 @@ console.log("unitById" , unitApiName, unitId);
 
     if (typeof raw === 'object') {
       try {
-        const {levelRequired, manual_conditions, conditions} = raw as any;
+        const { levelRequired, manual_conditions, conditions } = raw as any;
         const parts: string[] = [];
 
         if (levelRequired != null) {
@@ -330,7 +313,7 @@ console.log("unitById" , unitApiName, unitId);
       if (unit?.squareIcon && !unit.squareIcon.startsWith('http')) {
         // Could be a local path, but we'll use apiName for consistency
       }
-      
+
       // Use local image only
       const apiName = unit?.apiName || unit?.name || '';
       return getUnitAvatar(apiName, 80);
@@ -344,15 +327,8 @@ console.log("unitById" , unitApiName, unitId);
       const apiName = unit?.apiName || unit?.name || '';
       return getUnitSplashUrl(apiName, 768, 456);
     };
-    
+
     const splashUri = getSplashArtUrl();
-
-    // Get unit border color based on cost
-    const getUnitCostBorderColor = (cost?: number | null): string => {
-      return getUnitCostBorderColorUtil(cost, colors.highlight || '#94a3b8');
-    };
-
-    const borderColor = getUnitCostBorderColor(unit.cost);
 
     // Parse variables in ability description
     const parseAbilityDescription = (desc?: string | null) => {
@@ -365,7 +341,7 @@ console.log("unitById" , unitApiName, unitId);
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        
+
         {/* Hero Section with overlay */}
         <View style={styles.heroSection}>
           <FastImage
@@ -377,18 +353,12 @@ console.log("unitById" , unitApiName, unitId);
             resizeMode={FastImage.resizeMode.cover}
           />
           <View style={styles.heroOverlay} />
-          
+
           {/* Unit info overlay */}
           <View style={styles.heroContent}>
             <View style={styles.unitHeader}>
               <View style={styles.unitAvatarContainer}>
-                <Hexagon
-                  size={70}
-                  borderColor={borderColor} 
-                  borderWidth={2}
-                  imageUri={avatarUri}
-                  imageSource={avatarSource.local}
-                />
+                <UnitHexagonItem unit={unit} size={70} shape="square" />
               </View>
               <View style={styles.unitInfo}>
                 <View style={styles.unitNameRow}>
@@ -403,7 +373,7 @@ console.log("unitById" , unitApiName, unitId);
                     />
                   )}
                 </View>
-                <UnitTraitsDisplay  fromDetailScreen={true} unit={unit} />
+                <UnitTraitsDisplay fromDetailScreen={true} unit={unit} />
                 {unit.cost !== null && unit.cost !== undefined && (
                   <UnitCostBadge cost={unit.cost} />
                 )}
@@ -411,195 +381,195 @@ console.log("unitById" , unitApiName, unitId);
             </View>
           </View>
         </View>
-
-        {/* Unit Stats */}
-        {unit.stats && (
-          <View style={styles.unitStatsSection}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="heart" type={IconType.Ionicons} color="#4ade80" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.health}</Text>
-                </View>
-                <Text style={styles.statItemValue}>
-                  {unit.stats.hp ? `${unit.stats.hp} / ${Math.floor(unit.stats.hp * 1.8)} / ${Math.floor(unit.stats.hp * 3.24)}` : '---'}
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="flash" type={IconType.Ionicons} color="#fbbf24" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.attackSpeed}</Text>
-                </View>
-                <Text style={styles.statItemValue}>{unit.stats.attackSpeed ?? '---'}</Text>
-              </View>
-            </View>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="fitness" type={IconType.Ionicons} color="#fb923c" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.attackDamage}</Text>
-                </View>
-                <Text style={styles.statItemValue}>
-                  {unit.stats.damage ? `${unit.stats.damage} / ${Math.floor(unit.stats.damage * 1.5)} / ${Math.floor(unit.stats.damage * 2.25)}` : '---'}
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="shield" type={IconType.Ionicons} color="#fb7185" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.armor}</Text>
-                </View>
-                <Text style={styles.statItemValue}>{unit.stats.armor ?? '---'}</Text>
-              </View>
-            </View>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="sparkles" type={IconType.Ionicons} color="#c084fc" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.dps}</Text>
-                </View>
-                <Text style={styles.statItemValue}>
-                  {unit.stats.damage && unit.stats.attackSpeed ? `${Math.floor(unit.stats.damage * unit.stats.attackSpeed)} / ${Math.floor(unit.stats.damage * 1.5 * unit.stats.attackSpeed * 1.5)} / ${Math.floor(unit.stats.damage * 2.25 * unit.stats.attackSpeed * 2.25)}` : '---'}
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="color-wand" type={IconType.Ionicons} color="#ec4899" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.magicResist}</Text>
-                </View>
-                <Text style={styles.statItemValue}>{unit.stats.magicResist ?? '---'}</Text>
-              </View>
-            </View>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <View style={styles.statItemHeader}>
-                  <Icon name="radio-button-on" type={IconType.Ionicons} color="#60a5fa" size={16} />
-                  <Text style={styles.statItemLabel}>{translations.range}</Text>
-                </View>
-                <Text style={styles.statItemValue}>{unit.stats.range ? '■'.repeat(unit.stats.range) : '---'}</Text>
-              </View>
-              {unit.stats.mana !== null && unit.stats.mana !== undefined && (
+        <View style={{ paddingHorizontal: 6 }}>
+          {/* Unit Stats */}
+          {unit.stats && (
+            <View style={styles.unitStatsSection}>
+              <View style={styles.statsRow}>
                 <View style={styles.statItem}>
                   <View style={styles.statItemHeader}>
-                    <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={16} />
-                    <Text style={styles.statItemLabel}>{translations.mana}</Text>
+                    <Icon name="heart" type={IconType.Ionicons} color="#4ade80" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.health}</Text>
                   </View>
                   <Text style={styles.statItemValue}>
-                    {unit.stats.initialMana != null ? `${unit.stats.initialMana} / ${unit.stats.mana}` : `${unit.stats.mana}`}
+                    {unit.stats.hp ? `${unit.stats.hp} / ${Math.floor(unit.stats.hp * 1.8)} / ${Math.floor(unit.stats.hp * 3.24)}` : '---'}
                   </Text>
                 </View>
-              )}
-            </View>
-          </View>
-        )}
-
-        {/* Ability Section */}
-        {unit.ability && (
-          <View style={styles.abilitySection}>
-            <Text h3 bold color={colors.text} style={styles.sectionTitle}>
-              {translations.ability}
-            </Text>
-            
-            <View style={styles.abilityCard}>
-              <View style={styles.abilityHeader}>
-                <View style={styles.abilityIconContainer}>
-                  {(() => {
-                    // Priority 1: Parse icon path from API and get URL from metatft.com
-                    // Example: "ASSETS/Characters/TFT16_Sona/HUD/Icons2D/TFT16_Sona_Passive_Charged.TFT_Set16.tex"
-                    // -> "https://cdn.metatft.com/file/metatft/champions/tft16_sona_passive_charged.png"
-                    if (unit.ability?.icon) {
-                      const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
-                      if (abilityIconUrl) {
-                        return (
-                    <FastImage
-                            source={{uri: abilityIconUrl, priority: FastImage.priority.normal}}
-                      style={styles.abilityIcon}
-                      resizeMode={FastImage.resizeMode.cover}
-                    />
-                        );
-                      }
-                    }
-                    
-                    // Fallback to unit avatar
-                    if (avatarUri) {
-                      return (
-                    <FastImage
-                      source={{uri: avatarUri, priority: FastImage.priority.normal}}
-                      style={styles.abilityIcon}
-                      resizeMode={FastImage.resizeMode.cover}
-                    />
-                      );
-                    }
-                    
-                    return null;
-                  })()}
+                <View style={styles.statItem}>
+                  <View style={styles.statItemHeader}>
+                    <Icon name="flash" type={IconType.Ionicons} color="#fbbf24" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.attackSpeed}</Text>
+                  </View>
+                  <Text style={styles.statItemValue}>{unit.stats.attackSpeed ?? '---'}</Text>
                 </View>
-                <View style={styles.abilityInfo}>
-                  <Text style={styles.abilityName}>
-                    {localizedAbilityName || unit.ability.name || translations.ability}
+              </View>
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <View style={styles.statItemHeader}>
+                    <Icon name="fitness" type={IconType.Ionicons} color="#fb923c" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.attackDamage}</Text>
+                  </View>
+                  <Text style={styles.statItemValue}>
+                    {unit.stats.damage ? `${unit.stats.damage} / ${Math.floor(unit.stats.damage * 1.5)} / ${Math.floor(unit.stats.damage * 2.25)}` : '---'}
                   </Text>
-                  <View style={styles.abilityMeta}>
-                    <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={14} />
-                    <Text style={styles.abilityMetaText}>
-                      {unit.stats?.initialMana != null && unit.stats?.mana != null 
-                        ? `${unit.stats.initialMana} / ${unit.stats.mana}` 
-                        : '---'}
+                </View>
+                <View style={styles.statItem}>
+                  <View style={styles.statItemHeader}>
+                    <Icon name="shield" type={IconType.Ionicons} color="#fb7185" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.armor}</Text>
+                  </View>
+                  <Text style={styles.statItemValue}>{unit.stats.armor ?? '---'}</Text>
+                </View>
+              </View>
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <View style={styles.statItemHeader}>
+                    <Icon name="sparkles" type={IconType.Ionicons} color="#c084fc" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.dps}</Text>
+                  </View>
+                  <Text style={styles.statItemValue}>
+                    {unit.stats.damage && unit.stats.attackSpeed ? `${Math.floor(unit.stats.damage * unit.stats.attackSpeed)} / ${Math.floor(unit.stats.damage * 1.5 * unit.stats.attackSpeed * 1.5)} / ${Math.floor(unit.stats.damage * 2.25 * unit.stats.attackSpeed * 2.25)}` : '---'}
+                  </Text>
+                </View>
+                <View style={styles.statItem}>
+                  <View style={styles.statItemHeader}>
+                    <Icon name="color-wand" type={IconType.Ionicons} color="#ec4899" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.magicResist}</Text>
+                  </View>
+                  <Text style={styles.statItemValue}>{unit.stats.magicResist ?? '---'}</Text>
+                </View>
+              </View>
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <View style={styles.statItemHeader}>
+                    <Icon name="radio-button-on" type={IconType.Ionicons} color="#60a5fa" size={16} />
+                    <Text style={styles.statItemLabel}>{translations.range}</Text>
+                  </View>
+                  <Text style={styles.statItemValue}>{unit.stats.range ? '■'.repeat(unit.stats.range) : '---'}</Text>
+                </View>
+                {unit.stats.mana !== null && unit.stats.mana !== undefined && (
+                  <View style={styles.statItem}>
+                    <View style={styles.statItemHeader}>
+                      <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={16} />
+                      <Text style={styles.statItemLabel}>{translations.mana}</Text>
+                    </View>
+                    <Text style={styles.statItemValue}>
+                      {unit.stats.initialMana != null ? `${unit.stats.initialMana} / ${unit.stats.mana}` : `${unit.stats.mana}`}
                     </Text>
                   </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Ability Section */}
+          {unit.ability && (
+            <View style={styles.abilitySection}>
+              <Text h3 bold color={colors.text} style={styles.sectionTitle}>
+                {translations.ability}
+              </Text>
+
+              <View style={styles.abilityCard}>
+                <View style={styles.abilityHeader}>
+                  <View style={styles.abilityIconContainer}>
+                    {(() => {
+                      // Priority 1: Parse icon path from API and get URL from metatft.com
+                      // Example: "ASSETS/Characters/TFT16_Sona/HUD/Icons2D/TFT16_Sona_Passive_Charged.TFT_Set16.tex"
+                      // -> "https://cdn.metatft.com/file/metatft/champions/tft16_sona_passive_charged.png"
+                      if (unit.ability?.icon) {
+                        const abilityIconUrl = getUnitAbilityIconUrlFromPath(unit.ability.icon);
+                        if (abilityIconUrl) {
+                          return (
+                            <FastImage
+                              source={{ uri: abilityIconUrl, priority: FastImage.priority.normal }}
+                              style={styles.abilityIcon}
+                              resizeMode={FastImage.resizeMode.cover}
+                            />
+                          );
+                        }
+                      }
+
+                      // Fallback to unit avatar
+                      if (avatarUri) {
+                        return (
+                          <FastImage
+                            source={{ uri: avatarUri, priority: FastImage.priority.normal }}
+                            style={styles.abilityIcon}
+                            resizeMode={FastImage.resizeMode.cover}
+                          />
+                        );
+                      }
+
+                      return null;
+                    })()}
+                  </View>
+                  <View style={styles.abilityInfo}>
+                    <Text style={styles.abilityName}>
+                      {localizedAbilityName || unit.ability.name || translations.ability}
+                    </Text>
+                    <View style={styles.abilityMeta}>
+                      <Icon name="water" type={IconType.Ionicons} color="#60a5fa" size={14} />
+                      <Text style={styles.abilityMetaText}>
+                        {unit.stats?.initialMana != null && unit.stats?.mana != null
+                          ? `${unit.stats.initialMana} / ${unit.stats.mana}`
+                          : '---'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {(localizedAbilityDesc || unit.ability.desc) && (
+                  <AbilityDescription
+                    description={parseAbilityDescription(localizedAbilityDesc || unit.ability.desc) || ''}
+                    style={styles.abilityDescription}
+                    textStyle={styles.abilityDescription}
+                  />
+                )}
+
+                {/* Ability Tooltip Elements from Localized Data */}
+                {localizedTooltipElements && localizedTooltipElements.length > 0 && (
+                  <TooltipElements
+                    tooltipElements={localizedTooltipElements}
+                    unit={unit}
+                    styles={{
+                      abilityVariables: styles.abilityVariables,
+                      variableItem: styles.variableItem,
+                      variableValue: styles.variableValue,
+                    }}
+                  />
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Unlock Section riêng - chỉ hiển thị khi API đánh dấu needUnlock */}
+          {needUnlock && unlockText && (
+            <View style={styles.unlockSection}>
+              <Text h3 bold color={colors.text} style={styles.sectionTitle}>
+                {translations.unlock}
+              </Text>
+              <View style={styles.unlockCard}>
+                <View style={styles.unlockRow}>
+                  <FastImage
+                    source={require('@assets/icons/unlock.png')}
+                    style={styles.unlockIcon}
+                    resizeMode={FastImage.resizeMode.contain}
+                  />
+                  <Text style={styles.unlockText}>{unlockText}</Text>
                 </View>
               </View>
-              
-              {(localizedAbilityDesc || unit.ability.desc) && (
-                <AbilityDescription
-                  description={parseAbilityDescription(localizedAbilityDesc || unit.ability.desc) || ''}
-                  style={styles.abilityDescription}
-                  textStyle={styles.abilityDescription}
-                />
-              )}
-
-              {/* Ability Tooltip Elements from Localized Data */}
-              {localizedTooltipElements && localizedTooltipElements.length > 0 && (
-                <TooltipElements
-                  tooltipElements={localizedTooltipElements}
-                  unit={unit}
-                  styles={{
-                    abilityVariables: styles.abilityVariables,
-                    variableItem: styles.variableItem,
-                    variableValue: styles.variableValue,
-                  }}
-                />
-              )}
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Unlock Section riêng - chỉ hiển thị khi API đánh dấu needUnlock */}
-        {needUnlock && unlockText && (
-          <View style={styles.unlockSection}>
-            <Text h3 bold color={colors.text} style={styles.sectionTitle}>
-              {translations.unlock}
-            </Text>
-            <View style={styles.unlockCard}>
-              <View style={styles.unlockRow}>
-                <FastImage
-                  source={require('@assets/icons/unlock.png')}
-                  style={styles.unlockIcon}
-                  resizeMode={FastImage.resizeMode.contain}
-                />
-                <Text style={styles.unlockText}>{unlockText}</Text>
-              </View>
-            </View>
-          </View>
-        )}
+          {/* Reference Compositions Section */}
+          <ReferenceCompositionsSection
+            unitApiName={unitApiName}
+            unitApiNameFromUnit={unit?.apiName}
+          />
 
-        {/* Reference Compositions Section */}
-        <ReferenceCompositionsSection
-          unitApiName={unitApiName}
-          unitApiNameFromUnit={unit?.apiName}
-        />
-
-        {/* Popular Items Section */}
-        <PopularItemsSection popularItems={POPULAR_ITEMS} />
-
+          {/* Popular Items Section */}
+          <PopularItemsSection popularItems={POPULAR_ITEMS} />
+        </View>
         {/* Suggested Items Section */}
         {/* <View style={styles.augmentsSection}>
           <Text h3 bold color={colors.text} style={styles.sectionTitle}>

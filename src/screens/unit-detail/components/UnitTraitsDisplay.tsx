@@ -33,44 +33,65 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
   const [origins, setOrigins] = useState<TraitInfo[]>([]);
   const [classes, setClasses] = useState<TraitInfo[]>([]);
 
+// 1. Tối ưu hóa: Tạo Map Lookup chỉ khi language thay đổi (Cache Map)
+  // Giúp tránh việc phải loop qua toàn bộ traitsData mỗi khi bấm vào unit khác.
+  const traitsLookupMap = useMemo(() => {
+    if (!language) return null;
+    const traitsData = getCachedTraits(language);
+    if (!traitsData) return null;
+
+    const map = new Map<string, any>();
+    Object.values(traitsData).forEach((t: any) => {
+      // Map cả apiName và name về lowercase để tìm kiếm chính xác
+      if (t.apiName) map.set(t.apiName.toLowerCase(), t);
+      if (t.name) map.set(t.name.toLowerCase(), t);
+      // Map thêm key nếu có (thường là traitId gốc)
+      if (t.key) map.set(t.key.toLowerCase(), t);
+    });
+    return map;
+  }, [language]);
+
+  // 2. Effect chính: Chỉ thực hiện lookup và phân loại
   useEffect(() => {
-    if (!unit || !language) return;
+    // Reset state nhanh nếu thiếu dữ liệu đầu vào
+    if (!unit || !traitsLookupMap) {
+      setOrigins([]);
+      setClasses([]);
+      return;
+    }
 
     try {
       const unitsData = getCachedUnits(language);
-      const traitsData = getCachedTraits(language);
-      if (Object.keys(unitsData).length === 0 || Object.keys(traitsData).length === 0) return;
-
-      const unitsArray = Object.values(unitsData);
-      const localizedUnit: any = unitsArray.find((u: any) =>
-        u.apiName === unit.apiName || u.name === unit.name
-      );
-
+      
+      // Lookup O(1): Tìm unit trực tiếp thay vì check Object.keys
+      const localizedUnit = unitsData?.[unit.apiName];
+      
+      // Ưu tiên traits từ localized data -> fallback về unit props
       const traitNamesToFind = localizedUnit?.traits || unit.traits;
-      if (!traitNamesToFind || !Array.isArray(traitNamesToFind)) {
+
+      if (!traitNamesToFind?.length) {
         setOrigins([]);
         setClasses([]);
         return;
       }
 
-      const traitsMap = new Map();
-      Object.values(traitsData).forEach((t: any) => {
-        if (t.apiName) traitsMap.set(t.apiName.toLowerCase(), t);
-        if (t.name) traitsMap.set(t.name.toLowerCase(), t);
-      });
-
       const oList: TraitInfo[] = [];
       const cList: TraitInfo[] = [];
 
       traitNamesToFind.forEach((tName: string) => {
-        const trait = traitsMap.get(tName.toLowerCase());
+        // Tìm trait từ Map đã cache (O(1))
+        const trait = traitsLookupMap.get(tName.toLowerCase());
+
         if (trait) {
           const info = {
             name: trait.name || tName,
             apiName: trait.apiName || tName,
             id: trait.id || trait.apiName,
+            // Có thể thêm icon nếu cần: icon: trait.icon
           };
-          // Phân loại dựa trên type, mặc định nếu không có type thì cho vào Class
+
+          // Phân loại Origin vs Class
+          // Kiểm tra an toàn hơn với toLowerCase()
           if (trait.type?.toLowerCase() === 'origin') {
             oList.push(info);
           } else {
@@ -82,12 +103,11 @@ const UnitTraitsDisplay: React.FC<UnitTraitsDisplayProps> = ({unit, fromDetailSc
       setOrigins(oList);
       setClasses(cList);
     } catch (e) {
-      console.log('Error loading traits:', e);
+      console.error('Error processing unit traits:', e);
       setOrigins([]);
       setClasses([]);
     }
-  }, [unit, language]);
-
+  }, [unit, language, traitsLookupMap]);
   const handleTraitPress = (traitId?: string) => {
     if (traitId) {
       NavigationService.push(SCREENS.TRAIT_DETAIL, {traitId});

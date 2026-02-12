@@ -22,7 +22,7 @@ export default (theme: ExtendedTheme) => {
   const {colors} = theme;
   return StyleSheet.create<Style>({
     container: {
-      marginHorizontal: 16,
+      marginHorizontal: 6,
       marginBottom: 16,
       borderRadius: 20,
       backgroundColor: colors.card ?? '#252836',

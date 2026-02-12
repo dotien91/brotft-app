@@ -92,7 +92,6 @@ export default (theme: ExtendedTheme) => {
       left: 0,
       right: 0,
       zIndex: 10,
-      paddingHorizontal: 20,
       paddingTop: 60,
       paddingBottom: 16,
     },
@@ -130,7 +129,7 @@ export default (theme: ExtendedTheme) => {
       bottom: 0,
       left: 0,
       right: 0,
-      padding: 16,
+      padding: 12,
     },
     unitHeader: {
       flexDirection: 'row',
@@ -226,7 +225,6 @@ export default (theme: ExtendedTheme) => {
       letterSpacing: 0.3,
     },
     unitStatsSection: {
-      paddingHorizontal: 16,
       paddingBottom: 16,
       paddingTop: 16,
     },
@@ -259,8 +257,6 @@ export default (theme: ExtendedTheme) => {
       color: colors.text,
     },
     abilitySection: {
-      paddingHorizontal: 16,
-      paddingBottom: 16,
     },
     sectionTitle: {
       fontSize: 18,
@@ -496,12 +492,9 @@ export default (theme: ExtendedTheme) => {
       height: 18,
     },
     referenceCompositionsSection: {
-      paddingHorizontal: 16,
       paddingTop: 24,
-      paddingBottom: 16,
     },
     compositionsList: {
-      gap: 12,
     },
   });
 };

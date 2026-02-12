@@ -3,22 +3,40 @@ import { View, Image, StyleSheet, type ViewStyle } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import Hexagon from '@screens/detail/components/Hexagon';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
-import type { ICompositionUnit } from '@services/models/composition';
 import getUnitAvatar from '../../../../utils/unit-avatar';
 import { getItemIconImageSource } from '../../../../utils/item-images';
 import { getUnitCostBorderColor } from '../../../../utils/unitCost';
+import { getCachedUnits } from '@services/api/data';
+
+export type UnitHexagonItemUnit = {
+  championKey?: string;
+  championId?: string;
+  apiName?: string;
+  name?: string;
+  cost?: number | null;
+  image?: string;
+  items?: string[];
+  need3Star?: boolean;
+  carry?: boolean;
+  needUnlock?: boolean;
+};
 
 interface UnitHexagonItemProps {
-  unit: ICompositionUnit;
+  unit: UnitHexagonItemUnit;
   size?: number;
   style?: ViewStyle;
-  /** Vị trí hàng item: 'top' | 'bottom'. Mặc định 'bottom'. */
   itemsPosition?: 'top' | 'bottom';
-  /** Hình dạng của unit: 'hexagon' | 'square'. Mặc định 'hexagon'. */
   shape?: 'hexagon' | 'square';
   customStyleItem?: ViewStyle;
   customStyleStar?: ViewStyle;
   borderWidth?: number;
+  
+  /** * Vị trí icon Unlock: 
+   * - 'left': Giữa cạnh trái 
+   * - 'top': Giữa cạnh trên 
+   * - 'topLeft': Góc trên trái (mặc định cũ)
+   */
+  unlockPosition?: 'top' | 'left' | 'topLeft';
 }
 
 const ITEM_BORDER_COLOR = '#a3a3a3'; 
@@ -29,39 +47,81 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
   size = 40,
   style,
   itemsPosition = 'bottom',
-  shape = 'hexagon', // Mặc định là hình lục giác
+  shape = 'hexagon',
   customStyleItem,
   customStyleStar,
-  borderWidth = 4,
+  borderWidth = 2,
+  unlockPosition = 'topLeft', // Mặc định là giữa lề trái
 }) => {
   const theme = useTheme();
   const { colors } = theme;
 
+  const unitKey = unit.championKey ?? unit.apiName ?? '';
+  
+  const itemLocal = useMemo(() => {
+    return getCachedUnits()?.[unitKey];
+  }, [unitKey]);
+
   const metrics = useMemo(() => {
-    // Offset badge: Hình vuông cần offset ít hơn hình lục giác để không bị bay quá xa góc
+    // Kích thước icon unlock
+    const unlockSize = size * 0.35;
+    
+    // Offset cho trường hợp topLeft
     const isSquare = shape === 'square';
-    const badgeOffset = isSquare ? -size * 0.05 : -size * 0.12; 
+    const cornerOffset = isSquare ? -size * 0.05 : -size * 0.12; 
+
+    // Tính toán vị trí Unlock dựa trên prop unlockPosition
+    let unlockTop = 0;
+    let unlockLeft = 0;
+
+    switch (unlockPosition) {
+      case 'top':
+        // Căn giữa theo chiều ngang
+        unlockLeft = (size - unlockSize) / 2;
+        // Đẩy lên trên mép (offset âm)
+        unlockTop = -size * 0.15;
+        break;
+        
+      case 'left':
+        // Căn giữa theo chiều dọc
+        unlockTop = (size - unlockSize) / 2;
+        // Đẩy sang trái mép (offset âm)
+        unlockLeft = -size * 0.15;
+        break;
+        
+      case 'topLeft':
+      default:
+        // Vị trí góc cũ
+        unlockTop = cornerOffset+2;
+        unlockLeft = cornerOffset;
+        break;
+    }
 
     return {
       innerSize: size,
       outerSize: size, 
       itemSize: size * 0.28,
       itemRadius: 99, 
-      unlockSize: size * 0.35,
+      unlockSize: unlockSize,
       itemsOffset: 0, 
-      badgeTop: badgeOffset,
-      badgeBottom: badgeOffset,
-      badgeLeft: badgeOffset,
-      // Bo góc cho hình vuông (khoảng 10-15% size)
+      
+      // Badge Star
+      badgeTop: cornerOffset,
+      badgeBottom: cornerOffset,
+      
+      // Badge Unlock (Dynamic)
+      unlockTop,
+      unlockLeft,
+
       squareRadius: size * 0.15,
     };
-  }, [size, shape]);
+  }, [size, shape, unlockPosition]);
 
-  const avatar = getUnitAvatar(unit.championKey, 64);
+  const avatar = getUnitAvatar(unitKey, 64);
   const imageSource = { local: avatar.local };
   const unitImage = avatar.local ? undefined : (avatar.uri || unit.image || '');
   const itemsToShow = unit.items?.slice(0, 3) ?? [];
-
+  const unitIdForKey = unit.championId ?? unit.championKey ?? unit.apiName ?? '';
   const borderColor = getUnitCostBorderColor(unit.cost, colors.primary || '#94a3b8');
 
   return (
@@ -72,7 +132,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
         style,
       ]}>
 
-      {/* 1. Nội dung chính: Hexagon hoặc Square */}
+      {/* 1. Nội dung chính */}
       <View style={styles.centerAbsolute}>
         {shape === 'hexagon' ? (
           <Hexagon
@@ -89,6 +149,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
             height: metrics.innerSize,
             borderWidth: borderWidth,
             borderColor: borderColor,
+            borderRadius: metrics.squareRadius,
             overflow: 'hidden',
             backgroundColor: colors.card
           }}>
@@ -101,7 +162,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
         )}
       </View>
 
-      {/* 2. ITEMS (Bo tròn & Sát mép) */}
+      {/* 2. ITEMS */}
       {itemsToShow.length > 0 && (
         <View
           style={[
@@ -118,7 +179,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
             if (!icon) return null;
             return (
               <Image
-                key={`${unit.championId}-item-${idx}`}
+                key={`${unitIdForKey}-item-${idx}`}
                 source={icon}
                 style={{
                   width: metrics.itemSize,
@@ -135,8 +196,8 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
         </View>
       )}
 
-      {/* 3. Icon 3 Sao - CĂN GIỮA TUYỆT ĐỐI */}
-      {(unit.need3Star || (unit.cost <= 3 && unit.carry)) && (
+      {/* 3. Icon 3 Sao */}
+      {((unit.need3Star || ((unit.cost ?? 0) <= 3 && unit.carry))) && (
         <View
           style={[
             styles.absoluteBadge,
@@ -147,7 +208,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
               alignItems: 'center',
               ...(itemsPosition === 'top' 
                 ? { bottom: metrics.badgeBottom } 
-                : { top: shape === 'hexagon' ? 4 : 0 } // Hình vuông không cần đẩy xuống 4px như lục giác
+                : { top: shape === 'hexagon' ? 4 : 0 } 
               ),
               zIndex: 25,
             },
@@ -157,15 +218,19 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
         </View>
       )}
 
-      {/* 4. Icon Mở khoá */}
-      {unit.needUnlock && (
+      {/* 4. Icon Mở khoá (Vị trí Dynamic) */}
+      {(unit.needUnlock || itemLocal?.unlock) && (
         <View
           style={[
             styles.absoluteBadge,
             {
-              top: metrics.badgeTop,
-              left: metrics.badgeLeft,
+              top: metrics.unlockTop,   
+              left: metrics.unlockLeft, 
               zIndex: 40,
+              width: metrics.unlockSize,
+              height: metrics.unlockSize,
+              borderRadius: 99,
+              overflow: 'hidden',
             },
           ]}>
           <Image

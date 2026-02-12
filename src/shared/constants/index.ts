@@ -26,6 +26,7 @@ export const SCREENS = {
   PRIVACY: 'Privacy',
   TERMS: 'Terms',
   FEEDBACK: 'Feedback',
+  SMART_TEAM_BUILDER: 'SmartTeamBuilder',
   // Legacy screens (kept for compatibility)
   TOOL: 'Tool',
   SEARCH: 'Search',

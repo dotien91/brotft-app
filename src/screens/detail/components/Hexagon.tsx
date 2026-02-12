@@ -11,12 +11,12 @@ interface HexagonProps {
   borderWidth?: number;
   children?: React.ReactNode;
   imageUri?: string;
-  imageSource?: any; // Local image source (require())
+  imageSource?: any;
 }
 
 const Hexagon: React.FC<HexagonProps> = ({
   size = 64,
-  borderColor = '#2a2d3a',
+  borderColor = '#444',
   backgroundColor,
   borderWidth = 2,
   children,
@@ -24,55 +24,54 @@ const Hexagon: React.FC<HexagonProps> = ({
   imageSource,
 }) => {
   const {colors} = useTheme();
-  const themeHexagonBg = (colors as Record<string, string>).hexagonBg;
-  const defaultBg = themeHexagonBg ?? '#252836';
 
-  const width = size;
-  const height = size * 1.15; // Hexagon height ratio
+  // ĐIỀU CHỈNH: Giảm tỷ lệ height xuống để bớt cảm giác bị "dài"
+  // Tỷ lệ 1.1 hoặc 1.07 thường cho cảm giác nhìn thuận mắt hơn trên màn hình di động
+// Trong Hexagon.tsx
+const width = size;
+const height = size * 1.1; // Giảm từ 1.15 xuống 1.1 để bớt dài
 
-  // Luôn có background: ưu tiên prop có giá trị, còn lại dùng màu từ theme (hexagonBg)
-  const fillColor =
-    typeof backgroundColor === 'string' && backgroundColor.trim() !== ''
-      ? backgroundColor
-      : defaultBg;
-  
-  // Generate unique ID for clipPath
-  const clipId = useMemo(() => `hexagon-clip-${Math.random().toString(36).substr(2, 9)}`, []);
-  
-  // Calculate hexagon points (flat-top hexagon)
+const points = useMemo(() => {
   const centerX = width / 2;
   const centerY = height / 2;
-  const radius = width / 2;
   
-  const points = [
-    [centerX, centerY - radius], // top
+  // Radius chuẩn dựa trên width để các cạnh bằng nhau
+  const radius = (size / 2) - (borderWidth / 2);
+
+  return [
+    [centerX, centerY - radius * 1.05], // top
     [centerX + radius * 0.866, centerY - radius * 0.5], // top-right
     [centerX + radius * 0.866, centerY + radius * 0.5], // bottom-right
-    [centerX, centerY + radius], // bottom
+    [centerX, centerY + radius * 1.05], // bottom
     [centerX - radius * 0.866, centerY + radius * 0.5], // bottom-left
     [centerX - radius * 0.866, centerY - radius * 0.5], // top-left
   ].map(p => p.join(',')).join(' ');
+}, [width, height, borderWidth, size]);
+
+  // ... (giữ nguyên phần return và styles)
+
+  const fillColor = backgroundColor || (colors as any).hexagonBg || '#222';
+  const clipId = useMemo(() => `hexagon-clip-${Math.random().toString(36).substr(2, 9)}`, []);
   return (
-    <View style={[styles.container, {width, height}]}>
-      <Svg width={width} height={height} style={styles.svg}>
+    <View style={{width, height, alignItems: 'center', justifyContent: 'center'}}>
+      <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
         <Defs>
           <ClipPath id={clipId}>
             <Polygon points={points} />
           </ClipPath>
         </Defs>
-        {/* Background hexagon - luôn vẽ, mặc định xám */}
+        {/* Lớp nền và viền */}
         <Polygon
           points={points}
           fill={fillColor}
           stroke={borderColor}
           strokeWidth={borderWidth}
+          strokeLinejoin="round"
         />
-        {/* Image clipped to hexagon shape (for URL images) */}
+        {/* Ảnh từ URL */}
         {imageUri && !imageSource && (
           <SvgImage
             href={{uri: imageUri}}
-            x="0"
-            y="0"
             width={width}
             height={height}
             clipPath={`url(#${clipId})`}
@@ -80,55 +79,38 @@ const Hexagon: React.FC<HexagonProps> = ({
           />
         )}
       </Svg>
-      {/* Local image overlay (for require() images) */}
+
+      {/* Ảnh Local (require) */}
       {imageSource && (
-        <MaskedView
-          style={styles.localImageContainer}
-          maskElement={
-            <Svg width={width} height={height} style={styles.localImageSvg}>
-              <Polygon points={points} fill="white" />
-            </Svg>
-          }>
-          <Image
-            source={imageSource}
-            style={[styles.localImage, {width, height}]}
-            resizeMode="cover"
-          />
-        </MaskedView>
+        <View style={StyleSheet.absoluteFill}>
+          <MaskedView
+            style={{flex: 1}}
+            maskElement={
+              <Svg width={width} height={height}>
+                <Polygon points={points} fill="white" />
+              </Svg>
+            }>
+            <Image
+              source={imageSource}
+              style={{width, height}}
+              resizeMode="cover"
+            />
+          </MaskedView>
+        </View>
       )}
-      <View style={styles.content}>
-        {children}
-      </View>
+      
+      <View style={styles.content}>{children}</View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  svg: {
-    position: 'absolute',
-  },
-  localImageContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-  },
-  localImageSvg: {
-    flex: 1,
-  },
-  localImage: {
-    flex: 1,
-  },
   content: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 10,
   },
 });
 
 export default Hexagon;
-

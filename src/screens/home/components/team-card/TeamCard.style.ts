@@ -26,7 +26,6 @@ export default (theme: ExtendedTheme) => {
       marginBottom: 12,
       borderWidth: 1,
       borderColor: colors.border,
-      minHeight: 140, 
     },
     teamHeader: {
       flexDirection: 'row',
@@ -89,7 +88,7 @@ export default (theme: ExtendedTheme) => {
       flexDirection: 'row',
       alignItems: 'flex-start',
       flexWrap: 'wrap',
-      marginTop: 4,
+      gap: 4,
     },
   });
 };

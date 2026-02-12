@@ -171,9 +171,10 @@ const itemImages: Record<string, any> = {
  * @returns Formatted key (e.g., "tft_item_bfsword", "tft5_item_quicksilverradiant")
  */
 export const formatItemApiNameForLocal = (apiName?: string | null): string => {
-  if (!apiName) return '';
-  // Convert to lowercase
-  let formatted = apiName.toLowerCase();
+  console.log("apiName", apiName);
+  if (apiName == null || apiName === '') return '';
+  // Ensure string (API may return number or other type)
+  let formatted = String(apiName).toLowerCase();
   
   // If it already starts with "tft" (any version like tft5, tft16, etc.), keep it as is
   if (formatted.startsWith('tft')) {

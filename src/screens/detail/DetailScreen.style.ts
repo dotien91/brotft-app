@@ -443,15 +443,12 @@ export default (theme: ExtendedTheme) => {
       marginLeft: '7%',
     },
     hexCellContainer: {
-      marginHorizontal: 1,
-      marginTop: 1,
-      marginBottom: -2,
-      alignItems: 'center',
-      justifyContent: 'center',
+      // alignItems: 'center',
+      // justifyContent: 'center',
     },
     unitWrapper: {
-      alignItems: 'center',
-      justifyContent: 'center',
+      // alignItems: 'center',
+      // justifyContent: 'center',
     },
     hexagonBorderWrapper: {
       position: 'relative',

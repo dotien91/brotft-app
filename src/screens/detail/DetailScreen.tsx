@@ -1,27 +1,23 @@
-import React, {useMemo, useState, useEffect, useCallback} from 'react';
-import {View, ScrollView, useWindowDimensions, ActivityIndicator, Image} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useTheme, useRoute} from '@react-navigation/native';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { View, ScrollView, useWindowDimensions, ActivityIndicator, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme, useRoute } from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
-import Hexagon from './components/Hexagon';
 import TraitsSection from './components/TraitsSection';
 import AugmentsSection from './components/AugmentsSection';
-import CarryUnitsSection from './components/CarryUnitsSection';
-import {useCompositionByCompId} from '@services/api/hooks/listQueryHooks';
+import { useCompositionByCompId } from '@services/api/hooks/listQueryHooks';
 import getUnitAvatar from '../../utils/unit-avatar';
-import {getItemIconImageSource} from '../../utils/item-images';
-import {getUnitCostBorderColor as getUnitCostBorderColorUtil} from '../../utils/unitCost';
-import ThreeStars from '@shared-components/three-stars/ThreeStars';
-import {getCachedItems} from '@services/api/data';
+import { getItemIconImageSource } from '../../utils/item-images';
+import { getCachedItems } from '@services/api/data';
 import useStore from '@services/zustand/store';
-import {translations} from '../../shared/localization';
+import { translations } from '../../shared/localization';
 import BackButton from '@shared-components/back-button/BackButton';
 import RNBounceable from '@freakycoder/react-native-bounceable';
-import Icon, {IconType} from '@shared-components/icon/Icon';
 import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
 import TierBadge from '@shared-components/tier-badge';
 import DescriptionSection from './components/DescriptionSection';
+import TeamBoard from './components/TeamBoard';
 
 type TeamUnitItem = {
   id?: string;
@@ -84,6 +80,7 @@ type TeamComposition = {
   midGame?: TeamUnit[];
   bench: TeamUnit[];
   carryItems: TeamCarry[];
+  coreChampion?: TeamUnit;
   augments?: Array<{
     name: string;
     tier: number;
@@ -102,12 +99,12 @@ interface DetailScreenProps {
   };
 }
 
-const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
+const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
   const theme = useTheme();
   const route = useRoute();
-  const {colors} = theme;
+  const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const {width: windowWidth} = useWindowDimensions();
+  const { width: windowWidth } = useWindowDimensions();
   const language = useStore((state) => state.language);
 
   // Get compId from params
@@ -132,7 +129,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     return units.map(unit => {
       // Map items from itemsDetails or items array
       let mappedItems: TeamUnitItem[] = [];
-      
+
       if (unit.itemsDetails && unit.itemsDetails.length > 0) {
         // Use itemsDetails if available
         mappedItems = unit.itemsDetails.map(itemDetail => {
@@ -144,7 +141,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
               return localizedItem;
             }
           }
-          
+
           // Fallback to itemDetail
           return {
             id: itemDetail.id,
@@ -177,7 +174,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         },
         image: avatar.uri || '', // Use URL when no local image
         imageSource: avatar.local, // Add local image source
-        items: mappedItems,
         championKey: unit.championKey,
       };
     });
@@ -187,7 +183,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   const getLocalizedItem = (itemApiName: string, itemsData: any): TeamUnitItem => {
     // Get local image source for item
     const imageSource = getItemIconImageSource(null, itemApiName, 48);
-    
+
     if (!itemApiName) {
       return {
         id: '',
@@ -197,7 +193,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         apiName: '',
       };
     }
-    
+
     if (!itemsData) {
       // Fallback: return item with apiName only
       return {
@@ -258,7 +254,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
   // Helper function to map carryItems
   const mapCarryItems = (carryItems: any[], itemsData: any): TeamCarry[] => {
     if (!carryItems || carryItems.length === 0) return [];
-    
+
     return carryItems.map(carryItem => {
       const mappedItems: TeamUnitItem[] = (carryItem.items || []).map((itemApiName: string) => {
         return getLocalizedItem(itemApiName, itemsData);
@@ -289,24 +285,13 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
       }
 
       return {
-        id: compositionData.id,
-        name: compositionData.name,
-        plan: compositionData.plan,
-        difficulty: compositionData.difficulty,
-        tier: compositionData.tier,
-        isOp: compositionData.isOp,
-        metaDescription: compositionData.metaDescription,
-        isLateGame: compositionData.isLateGame,
-        boardSize: compositionData.boardSize,
+        ...compositionData,
         synergies: compositionData.synergies || [],
         units: mapUnitsWithItems(compositionData.units || [], itemsData),
         earlyGame: compositionData.earlyGame && compositionData.earlyGame.length > 0 ? mapUnitsWithItems(compositionData.earlyGame, itemsData) : undefined,
         midGame: compositionData.midGame && compositionData.midGame.length > 0 ? mapUnitsWithItems(compositionData.midGame, itemsData) : undefined,
-        bench: compositionData.bench && compositionData.bench.length > 0 ? mapUnitsWithItems(compositionData.bench, itemsData) : [],
-        carryItems: mapCarryItems(compositionData.carryItems || [], itemsData),
         augments: compositionData.augments || [],
         notes: compositionData.notes || [],
-        teamcode: compositionData.teamcode || (compositionData as any).teamCode,
       };
     }
 
@@ -339,160 +324,14 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     }
   }, [team, gamePhase]);
 
-  // Get unit border color based on cost
-  const getUnitCostBorderColor = (cost?: number): string => {
-    return getUnitCostBorderColorUtil(cost, colors.border || '#94a3b8');
-  };
-
   // Difficulty badge colors (same as TeamCard)
-  const getDifficultyColor = (diff: string): {bg: string; text: string} => {
+  const getDifficultyColor = (diff: string): { bg: string; text: string } => {
     const d = diff?.toLowerCase() || '';
-    if (d.includes('easy')) return {bg: 'rgba(74, 222, 128, 0.2)', text: '#4ade80'};
-    if (d.includes('medium')) return {bg: 'rgba(251, 191, 36, 0.2)', text: '#fbbf24'};
-    if (d.includes('hard')) return {bg: 'rgba(249, 115, 22, 0.2)', text: '#f97316'};
-    return {bg: 'rgba(148, 163, 184, 0.2)', text: '#94a3b8'};
+    if (d.includes('easy')) return { bg: 'rgba(74, 222, 128, 0.2)', text: '#4ade80' };
+    if (d.includes('medium')) return { bg: 'rgba(251, 191, 36, 0.2)', text: '#fbbf24' };
+    if (d.includes('hard')) return { bg: 'rgba(249, 115, 22, 0.2)', text: '#f97316' };
+    return { bg: 'rgba(148, 163, 184, 0.2)', text: '#94a3b8' };
   };
-
-  // Calculate hex size to fit 7 hexagons in a row
-  const hexSize = useMemo(() => {
-    const horizontalPadding = 32; // Total padding
-    const availableWidth = windowWidth - horizontalPadding;
-    const calculatedSize = (availableWidth / 7.8); // 7.8 to account for spacing
-    return Math.max(Math.min(calculatedSize, 70), 45); // Min 45, Max 70
-  }, [windowWidth]);
-
-  // Use board size from API (4 rows x 7 cols = 28 cells)
-  // Note: API uses 1-based indexing (row: 1, col: 1 is first cell)
-  // Array uses 0-based indexing, so we need to convert
-  const boardRows = useMemo(() => {
-    if (!team) return [];
-    const rows = team.boardSize.rows || 4;
-    const cols = team.boardSize.cols || 7;
-    
-    return Array.from({length: rows}).map((_, rowIndex) =>
-      Array.from({length: cols}).map((_, colIndex) => {
-        // Convert array index (0-based) to API position (1-based) for comparison
-        // API position starts from 1,1 so we add 1 to array index
-        const apiRow = rowIndex + 1;
-        const apiCol = colIndex + 1;
-        
-        // Find unit at this position (API uses 1-based)
-        const unit = currentPhaseUnits.find(
-          champ =>
-            champ.position.row === apiRow &&
-            champ.position.col === apiCol,
-        );
-        return unit || null;
-      }),
-    );
-  }, [team, currentPhaseUnits]);
-
-
-  const renderUnit = (_unit: TeamUnit) => {
-    return null;
-  };
-
-  const renderBoard = () => (
-    <View style={styles.boardWrapper}>
-      <View style={styles.board}>
-        {boardRows.map((row, rowIndex) => (
-          <View
-            key={`row-${rowIndex}`}
-            style={[
-              styles.boardRow,
-              rowIndex % 2 !== 0 && {marginLeft: hexSize},
-            ]}>
-            {row.map((unit, colIndex) => (
-              <View
-                key={`cell-${rowIndex}-${colIndex}`}
-                style={styles.hexCellContainer}>
-                {unit ? (
-                  <View style={styles.unitWrapper}>
-                    <View style={styles.hexagonBorderWrapper}>
-                      {/* Border hexagon */}
-                      <View style={styles.hexagonBorder}>
-                        <Hexagon
-                          size={hexSize + 4}
-                          backgroundColor="transparent"
-                          borderColor={getUnitCostBorderColor(unit.cost)}
-                          borderWidth={1}
-                        />
-                      </View>
-                      {/* Main hexagon with image */}
-                      <View style={styles.hexagonInner}>
-                        <Hexagon
-                          size={hexSize}
-                          borderColor={getUnitCostBorderColor(unit.cost)}
-                          borderWidth={2}
-                          imageUri={unit.image}
-                          imageSource={(unit as any).imageSource}>
-                          {renderUnit(unit)}
-                          {/* Items inside hexagon (absolute positioned) */}
-                          {unit.items && unit.items.length > 0 && (
-                            <View style={styles.unitItemsRow}>
-                              {unit.items.map(item => (
-                                <Image
-                                  key={item.id}
-                                  source={item.iconSource || null}
-                                  style={[styles.unitItemIcon, {
-                                    width: Math.max(hexSize * 0.2, 12),
-                                    height: Math.max(hexSize * 0.2, 12),
-                                  }]}
-                                  resizeMode="contain"
-                                />
-                              ))}
-                            </View>
-                          )}
-                        </Hexagon>
-                      </View>
-                      {/* 3 Stars icon */}
-                      {(unit.need3Star || (unit.cost <= 3 && unit.carry)) && (
-                        <View style={[styles.tier3Icon, {
-                          top: -8,
-                          right: 5,
-                        }]}>
-                          <ThreeStars size={Math.max(hexSize * 0.6, 36)} color="#fbbf24" />
-                          </View>
-                      )}
-                      {/* Unlock icon */}
-                      {unit.needUnlock && (
-                        <View style={[
-                          styles.unlockBadge,
-                          {
-                            width: hexSize * 0.3,
-                            height: hexSize * 0.3,
-                            borderRadius: hexSize * 0.3 / 2,
-                            top: -0,
-                            right: -0,
-                          }
-                        ]}>
-                          <Image
-                            source={require('@assets/icons/unlock.png')}
-                            style={[styles.unlockIcon, {
-                              width: hexSize * 0.18,
-                              height: hexSize * 0.18,
-                            }]}
-                            resizeMode="contain"
-                          />
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                ) : (
-                  <Hexagon
-                    size={hexSize}
-                    borderColor={colors.borderColor}
-                    borderWidth={2}
-                  />
-                )}
-              </View>
-            ))}
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-
 
   // Render loading state
   if (isLoading && compIdFromParams) {
@@ -501,7 +340,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         <View style={styles.topHeader}>
           <BackButton />
         </View>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
@@ -515,11 +354,11 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         <View style={styles.topHeader}>
           <BackButton />
         </View>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20}}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
           <Text h4 color={colors.danger}>
             {translations.errorLoadingComposition}
           </Text>
-          <Text color={colors.placeholder} style={{marginTop: 8, textAlign: 'center'}}>
+          <Text color={colors.placeholder} style={{ marginTop: 8, textAlign: 'center' }}>
             {error?.message || translations.somethingWentWrong}
           </Text>
         </View>
@@ -529,53 +368,53 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-          <ScrollView
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <BackButton />
 
-      <View style={styles.topHeader}>
+        <View style={styles.topHeader}>
 
-        {/* 1. TIER (LEFT) */}
-        <TierBadge
-          tier={team.tier}
-          isOp={team.isOp}
-          size={36}
-          style={styles.tierBadge}
-        />
+          {/* 1. TIER (LEFT) */}
+          <TierBadge
+            tier={team.tier}
+            isOp={team.isOp}
+            size={36}
+            style={styles.tierBadge}
+          />
 
-        {/* 2. INFO (MIDDLE) */}
-        <View style={styles.detailHeaderInfo}>
-          <Text h2 bold style={styles.compositionName} numberOfLines={1}>
-            {team.name}
-          </Text>
-          {(team.plan || team.difficulty) && (
-            <View style={styles.planAndDifficultyRow}>
-              {team.plan ? (
-                <View style={styles.planBadge}>
-                  <Text style={styles.planText}>{team.plan}</Text>
-                </View>
-              ) : null}
-              {team.difficulty ? (
-                <View style={[styles.difficultyBadge, {backgroundColor: getDifficultyColor(team.difficulty).bg}]}>
-                  <Text style={[styles.difficultyText, {color: getDifficultyColor(team.difficulty).text}]}>
-                    {team.difficulty}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          )}
+          {/* 2. INFO (MIDDLE) */}
+          <View style={styles.detailHeaderInfo}>
+            <Text h2 bold style={styles.compositionName} numberOfLines={1}>
+              {team.name}
+            </Text>
+            {(team.plan || team.difficulty) && (
+              <View style={styles.planAndDifficultyRow}>
+                {team.plan ? (
+                  <View style={styles.planBadge}>
+                    <Text style={styles.planText}>{team.plan}</Text>
+                  </View>
+                ) : null}
+                {team.difficulty ? (
+                  <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(team.difficulty).bg }]}>
+                    <Text style={[styles.difficultyText, { color: getDifficultyColor(team.difficulty).text }]}>
+                      {team.difficulty}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            )}
+          </View>
+
+          {/* 3. COPY BUTTON (RIGHT) */}
+          <CopyTeamcodeButton teamcode={team.teamcode} />
         </View>
 
-        {/* 3. COPY BUTTON (RIGHT) */}
-        <CopyTeamcodeButton teamcode={team.teamcode} />
-      </View>
 
-  
         {/* Description Section */}
         {team.metaDescription && (
-          <DescriptionSection 
+          <DescriptionSection
             description={team.metaDescription}
           />
         )}
@@ -606,14 +445,20 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
 
         <View style={styles.mainLayout}>
           <View style={styles.boardColumn}>
-            {renderBoard()}
+            {/* {renderBoard()} */}
+            <TeamBoard
+              units={currentPhaseUnits}
+              boardSize={team.boardSize}
+              colors={colors}
+              styles={styles}
+            />
           </View>
         </View>
 
-        <CarryUnitsSection 
-          team={team} 
+        {/* <CarryUnitsSection
+          team={team}
           getUnitCostBorderColor={getUnitCostBorderColor}
-        />
+        /> */}
       </ScrollView>
     </SafeAreaView>
   );

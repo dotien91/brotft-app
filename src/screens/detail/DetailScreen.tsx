@@ -20,8 +20,8 @@ import BackButton from '@shared-components/back-button/BackButton';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import Icon, {IconType} from '@shared-components/icon/Icon';
 import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
+import TierBadge from '@shared-components/tier-badge';
 import DescriptionSection from './components/DescriptionSection';
-import TierBadge from '@shared-components/tier-badge/TierBadge';
 
 type TeamUnitItem = {
   id?: string;
@@ -71,6 +71,7 @@ type TeamComposition = {
   plan: string;
   difficulty: string;
   tier?: string; // S, A, B, C, D
+  isOp?: boolean;
   metaDescription: string;
   isLateGame: boolean;
   boardSize: {
@@ -293,6 +294,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
         plan: compositionData.plan,
         difficulty: compositionData.difficulty,
         tier: compositionData.tier,
+        isOp: compositionData.isOp,
         metaDescription: compositionData.metaDescription,
         isLateGame: compositionData.isLateGame,
         boardSize: compositionData.boardSize,
@@ -337,35 +339,9 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
     }
   }, [team, gamePhase]);
 
-  // Get tier color
-  const getRankColor = (tier?: string) => {
-    if (!tier) return colors.primary;
-    switch (tier) {
-      case 'OP':
-        return '#ff4757';
-      case 'S':
-        return '#ff7e83';
-      case 'A':
-        return '#ffbf7f';
-      case 'B':
-        return '#ffdf80';
-      case 'C':
-        return '#feff7f';
-      case 'D':
-        return '#bffe7f';
-      default:
-        return colors.primary;
-    }
-  };
-
   // Get unit border color based on cost
   const getUnitCostBorderColor = (cost?: number): string => {
     return getUnitCostBorderColorUtil(cost, colors.border || '#94a3b8');
-  };
-
-  // Always return black text color
-  const getContrastTextColor = (): string => {
-    return '#000000';
   };
 
   // Difficulty badge colors (same as TeamCard)
@@ -562,7 +538,12 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route: routeProp}) => {
       <View style={styles.topHeader}>
 
         {/* 1. TIER (LEFT) */}
-        <TierBadge style={styles.tierBadge} tier={team.tier} isOp={!!compositionData?.isOp} />
+        <TierBadge
+          tier={team.tier}
+          isOp={team.isOp}
+          size={36}
+          style={styles.tierBadge}
+        />
 
         {/* 2. INFO (MIDDLE) */}
         <View style={styles.detailHeaderInfo}>

@@ -10,25 +10,13 @@ import createStyles from './TeamCard.style';
 import * as NavigationService from 'react-navigation-helpers';
 import {SCREENS} from '@shared-constants';
 import {translations} from '../../../../shared/localization';
-import TierBadge from '@shared-components/tier-badge/TierBadge';
+import TierBadge from '@shared-components/tier-badge';
 
 interface TeamCardProps {
   composition: IComposition;
 }
 
 // --- HELPER FUNCTIONS (Move outside to prevent recreation) ---
-
-const getRankColor = (rankOrTier: string, primaryColor: string): string => {
-  switch (rankOrTier) {
-    case 'OP': return '#ff4757';
-    case 'S': return '#ff7e83';
-    case 'A': return '#ffbf7f';
-    case 'B': return '#ffdf80';
-    case 'C': return '#feff7f';
-    case 'D': return '#bffe7f';
-    default: return primaryColor;
-  }
-};
 
 const getDifficultyColor = (diff: string) => {
   const d = diff?.toLowerCase() || '';
@@ -50,7 +38,6 @@ const getDifficultyLabel = (diff: string): string => {
 
 const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
   const theme = useTheme();
-  const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   
   // Safe access teamcode
@@ -60,10 +47,6 @@ const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
     NavigationService.push(SCREENS.DETAIL, {compId: composition.compId});
   }, [composition.compId]);
 
-  const isOp = !!composition.isOp;
-  const displayTier = isOp ? 'OP' : (composition.tier || 'S');
-  const rankBackgroundColor = isOp ? '#a855f7' : getRankColor(displayTier, colors.primary);
-  
   // Tính toán màu sắc ngay trong body function vì nó rất nhẹ, không cần memo cũng được,
   // hoặc dùng useMemo nếu muốn strict.
   const difficultyStyle = getDifficultyColor(composition.difficulty);
@@ -84,7 +67,12 @@ const TeamCard: React.FC<TeamCardProps> = ({composition}) => {
     <RNBounceable style={styles.teamCard} onPress={handlePress}>
       <View style={styles.teamHeader}>
         {/* 1. TIER */}
-        <TierBadge style={styles.rankBadge} tier={displayTier} isOp={isOp} />
+        <TierBadge
+          tier={composition.tier || 'S'}
+          isOp={composition.isOp}
+          size={40}
+          style={styles.rankBadge}
+        />
 
         {/* 2. INFO */}
         <View style={styles.teamNameContainer}>

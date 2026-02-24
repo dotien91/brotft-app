@@ -20,9 +20,9 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // --- CẤU HÌNH GRID ĐỂ GIỐNG Y HỆT PAGE ITEMS ---
 const COLUMNS = 7; 
-const ROWS_PER_PAGE = 2; 
+const ROWS_PER_PAGE = 3; 
 const ITEMS_PER_PAGE = COLUMNS * ROWS_PER_PAGE; // 14 augments mỗi trang
-const GRID_PADDING = 16;
+const GRID_PADDING = 8;
 const GAP = 8;
 const ITEM_WIDTH = (SCREEN_WIDTH - GRID_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
 const ITEM_HEIGHT = ITEM_WIDTH; // Set bằng ITEM_WIDTH để tạo thành hình vuông

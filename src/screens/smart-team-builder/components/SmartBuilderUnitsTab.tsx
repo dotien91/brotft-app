@@ -11,11 +11,13 @@ import { useTftUnitsWithPagination } from '@services/api/hooks/listQueryHooks';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const COLUMNS = 7;
-const ROWS_PER_PAGE = 2; // Đổi từ 3 xuống 2 hàng cho mỗi page (slider)
+const ROWS_PER_PAGE = 2; 
 const ITEMS_PER_PAGE = COLUMNS * ROWS_PER_PAGE;
-const GRID_PADDING = 16;
+const GRID_PADDING = 8;
 const GAP = 4;
-const UNIT_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
+
+// FIX CHÍNH: Dùng Math.floor để làm tròn xuống, tránh sai số thập phân khiến item thứ 7 bị rớt dòng
+const UNIT_SIZE = Math.floor((SCREEN_WIDTH - GRID_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
 
 export interface SmartBuilderUnitsTabProps {
   selectedUnitApiNames: string[];
@@ -55,7 +57,7 @@ const SmartBuilderUnitsTab: React.FC<SmartBuilderUnitsTabProps> = ({
     return pages;
   }, [filteredUnits]);
 
-  // Số trang slider: dùng total_count từ API khi không filter; khi filter cost thì theo số trang đã load
+  // Số trang slider
   const totalPages = useMemo(() => {
     if (selectedCost === 'all' && totalCount != null && totalCount > 0) {
       return Math.ceil(totalCount / ITEMS_PER_PAGE);
@@ -72,16 +74,19 @@ const SmartBuilderUnitsTab: React.FC<SmartBuilderUnitsTabProps> = ({
           onPress={() => onToggleUnit(unit.apiName)}
           activeOpacity={0.7}
           style={{ width: UNIT_SIZE, height: UNIT_SIZE }}>
-          <View style={[styles.avatarWrapper, isSelected && { borderColor: colors.primary, borderWidth: 2 }]}>
-            <UnitHexagonItem
-              unit={unit}
-              size={UNIT_SIZE - 4}
-              shape="square"
-              style={{ pointerEvents: 'none' }}
-              customStyleStar={{ display: 'none' }}
-            />
+          <View style={styles.itemWrapper}>
+            <View pointerEvents="none" style={styles.innerContainer}>
+              <UnitHexagonItem
+                unit={unit}
+                size={UNIT_SIZE} // Giữ nguyên kích thước to nhất, không trừ hao nữa
+                shape="square"
+                customStyleStar={{ display: 'none' }}
+              />
+            </View>
+
+            {/* Chuyển Border vào chung với lớp phủ để không bóp méo hình ảnh */}
             {isSelected && (
-              <View style={styles.selectedOverlay}>
+              <View style={[styles.selectedOverlay, { borderColor: colors.primary, borderWidth: 2 }]}>
                 <Icon name="checkmark" type={IconType.Ionicons} size={16} color="#fff" />
               </View>
             )}
@@ -117,17 +122,15 @@ const SmartBuilderUnitsTab: React.FC<SmartBuilderUnitsTabProps> = ({
               data={paginatedUnits}
               renderItem={renderPage}
               horizontal
-              pagingEnabled // Thuộc tính này biến FlatList thành Slider chuẩn
+              pagingEnabled 
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={(e) => {
                 setCurrentPageIndex(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH));
               }}
               keyExtractor={(_, index) => `page-${index}`}
-              // Thêm vài props tối ưu slider
               snapToAlignment="center"
               decelerationRate="fast"
             />
-            {/* Dots Indicator - số trang theo total_count từ API */}
             {totalPages > 1 && (
               <View style={styles.dotsContainer}>
                 {Array.from({ length: totalPages }, (_, i) => (
@@ -153,12 +156,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 8 },
   loadingContainer: { width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' },
   pageContainer: { width: SCREEN_WIDTH, paddingHorizontal: GRID_PADDING },
-  gridContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP, height: UNIT_SIZE * ROWS_PER_PAGE + GAP * (ROWS_PER_PAGE - 1) },
-  avatarWrapper: { borderRadius: 6, overflow: 'hidden', position: 'relative' },
-  selectedOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+  gridContainer: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: GAP, 
+    justifyContent: 'center', // FIX CHÍNH: Căn giữa phần grid để chia đều khoảng trống nếu có số dư pixel
+    height: UNIT_SIZE * ROWS_PER_PAGE + GAP * (ROWS_PER_PAGE - 1) 
+  },
+  itemWrapper: { flex: 1, borderRadius: 6, overflow: 'hidden', position: 'relative' },
+  innerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  selectedOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', borderRadius: 6 },
   dotsContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 12, gap: 6 },
   dot: { width: 6, height: 6, borderRadius: 3 },
-  activeDot: { width: 12 }, // Hiệu ứng cho dot đang active kéo dài ra một chút cho đẹp
+  activeDot: { width: 12 },
 });
 
 export default SmartBuilderUnitsTab;

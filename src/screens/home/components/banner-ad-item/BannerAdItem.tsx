@@ -25,7 +25,7 @@ const BannerAdItem: React.FC<BannerAdItemProps> = () => {
     setIsLoading(false);
     setHasError(true);
   };
-
+  // return null
   // Chỉ show banner khi đã attempt init và init thành công
   if (!adsSdkInitAttempted || !adsSdkInitialized) {
     return null;

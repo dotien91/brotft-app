@@ -509,12 +509,12 @@
 				DEVELOPMENT_TEAM = J8ML7H3GZN;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = rnTypescriptZustandBoilerplate/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TFTBuddy;
+				INFOPLIST_KEY_CFBundleDisplayName = ChessBuddy;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.8;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -538,12 +538,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J8ML7H3GZN;
 				INFOPLIST_FILE = rnTypescriptZustandBoilerplate/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TFTBuddy;
+				INFOPLIST_KEY_CFBundleDisplayName = ChessBuddy;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.8;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

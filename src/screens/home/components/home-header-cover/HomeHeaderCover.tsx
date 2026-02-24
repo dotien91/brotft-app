@@ -17,7 +17,7 @@ const HomeHeaderCover: React.FC = (() => {
         resizeMode="cover"
       />
       <View style={styles.headerOverlay}>
-        <Text style={styles.welcomeText}>{translations.welcomeToTFTBuddy}</Text>
+        <Text style={styles.welcomeText}>{translations.welcomeToChessBuddy}</Text>
       </View>
     </View>
   );

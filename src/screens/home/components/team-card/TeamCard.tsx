@@ -77,13 +77,15 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
   return (
     <RNBounceable style={styles.teamCard} onPress={handlePress}>
       <View style={styles.teamHeader}>
-        {/* TIER BADGE */}
-        <TierBadge
-          tier={composition.tier || 'S'}
-          isOp={composition.isOp}
-          size={40}
-          style={styles.rankBadge}
-        />
+        {/* TIER BADGE - chỉ hiện khi active !== false */}
+        {composition.active === true && (
+          <TierBadge
+            tier={composition.tier || 'S'}
+            isOp={composition.isOp}
+            size={40}
+            style={styles.rankBadge}
+          />
+        )}
 
         {/* INFO */}
         <View style={styles.teamNameContainer}>

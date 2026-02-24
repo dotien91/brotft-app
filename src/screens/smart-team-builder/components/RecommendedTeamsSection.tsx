@@ -44,10 +44,10 @@ const RecommendedTeamsSection: React.FC<RecommendedTeamsSectionProps> = ({
 
 const styles = StyleSheet.create({
   sectionContainer: { paddingBottom: 4 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 6, gap: 10 },
-  sectionTitle: { fontSize: 15, fontWeight: 'bold' },
-  teamsListContainer: { paddingHorizontal: 16, gap: 12 },
-  emptyText: { textAlign: 'center', marginTop: 24, color: '#9ca3af' },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, marginBottom: 6, gap: 10 },
+  sectionTitle: { fontSize: 15, fontWeight: 'bold', marginBottom: 6 },
+  teamsListContainer: { paddingHorizontal: 6, gap: 6 },
+  emptyText: { textAlign: 'center', marginTop: 12, color: '#9ca3af' },
 });
 
 export default RecommendedTeamsSection;

@@ -19,7 +19,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const COLUMNS = 7;
 const ROWS_PER_PAGE = 2; // Giảm xuống 2 hàng để vừa với TabView ở màn hình cha
 const ITEMS_PER_PAGE = COLUMNS * ROWS_PER_PAGE; // 14 items mỗi trang
-const GRID_PADDING = 16;
+const GRID_PADDING = 8;
 const GAP = 8;
 const ITEM_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
 

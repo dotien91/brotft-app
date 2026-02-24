@@ -1505,7 +1505,7 @@ export const useCompositions = (
 };
 
 // Hook with pagination handling built-in for compositions
-export const useCompositionsWithPagination = (limit: number = 10) => {
+export const useCompositionsWithPagination = (limit: number = 10, params?: ICompositionsQueryParams) => {
   const [page, setPage] = useState(1);
   const [allCompositions, setAllCompositions] = useState<IComposition[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -1519,7 +1519,7 @@ export const useCompositionsWithPagination = (limit: number = 10) => {
     error,
     refetch,
     isRefetching,
-  } = useCompositions({page, limit}, {
+  } = useCompositions({page, limit, ...params}, {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 0, // Always consider data stale to ensure refetch on page change

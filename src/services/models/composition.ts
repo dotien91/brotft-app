@@ -68,6 +68,7 @@ export interface IComposition {
   }>;
   notes: string[];
   teamcode?: string;
+  active?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

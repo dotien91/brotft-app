@@ -24,13 +24,13 @@ const SelectedAugmentsSection: React.FC<SelectedAugmentsSectionProps> = ({
 
   return (
     <View style={styles.sectionContainer}>
-      <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 16, marginBottom: 6 }]}>
+      <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 8, marginBottom: 6 }]}>
         {translations.selectedAugments}
       </Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingTop: 4, paddingBottom: 4 }}
+        contentContainerStyle={{ paddingHorizontal: 8, gap: 12, paddingTop: 4, paddingBottom: 4 }}
       >
         {selectedAugmentApiNames.map((apiName) => (
           <RNBounceable

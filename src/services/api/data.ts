@@ -179,7 +179,6 @@ export const getCachedItems = () => {
 };
 
 export const getCachedTraits = () => {
-  console.log("MEMORY_CACHEMEMORY_CACHE", MEMORY_CACHE);
   return MEMORY_CACHE.traits;
 };
 

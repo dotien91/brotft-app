@@ -5,6 +5,7 @@ interface Style {
   container: ViewStyle;
   scrollView: ViewStyle;
   scrollContent: ViewStyle;
+  bannerAdBottom: ViewStyle;
   topHeader: ViewStyle;
   headerContent: ViewStyle;
   compositionHeader: ViewStyle;
@@ -156,6 +157,15 @@ export default (theme: ExtendedTheme) => {
     },
     scrollContent: {
       paddingBottom: 48,
+    },
+    bannerAdBottom: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
     },
     topHeader: {
       flexDirection: 'row',

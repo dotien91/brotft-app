@@ -24,13 +24,13 @@ const SelectedItemsSection: React.FC<SelectedItemsSectionProps> = ({
 
   return (
     <View style={styles.sectionContainer}>
-      <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 16, marginBottom: 6 }]}>
-        {translations.selectedItems}
+      <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 8, marginBottom: 6 }]}>
+      {translations.selectedItems}
       </Text>
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false} 
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingTop: 4, paddingBottom: 4 }}
+        contentContainerStyle={{ paddingHorizontal: 6, gap: 6, paddingTop: 4, paddingBottom: 4 }}
       >
         {selectedItemIds.map((itemId) => (
           <RNBounceable 

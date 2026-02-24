@@ -19,6 +19,12 @@ export const getCompositions = async (
     queryParams.append('limit', params.limit.toString());
   }
 
+  if (params?.active != undefined) {
+    queryParams.append('active', params.active.toString());
+  }
+
+  console.log("params", params);
+
   const response = await axiosInstance.get<ICompositionsResponse>(
     `/compositions?${queryParams.toString()}`,
   );
@@ -109,11 +115,9 @@ export const searchCompositionsV2 = async (
   if (params?.limit) queryParams.append('limit', params.limit.toString());
 
   const url = `/compositions/search-v2?${queryParams.toString()}`;
-  console.log("searchData", searchData);
   try {
     // Sử dụng phương thức POST và gửi searchData trong body
     const response = await axiosInstance.post<ICompositionsResponse>(url, searchData);
-    console.log("response", response);
     return response.data;
   } catch (error: any) {
     console.error('❌ ========== SEARCH V2 ERROR ==========');

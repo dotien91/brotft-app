@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { View, ScrollView, useWindowDimensions, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme, useRoute } from '@react-navigation/native';
+import { useTheme, useRoute, useFocusEffect } from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
 import TraitsSection from './components/TraitsSection';
@@ -19,6 +19,12 @@ import TierBadge from '@shared-components/tier-badge';
 import DescriptionSection from './components/DescriptionSection';
 import TeamBoard from './components/TeamBoard';
 import CoreChampion from './components/CoreChampion';
+import BannerAdItem from '@screens/home/components/banner-ad-item/BannerAdItem';
+import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
+import { AD_UNIT_IDS } from '@shared-constants';
+import storage from '@services/local-storage';
+
+const DETAIL_SCREEN_ENTER_COUNT_KEY = 'detail_screen_enter_count';
 
 type TeamUnitItem = {
   id?: string;
@@ -88,6 +94,7 @@ type TeamComposition = {
   }>;
   notes: string[];
   teamcode?: string;
+  active?: boolean;
 };
 
 
@@ -107,6 +114,85 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { width: windowWidth } = useWindowDimensions();
   const language = useStore((state) => state.language);
+  const adsSdkInitAttempted = useStore((state) => state.adsSdkInitAttempted);
+  const adsSdkInitialized = useStore((state) => state.adsSdkInitialized);
+  const hasTrackingPermission = useStore((state) => state.hasTrackingPermission);
+
+  const interstitial = useMemo(() => {
+    return InterstitialAd.createForAdRequest(AD_UNIT_IDS.INTERSTITIAL, {
+      requestNonPersonalizedAdsOnly: !hasTrackingPermission,
+    });
+  }, [hasTrackingPermission]);
+
+  const isInterstitialLoadedRef = useRef(false);
+  const isInterstitialLoadingRef = useRef(false);
+  const pendingShowRef = useRef(false);
+
+  const requestLoadInterstitial = useCallback(() => {
+    if (!adsSdkInitAttempted || !adsSdkInitialized) return;
+    if (isInterstitialLoadingRef.current || isInterstitialLoadedRef.current) return;
+    isInterstitialLoadingRef.current = true;
+    interstitial.load();
+  }, [adsSdkInitAttempted, adsSdkInitialized, interstitial]);
+
+  const maybeShowInterstitial = useCallback(() => {
+    if (!adsSdkInitAttempted || !adsSdkInitialized) return;
+    if (isInterstitialLoadedRef.current) {
+      pendingShowRef.current = false;
+      interstitial.show();
+      return;
+    }
+    pendingShowRef.current = true;
+    requestLoadInterstitial();
+  }, [adsSdkInitAttempted, adsSdkInitialized, interstitial, requestLoadInterstitial]);
+
+  useFocusEffect(
+    useCallback(() => {
+      isInterstitialLoadedRef.current = false;
+      isInterstitialLoadingRef.current = false;
+      pendingShowRef.current = false;
+
+      if (!adsSdkInitAttempted || !adsSdkInitialized) {
+        const nextCount = (storage.getNumber(DETAIL_SCREEN_ENTER_COUNT_KEY) ?? 0) + 1;
+        storage.set(DETAIL_SCREEN_ENTER_COUNT_KEY, nextCount);
+        return;
+      }
+
+      const unsubscribeLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+        isInterstitialLoadedRef.current = true;
+        isInterstitialLoadingRef.current = false;
+        if (pendingShowRef.current) {
+          pendingShowRef.current = false;
+          interstitial.show();
+        }
+      });
+
+      const unsubscribeClosed = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+        isInterstitialLoadedRef.current = false;
+        requestLoadInterstitial();
+      });
+
+      const unsubscribeError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+        isInterstitialLoadedRef.current = false;
+        isInterstitialLoadingRef.current = false;
+        pendingShowRef.current = false;
+      });
+
+      const nextCount = (storage.getNumber(DETAIL_SCREEN_ENTER_COUNT_KEY) ?? 0) + 1;
+      storage.set(DETAIL_SCREEN_ENTER_COUNT_KEY, nextCount);
+      if (nextCount % 4 === 0) {
+        maybeShowInterstitial();
+      } else {
+        requestLoadInterstitial();
+      }
+
+      return () => {
+        unsubscribeLoaded();
+        unsubscribeClosed();
+        unsubscribeError();
+      };
+    }, [adsSdkInitAttempted, adsSdkInitialized, interstitial, requestLoadInterstitial, maybeShowInterstitial]),
+  );
 
   // Get compId from params
   const compIdFromParams =
@@ -250,26 +336,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
     };
   };
 
-  // Helper function to map carryItems
-  const mapCarryItems = (carryItems: any[], itemsData: any): TeamCarry[] => {
-    if (!carryItems || carryItems.length === 0) return [];
-
-    return carryItems.map(carryItem => {
-      const mappedItems: TeamUnitItem[] = (carryItem.items || []).map((itemApiName: string) => {
-        return getLocalizedItem(itemApiName, itemsData);
-      });
-
-      return {
-        championId: carryItem.championId || carryItem.championKey,
-        championName: carryItem.championName || carryItem.name,
-        role: carryItem.role || 'Carry',
-        image: '', // Use local image via imageSource instead
-        imageSource: getUnitAvatar(carryItem.championKey, 64).local, // Add local image source
-        items: mappedItems,
-      };
-    });
-  };
-
   // Map IComposition to TeamComposition format
   const team = useMemo<TeamComposition>(() => {
     if (compositionData) {
@@ -369,18 +435,20 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}>
         <BackButton />
         <View style={styles.topHeader}>
 
-          {/* 1. TIER (LEFT) */}
-          <TierBadge
-            tier={team.tier}
-            isOp={team.isOp}
-            size={36}
-            style={styles.tierBadge}
-          />
+          {/* 1. TIER (LEFT) - chỉ hiện khi active !== false */}
+          {team.active === true && (
+            <TierBadge
+              tier={team.tier}
+              isOp={team.isOp}
+              size={36}
+              style={styles.tierBadge}
+            />
+          )}
 
           {/* 2. INFO (MIDDLE) */}
           <View style={styles.detailHeaderInfo}>
@@ -452,8 +520,12 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
           </View>
         </View>
         <CoreChampion coreChampion={team.coreChampion} />
-   
       </ScrollView>
+
+      {/* Banner ad cố định bottom */}
+      <View style={styles.bannerAdBottom}>
+        <BannerAdItem />
+      </View>
     </SafeAreaView>
   );
 };

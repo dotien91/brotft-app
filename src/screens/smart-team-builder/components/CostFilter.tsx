@@ -59,7 +59,7 @@ const CostFilter: React.FC<CostFilterProps> = ({ selectedCost, onCostChange }) =
   );
 
   return (
-    <View style={[styles.container, { marginHorizontal: 16 }]}>
+    <View style={[styles.container, { marginHorizontal: 6 }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

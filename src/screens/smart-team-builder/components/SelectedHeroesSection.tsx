@@ -24,14 +24,14 @@ const SelectedHeroesSection: React.FC<SelectedHeroesSectionProps> = ({
 
   return (
     <View style={styles.sectionContainer}>
-      <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 16, marginBottom: 6 }]}>
+      <Text style={[styles.sectionTitle, { color: colors.text, marginLeft: 8, marginBottom: 6 }]}>
         {translations.selectHeroes}
       </Text>
       
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false} 
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingTop: 4, paddingBottom: 4 }}
+        contentContainerStyle={{ paddingHorizontal: 8, gap: 8, paddingTop: 4, paddingBottom: 4 }}
       >
         {selectedUnitApiNames.map((apiName) => (
           <RNBounceable 

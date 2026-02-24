@@ -32,11 +32,12 @@ interface UnitHexagonItemProps {
   borderWidth?: number;
   
   /** * Vị trí icon Unlock: 
+   * - 'center': Giữa avatar
    * - 'left': Giữa cạnh trái 
    * - 'top': Giữa cạnh trên 
    * - 'topLeft': Góc trên trái (mặc định cũ)
    */
-  unlockPosition?: 'top' | 'left' | 'topLeft';
+  unlockPosition?: 'center' | 'top' | 'left' | 'topLeft';
 }
 
 const ITEM_BORDER_COLOR = '#a3a3a3'; 
@@ -75,24 +76,29 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
     let unlockLeft = 0;
 
     switch (unlockPosition) {
+      case 'center':
+        unlockLeft =  4;
+        unlockTop = size / 4;
+        break;
+
       case 'top':
         // Căn giữa theo chiều ngang
         unlockLeft = (size - unlockSize) / 2;
         // Đẩy lên trên mép (offset âm)
         unlockTop = -size * 0.15;
         break;
-        
+
       case 'left':
         // Căn giữa theo chiều dọc
         unlockTop = (size - unlockSize) / 2;
         // Đẩy sang trái mép (offset âm)
         unlockLeft = -size * 0.15;
         break;
-        
+
       case 'topLeft':
       default:
         // Vị trí góc cũ
-        unlockTop = cornerOffset+2;
+        unlockTop = cornerOffset + 2;
         unlockLeft = cornerOffset;
         break;
     }

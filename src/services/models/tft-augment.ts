@@ -51,6 +51,7 @@ export interface ITftAugmentsQueryParams {
 export interface ITftAugmentsResponse {
   data: ITftAugment[];
   hasNextPage?: boolean;
+  total_count?: number;
   page?: number;
   limit?: number;
 }

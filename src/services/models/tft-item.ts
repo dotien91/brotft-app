@@ -38,11 +38,13 @@ export interface ITftItemsQueryParams {
   limit?: number;
   filters?: ITftItemsFilters;
   sort?: ITftItemsSort[];
+  hasComposition?: boolean;
 }
 
 export interface ITftItemsResponse {
   data: ITftItem[];
   hasNextPage?: boolean;
+  total_count?: number;
 }
 
 // DTOs for create and update

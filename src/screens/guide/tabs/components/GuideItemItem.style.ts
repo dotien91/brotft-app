@@ -20,6 +20,9 @@ interface Style {
   componentIconWrap: ViewStyle;
   componentIcon: ImageStyle;
   recipePlus: TextStyle;
+  compactContainer: ViewStyle;
+  compactIcon: ImageStyle;
+  compactIconPlaceholder: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -133,6 +136,29 @@ export default (theme: ExtendedTheme) => {
       fontWeight: '700',
       color: colors.placeholder,
     },
+// Tìm và sửa lại 3 class này ở cuối file GuideItemItem.style.ts
+
+compactContainer: {
+  flex: 1, // Điền đầy thẻ cha
+  width: '100%',
+  height: '100%',
+  alignItems: 'center',
+  justifyContent: 'center', // Căn giữa nội dung
+  position: 'relative',
+},
+compactIcon: {
+  width: '100%', // Tự động fit theo kích thước thẻ cha truyền vào
+  height: '100%',
+  // Tùy chọn: bạn có thể thêm borderRadius: 6 hoặc 8 vào đây 
+  // nếu muốn bản thân cái ảnh cũng bo góc khớp với viền ngoài
+},
+compactIconPlaceholder: {
+  width: '100%', 
+  height: '100%',
+  backgroundColor: colors.primary + '20',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
   });
 };
 

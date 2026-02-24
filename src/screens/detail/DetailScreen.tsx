@@ -123,8 +123,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
     enabled: !!compIdFromParams,
   });
 
-  console.log("compositionData", compositionData);
-
   // Helper function to map units with items
   const mapUnitsWithItems = (units: any[], itemsData: any): TeamUnit[] => {
     return units.map(unit => {

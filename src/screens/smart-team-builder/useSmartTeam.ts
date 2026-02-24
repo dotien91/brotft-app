@@ -15,9 +15,9 @@ export const useSmartSearchCompositions = (
     queryKey: ['compositions', 'search-v2', searchData],
     queryFn: () => searchCompositionsV2(searchData, { page: 1, limit: 50 }),
     enabled: enabled && (
-      (searchData.units?.length ?? 0) > 0 || 
-      (searchData.items?.length ?? 0) > 0 || 
-      (searchData.augments?.length ?? 0) > 0
+      (searchData?.units?.length ?? 0) > 0 ||
+      (searchData?.items?.length ?? 0) > 0 ||
+      (searchData?.augments?.length ?? 0) > 0
     ),
     staleTime: 1000 * 60 * 5, // Cache trong 5 phút
     retry: 1,

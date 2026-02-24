@@ -13,9 +13,10 @@ import {getCachedAugments} from '@services/api/data';
 interface GuideAugmentItemProps {
   data: ITftAugment;
   onPress: () => void;
+  isCompact?: boolean;
 }
 
-const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
+const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress, isCompact = false}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -160,6 +161,22 @@ const GuideAugmentItem: React.FC<GuideAugmentItemProps> = ({data, onPress}) => {
     color: colors.text,
     fontSize: 11,
   }), [colors.text]);
+
+  if (isCompact) {
+    return (
+      <View style={styles.compactContainer}>
+        {imageUri ? (
+          <Image
+            source={{uri: imageUri}}
+            style={styles.compactIcon}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.compactIconPlaceholder} />
+        )}
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       {/* Augment Icon */}

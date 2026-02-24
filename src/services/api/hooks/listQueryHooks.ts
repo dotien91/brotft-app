@@ -501,6 +501,7 @@ export const useTftUnitsWithPagination = (
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
+    totalCount: tftUnitsData?.total_count,
   };
 };
 
@@ -793,7 +794,11 @@ export const useTftItems = (
 };
 
 // Hook with pagination handling built-in for TFT items
-export const useTftItemsWithPagination = (limit: number = 20, enabled: boolean = true) => {
+export const useTftItemsWithPagination = (
+  limit: number = 20,
+  enabled: boolean = true,
+  extraParams?: Pick<ITftItemsQueryParams, 'hasComposition'>,
+) => {
   const [page, setPage] = useState(1);
   const [allTftItems, setAllTftItems] = useState<ITftItem[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -808,7 +813,7 @@ export const useTftItemsWithPagination = (limit: number = 20, enabled: boolean =
     error,
     refetch,
     isRefetching,
-  } = useTftItems({page, limit}, {enabled});
+  } = useTftItems({ page, limit, ...extraParams }, { enabled });
 
   // Refetch when page is set to 1 during refresh
   useEffect(() => {
@@ -882,6 +887,7 @@ export const useTftItemsWithPagination = (limit: number = 20, enabled: boolean =
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
+    totalCount: tftItemsData?.total_count,
   };
 };
 
@@ -1080,6 +1086,7 @@ export const useTftAugmentsWithPagination = (
     loadMore,
     refresh,
     isRefetching: isRefetching && page === 1,
+    totalCount: tftAugmentsData?.total_count,
   };
 };
 

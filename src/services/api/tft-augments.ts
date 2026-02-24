@@ -50,7 +50,9 @@ export const getTftAugments = async (
   const response = await axiosInstance.get<ITftAugmentsResponse>(
     `/tft-augments?${queryParams.toString()}`,
   );
-  return response.data;
+  const totalCountHeader = response.headers['x-total-count'] ?? response.headers['X-Total-Count'];
+  const total_count = totalCountHeader != null ? parseInt(String(totalCountHeader), 10) : undefined;
+  return { ...response.data, ...(total_count !== undefined && !Number.isNaN(total_count) ? { total_count } : {}) };
 };
 
 // Get TFT augment by ID

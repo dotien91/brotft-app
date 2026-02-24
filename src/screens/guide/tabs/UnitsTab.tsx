@@ -8,12 +8,10 @@ import {
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import Icon, {IconType} from '@shared-components/icon/Icon';
-import * as NavigationService from 'react-navigation-helpers';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import GuideUnitItem from './components/GuideUnitItem';
 import {useTftUnitsWithPagination} from '@services/api/hooks/listQueryHooks';
 import type {ITftUnitsFilters} from '@services/models/tft-unit';
-import {SCREENS} from '@shared-constants';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import {translations} from '../../../shared/localization';
 import createStyles from './TabContent.style';

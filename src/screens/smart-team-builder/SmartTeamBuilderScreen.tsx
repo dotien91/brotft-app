@@ -3,12 +3,20 @@ import { View, ScrollView, StyleSheet, StatusBar, useWindowDimensions } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import { TabView, TabBar, Route } from 'react-native-tab-view';
-import Text from '@shared-components/text-wrapper/TextWrapper';
-
+import { getCachedUnits, getCachedItems, getCachedAugments } from '@services/api/data';
 import { useSmartSearchCompositions } from './useSmartTeam';
-
 import BackButton from '@shared-components/back-button/BackButton';
-import { UnitsTabContent, ItemsTabContent, AugmentsTabContent } from './components';
+import Text from '@shared-components/text-wrapper/TextWrapper';
+import {
+  SmartBuilderUnitsTab,
+  SmartBuilderItemsTab,
+  SmartBuilderAugmentsTab,
+  SelectedHeroesSection,
+  SelectedItemsSection,
+  SelectedAugmentsSection,
+  RecommendedTeamsSection,
+} from './components';
+import { translations } from '../../shared/localization';
 
 const SmartTeamBuilderScreen: React.FC = () => {
   const theme = useTheme();
@@ -16,65 +24,106 @@ const SmartTeamBuilderScreen: React.FC = () => {
   const layout = useWindowDimensions();
 
   const [index, setIndex] = useState(0);
+  
+  // --- STATE LƯU TRỮ LỰA CHỌN ---
   const [selectedUnitApiNames, setSelectedUnitApiNames] = useState<string[]>([]);
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+  const [selectedAugmentApiNames, setSelectedAugmentApiNames] = useState<string[]>([]);
 
   const routes: Route[] = useMemo(
     () => [
-      { key: 'units', title: 'Units' },
-      { key: 'items', title: 'Items' },
-      { key: 'augments', title: 'Augments' },
+      { key: 'units', title: translations.units },
+      { key: 'items', title: translations.items },
+      { key: 'augments', title: translations.augments },
     ],
     [],
   );
 
-  const searchParams = useMemo(
-    () => ({ units: selectedUnitApiNames, searchInAllArrays: true }),
-    [selectedUnitApiNames],
-  );
-  const { data: searchResponse, isLoading: isSearching, isFetching } = useSmartSearchCompositions(
-    searchParams,
-    selectedUnitApiNames.length > 0,
-  );
-  const matchedTeams = useMemo(() => searchResponse?.data || [], [searchResponse]);
+  // --- LẤY DỮ LIỆU TỪ LOCAL CACHE ---
+  const localUnitsMap = useMemo(() => {
+    const cached = getCachedUnits();
+    return cached ? Object.values(cached) : [];
+  }, []);
 
+  const localItemsMap = useMemo(() => {
+    const cached = typeof getCachedItems === 'function' ? getCachedItems() : null;
+    return cached ? Object.values(cached) : [];
+  }, []);
+
+  const localAugmentsMap = useMemo(() => {
+    const cached = typeof getCachedAugments === 'function' ? getCachedAugments() : null;
+    return cached ? Object.values(cached) : [];
+  }, []);
+
+  // --- GỌI API TÌM KIẾM ĐỘI HÌNH ---
+  const searchParams = useMemo(() => {
+    if (selectedUnitApiNames.length === 0 && selectedItemIds.length === 0 && selectedAugmentApiNames.length === 0) return null;
+    return {
+      units: selectedUnitApiNames,
+      items: selectedItemIds,
+      augments: selectedAugmentApiNames,
+      searchInAllArrays: true,
+    };
+  }, [selectedUnitApiNames, selectedItemIds, selectedAugmentApiNames]);
+
+  const { data: searchResponse, isLoading: isSearching, isFetching } = useSmartSearchCompositions(
+    searchParams ?? { units: [], items: [], augments: [], searchInAllArrays: true },
+    true,
+  );
+  const matchedTeams: any[] = useMemo(() => {
+    const r = searchResponse as any;
+    return (Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : []) as any[];
+  }, [searchResponse]);
+
+  // --- CÁC HÀM TOGGLE (CHỌN/BỎ CHỌN) ---
   const handleToggleUnit = useCallback((apiName: string) => {
     setSelectedUnitApiNames((prev) =>
       prev.includes(apiName) ? prev.filter((id) => id !== apiName) : [...prev, apiName]
     );
   }, []);
 
+  const handleToggleItem = useCallback((itemId: string) => {
+    setSelectedItemIds((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+    );
+  }, []);
+
+  const handleToggleAugment = useCallback((apiName: string) => {
+    setSelectedAugmentApiNames((prev) =>
+      prev.includes(apiName) ? prev.filter((id) => id !== apiName) : [...prev, apiName]
+    );
+  }, []);
+
+  // --- RENDER TỪNG TAB ---
   const renderScene = useCallback(
     ({ route }: { route: Route }) => {
       switch (route.key) {
         case 'units':
           return (
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.scene}>
-              <UnitsTabContent
-                selectedUnitApiNames={selectedUnitApiNames}
-                onToggleUnit={handleToggleUnit}
-                matchedTeams={matchedTeams}
-                isSearching={isSearching}
-                isFetching={isFetching}
-              />
-            </ScrollView>
+            <SmartBuilderUnitsTab
+              selectedUnitApiNames={selectedUnitApiNames}
+              onToggleUnit={handleToggleUnit}
+            />
           );
         case 'items':
           return (
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.scene}>
-              <ItemsTabContent />
-            </ScrollView>
+            <SmartBuilderItemsTab
+              selectedItemIds={selectedItemIds}
+              onToggleItem={handleToggleItem}
+            />
           );
         case 'augments':
           return (
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.scene}>
-              <AugmentsTabContent />
-            </ScrollView>
+            <SmartBuilderAugmentsTab
+              selectedAugmentIds={selectedAugmentApiNames}
+              onToggleAugment={handleToggleAugment}
+            />
           );
         default:
           return null;
       }
     },
-    [selectedUnitApiNames, handleToggleUnit, matchedTeams, isSearching, isFetching],
+    [selectedUnitApiNames, handleToggleUnit, selectedItemIds, handleToggleItem, selectedAugmentApiNames, handleToggleAugment],
   );
 
   const tabWidth = layout.width / routes.length;
@@ -91,9 +140,10 @@ const SmartTeamBuilderScreen: React.FC = () => {
         activeColor={colors.primary}
         inactiveColor={colors.placeholder}
         pressColor={colors.primary + '20'}
+        swipeEnabled={false}
       />
     ),
-    [colors.background, colors.border, colors.primary, colors.placeholder, colors.text, tabWidth],
+    [colors, tabWidth],
   );
 
   return (
@@ -102,40 +152,62 @@ const SmartTeamBuilderScreen: React.FC = () => {
 
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <BackButton />
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Smart Builder</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{translations.smartBuilder}</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <TabView
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        renderTabBar={renderTabBar}
-        onIndexChange={setIndex}
-        initialLayout={{ width: layout.width }}
-      />
+
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+      <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+     
+      <View style={{ height: 240 }}>
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          renderTabBar={renderTabBar}
+          onIndexChange={setIndex}
+          initialLayout={{ width: layout.width }}
+          lazy={true}
+          swipeEnabled={false}
+        />
+      </View>
+        <SelectedHeroesSection
+          selectedUnitApiNames={selectedUnitApiNames}
+          localUnitsMap={localUnitsMap}
+          onToggleUnit={handleToggleUnit}
+        />
+        <SelectedItemsSection
+          selectedItemIds={selectedItemIds}
+          localItemsMap={localItemsMap}
+          onToggleItem={handleToggleItem}
+        />
+        <SelectedAugmentsSection
+          selectedAugmentApiNames={selectedAugmentApiNames}
+          localAugmentsMap={localAugmentsMap}
+          onToggleAugment={handleToggleAugment}
+        />
+        <RecommendedTeamsSection
+          matchedTeams={matchedTeams}
+          isSearching={isSearching}
+          isFetching={isFetching}
+          hasSelection={selectedUnitApiNames.length > 0 || selectedItemIds.length > 0 || selectedAugmentApiNames.length > 0}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 50,
-    borderBottomWidth: 1,
-  },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 50, borderBottomWidth: 1 },
   headerTitle: { fontSize: 16, fontWeight: 'bold' },
-  scene: { flex: 1 },
-  tabBar: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderBottomWidth: 1,
-  },
+  tabBar: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1 },
   tab: { paddingHorizontal: 0 },
   tabLabel: { fontSize: 14, fontWeight: '600', textTransform: 'none' as const },
   tabIndicator: { height: 3, borderRadius: 2 },
+  divider: { height: 4, opacity: 0.15 },
+  resultsContainer: { flex: 1, paddingTop: 6 },
 });
 
 export default SmartTeamBuilderScreen;

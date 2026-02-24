@@ -70,6 +70,7 @@ export interface ITftUnitsQueryParams {
 export interface ITftUnitsResponse {
   data: ITftUnit[];
   hasNextPage?: boolean;
+  total_count?: number;
 }
 
 // DTOs for create and update

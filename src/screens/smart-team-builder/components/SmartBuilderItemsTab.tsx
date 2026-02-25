@@ -7,12 +7,14 @@ import {
   FlatList,
   Text,
   TouchableOpacity,
+  Image,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '@react-navigation/native';
 import { useTftItemsWithPagination } from '@services/api/hooks/listQueryHooks';
-import GuideItemItem from '@screens/guide/tabs/components/GuideItemItem';
 import Icon, { IconType } from '@shared-components/icon/Icon';
 import { translations } from '../../../shared/localization';
+import { getItemIconImageSource } from '../../../utils/item-images';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -85,27 +87,28 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
     }
   }, [paginatedItems.length, hasMore, isLoadingMore, loadMore]);
 
-  // 4. Render từng Item kèm cơ chế Select (ĐÃ ĐỔI SANG DÙNG apiName)
+  // 4. Render ô vuông chỉ icon, chọn thì viền xanh lá
   const renderGridItem = useCallback(
     (item: any, index: number) => {
-      // Lấy apiName trang bị (thay vì id)
       const itemApiName = item?.apiName;
       const isSelected = selectedItemIds.includes(itemApiName);
+      const imageSource = getItemIconImageSource(item?.icon, itemApiName, Math.round(ITEM_SIZE));
 
       return (
         <TouchableOpacity
           key={itemApiName || index}
           onPress={() => itemApiName && onToggleItem(itemApiName)}
           activeOpacity={0.7}
-          style={{ width: ITEM_SIZE, height: ITEM_SIZE }}
+          style={styles.cellTouchable}
         >
-          <View style={[styles.itemWrapper, isSelected && { borderColor: colors.primary, borderWidth: 2 }]}>
-            {/* Vô hiệu hoá click bên trong thẻ con để ưu tiên TouchableOpacity bọc ngoài */}
-            <View pointerEvents="none" style={{ flex: 1 }}>
-              <GuideItemItem data={item} onPress={() => {}} />
-            </View>
-
-            {/* Lớp phủ khi đang được chọn */}
+          <View style={[styles.itemWrapper, isSelected && styles.itemWrapperSelected]}>
+            {imageSource.local ? (
+              <Image source={imageSource.local} style={styles.iconSquare} resizeMode="cover" />
+            ) : imageSource.uri ? (
+              <FastImage source={{ uri: imageSource.uri }} style={styles.iconSquare} resizeMode={FastImage.resizeMode.cover} />
+            ) : (
+              <View style={styles.iconPlaceholder} />
+            )}
             {isSelected && (
               <View style={styles.selectedOverlay}>
                 <Icon name="checkmark" type={IconType.Ionicons} size={16} color="#fff" />
@@ -115,7 +118,7 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
         </TouchableOpacity>
       );
     },
-    [selectedItemIds, onToggleItem, colors.primary]
+    [selectedItemIds, onToggleItem]
   );
 
   const renderPage = useCallback(
@@ -219,11 +222,30 @@ const styles = StyleSheet.create({
     gap: GAP,
     height: ITEM_SIZE * ROWS_PER_PAGE + GAP * (ROWS_PER_PAGE - 1),
   },
+  cellTouchable: {
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+  },
   itemWrapper: {
-    flex: 1,
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
     borderRadius: 6,
     overflow: 'hidden',
     position: 'relative',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    backgroundColor: '#000',
+  },
+  itemWrapperSelected: {
+    borderColor: '#22c55e',
+  },
+  iconSquare: {
+    width: '100%',
+    height: '100%',
+  },
+  iconPlaceholder: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   selectedOverlay: {
     ...StyleSheet.absoluteFillObject,

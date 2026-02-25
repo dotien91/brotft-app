@@ -153,11 +153,11 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ enabled = true }) => {
     return (
       <TouchableOpacity 
         activeOpacity={0.7} 
-        onPress={() => handleItemPress(item)}
+        // onPress={() => handleItemPress(item)}
         style={[styles.iconWrapper, isMatrix && styles.matrixIconWrapper]}
       >
         {source ? (
-          <FastImage source={source} style={styles.icon} />
+          <FastImage source={source} style={styles.icon} resizeMode='cover' />
         ) : (
           <View style={[styles.icon, styles.emptyIcon]} />
         )}
@@ -211,7 +211,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ enabled = true }) => {
           <View style={styles.matrixRow}>
             {/* Ô góc cùng bên trái */}
             <View style={[styles.cell, { backgroundColor: theme.dark ? '#374151' : '#f3f4f6' }]}>
-              <Text style={{ fontSize: 9, color: colors.placeholder, textAlign: 'center' }}>Mix</Text>
+              <Text style={{ fontSize: 9, color: colors.placeholder, textAlign: 'center' }}>{translations.itemsMix}</Text>
             </View>
             {BASE_ITEM_IDS.map(xId => (
               <View key={`header_x_${xId}`} style={[styles.cell, { backgroundColor: theme.dark ? '#374151' : '#f3f4f6' }]}>

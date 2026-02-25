@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, Image } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
+import FastImage from 'react-native-fast-image';
 import Icon, { IconType } from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import GuideItemItem from '@screens/guide/tabs/components/GuideItemItem';
 import { translations } from '../../../shared/localization';
+import { getItemIconImageSource } from '../../../utils/item-images';
 
 export interface SelectedItemsSectionProps {
   selectedItemIds: string[];
@@ -32,31 +33,32 @@ const SelectedItemsSection: React.FC<SelectedItemsSectionProps> = ({
         showsHorizontalScrollIndicator={false} 
         contentContainerStyle={{ paddingHorizontal: 6, gap: 6, paddingTop: 4, paddingBottom: 4 }}
       >
-        {selectedItemIds.map((itemId) => (
-          <RNBounceable 
-            key={itemId} 
-            onPress={() => onToggleItem(itemId)}
-            style={{ overflow: 'visible' }}
-          >
-            {/* Wrapper ngoài để visible cho badge thò ra */}
-            <View style={styles.itemWrapper}>
-              {/* Box trong để hidden bo góc hình item */}
-              <View style={styles.itemBox}>
-                <View pointerEvents="none" style={{ flex: 1 }}>
-                  <GuideItemItem
-                    data={localItemsMap.find((i: any) => i.id === itemId || i.apiName === itemId) || { id: itemId }}
-                    onPress={() => {}}
-                  />
+        {selectedItemIds.map((itemId) => {
+          const item = localItemsMap.find((i: any) => i.id === itemId || i.apiName === itemId);
+          const imageSource = getItemIconImageSource(item?.icon, itemId, 48);
+          return (
+            <RNBounceable
+              key={itemId}
+              onPress={() => onToggleItem(itemId)}
+              style={{ overflow: 'visible' }}
+            >
+              <View style={styles.itemWrapper}>
+                <View style={styles.itemBox}>
+                  {imageSource.local ? (
+                    <Image source={imageSource.local} style={styles.iconSquare} resizeMode="cover" />
+                  ) : imageSource.uri ? (
+                    <FastImage source={{ uri: imageSource.uri }} style={styles.iconSquare} resizeMode={FastImage.resizeMode.cover} />
+                  ) : (
+                    <View style={[styles.iconSquare, styles.iconPlaceholder]} />
+                  )}
+                </View>
+                <View style={[styles.removeBadge, { backgroundColor: colors.danger }]}>
+                  <Icon name="close" type={IconType.Ionicons} size={10} color="#fff" />
                 </View>
               </View>
-              
-              {/* Badge nằm ngoài itemBox nên không bị hidden cắt mất */}
-              <View style={[styles.removeBadge, { backgroundColor: colors.danger }]}>
-                <Icon name="close" type={IconType.Ionicons} size={10} color="#fff" />
-              </View>
-            </View>
-          </RNBounceable>
-        ))}
+            </RNBounceable>
+          );
+        })}
       </ScrollView>
       <View style={[styles.divider, { backgroundColor: colors.border, marginTop: 8, opacity: 0.1 }]} />
     </View>
@@ -72,10 +74,19 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'visible', // Quan trọng: Cho phép badge trồi ra ngoài
   },
-  itemBox: { 
-    flex: 1, 
-    borderRadius: 6, 
-    overflow: 'hidden', // Quan trọng: Cắt phần thừa của hình item để bo góc
+  itemBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 6,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  iconSquare: {
+    width: '100%',
+    height: '100%',
+  },
+  iconPlaceholder: {
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   removeBadge: {
     position: 'absolute',

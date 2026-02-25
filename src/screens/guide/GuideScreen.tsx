@@ -89,7 +89,6 @@ const GuideScreen: React.FC = () => {
         onIndexChange={handleIndexChange}
         initialLayout={{width: layout.width}}
         lazy={true}
-        lazyPreloadDistance={1}
       />
     </SafeAreaView>
   );

@@ -75,8 +75,14 @@ export const arrayToObject = <T>(array: T[], keyField: keyof T): Record<string, 
  * Hàm này đảm bảo MEMORY_CACHE luôn có dữ liệu (nếu đã từng tải về).
  */
 const ensureCacheIsWarm = (locale: string) => {
-  // 1. Nếu cache RAM đã có đúng locale và có dữ liệu -> Return ngay (Nhanh nhất)
-  if (MEMORY_CACHE.locale === locale && Object.keys(MEMORY_CACHE.units).length > 0) {
+  // 1. Nếu cache RAM đã có đúng locale và có đủ units, items, traits, augments -> Return ngay
+  if (
+    MEMORY_CACHE.locale === locale &&
+    Object.keys(MEMORY_CACHE.units).length > 0 &&
+    Object.keys(MEMORY_CACHE.items).length > 0 &&
+    Object.keys(MEMORY_CACHE.traits).length > 0 &&
+    Object.keys(MEMORY_CACHE.augments).length > 0
+  ) {
     return;
   }
 
@@ -115,10 +121,12 @@ export const checkAndFetchDataByLocale = async (language: string): Promise<boole
   // B1: Nạp cache từ Disk (nếu có)
   ensureCacheIsWarm(locale);
 
-  // B2: Kiểm tra xem đã đủ dữ liệu chưa
-  const hasData = 
+  // B2: Kiểm tra xem đã đủ dữ liệu chưa (units, items, traits, augments)
+  const hasData =
     Object.keys(MEMORY_CACHE.units).length > 0 &&
-    Object.keys(MEMORY_CACHE.items).length > 0;
+    Object.keys(MEMORY_CACHE.items).length > 0 &&
+    Object.keys(MEMORY_CACHE.traits).length > 0 &&
+    Object.keys(MEMORY_CACHE.augments).length > 0;
 
   if (hasData) {
     return true; // Đã có data, không cần fetch

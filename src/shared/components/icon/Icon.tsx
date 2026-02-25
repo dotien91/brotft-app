@@ -116,8 +116,6 @@ const Icon: React.FC<IconProps> = ({name, size = 20, color = '#000', weight = 'b
 			return <PhosphorComp size={size} color={color} weight={weight} {...rest} />;
 		}
 	}
-
-	// Final fallback to existing icon implementation
 	return <RNIcon name={String(name)} size={size} color={color} {...rest} />;
 };
 

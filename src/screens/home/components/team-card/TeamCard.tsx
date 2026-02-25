@@ -4,7 +4,7 @@ import { useTheme } from '@react-navigation/native';
 import RNBounceable from '@freakycoder/react-native-bounceable';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import type { IComposition } from '@services/models/composition';
-import UnitHexagonItem from '../unit-hexagon-item/UnitHexagonItem'; // Đảm bảo đường dẫn đúng
+import UnitHexagonItem from '../unit-hexagon-item/UnitHexagonItem'; 
 import CopyTeamcodeButton from '@shared-components/copy-teamcode-button';
 import createStyles from './TeamCard.style';
 import * as NavigationService from 'react-navigation-helpers';
@@ -17,8 +17,6 @@ interface TeamCardProps {
 }
 
 // --- HELPER FUNCTIONS ---
-// (Giữ nguyên bên ngoài để tránh khởi tạo lại không cần thiết)
-
 const getDifficultyColor = (diff?: string) => {
   const d = diff?.toLowerCase() || '';
   if (d.includes('easy')) return { bg: 'rgba(74, 222, 128, 0.2)', text: '#4ade80' };
@@ -35,41 +33,54 @@ const getDifficultyLabel = (diff?: string): string => {
   return diff || '';
 };
 
-// Cấu hình khoảng cách để tính toán size
+// --- CONSTANTS ---
 const UNITS_PER_ROW = 9;
-// Tổng padding ngang (ước lượng):
-// Margin màn hình (16*2) + Padding trong Card (12*2) + Gap giữa các items (2*6) ~= 60-70px
 const TOTAL_HORIZONTAL_PADDING = 32 + 38; 
+
+// Đưa các style tĩnh ra ngoài để tránh tạo object rác (GC memory leak) trong vòng lặp map
+const STATIC_UNIT_STYLES = {
+  container: { marginBottom: 3 },
+  itemConfig: { bottom: -4 },
+  starConfig: { top: -8 },
+};
 
 const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   
-  // 1. Lấy chiều rộng màn hình TẠI ĐÂY (trong component)
   const { width } = useWindowDimensions();
 
-  // 2. Tính toán itemSize dựa trên màn hình
+  // Tính toán itemSize
   const itemSize = useMemo(() => {
-    const availableWidth = width - TOTAL_HORIZONTAL_PADDING;
-    return availableWidth / UNITS_PER_ROW;
+    return (width - TOTAL_HORIZONTAL_PADDING) / UNITS_PER_ROW;
   }, [width]);
 
-  // Safe access teamcode
+  // Lấy data an toàn
   const teamcode = composition.teamcode || (composition as any).teamCode;
 
+  // Xử lý navigate
   const handlePress = useCallback(() => {
     NavigationService.push(SCREENS.DETAIL, { compId: composition.compId });
   }, [composition.compId]);
 
-  const difficultyStyle = getDifficultyColor(composition.difficulty);
+  // Caching màu sắc và text độ khó
+  const { diffBg, diffText, diffLabel } = useMemo(() => {
+    const colorConfig = getDifficultyColor(composition.difficulty);
+    return {
+      diffBg: colorConfig.bg,
+      diffText: colorConfig.text,
+      diffLabel: getDifficultyLabel(composition.difficulty)
+    };
+  }, [composition.difficulty]);
 
-  // 3. Logic Sort: Đưa tướng có item lên đầu
+  // Sort: Đưa tướng có item lên đầu
   const sortedUnits = useMemo(() => {
     const units = composition.units || [];
+    // Tối ưu nhẹ: Không cần spread operator nếu không can thiệp sâu, 
+    // nhưng array.sort mutate array gốc nên việc tạo shallow copy bằng [...units] của bạn là ĐÚNG.
     return [...units].sort((a, b) => {
       const aItems = a.items?.length || 0;
       const bItems = b.items?.length || 0;
-      // Sắp xếp giảm dần theo số lượng item (Nhiều item -> lên đầu)
       return bItems - aItems; 
     });
   }, [composition.units]);
@@ -77,8 +88,8 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
   return (
     <RNBounceable style={styles.teamCard} onPress={handlePress}>
       <View style={styles.teamHeader}>
-        {/* TIER BADGE - chỉ hiện khi active !== false */}
-        {composition.active === true && (
+        {/* TIER BADGE */}
+        {composition.active && (
           <TierBadge
             tier={composition.tier || 'S'}
             isOp={composition.isOp}
@@ -101,9 +112,9 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
                 </View>
               )}
               {composition.difficulty && (
-                <View style={[styles.difficultyBadge, { backgroundColor: difficultyStyle.bg }]}>
-                  <Text style={[styles.difficultyText, { color: difficultyStyle.text }]}>
-                    {getDifficultyLabel(composition.difficulty)}
+                <View style={[styles.difficultyBadge, { backgroundColor: diffBg }]}>
+                  <Text style={[styles.difficultyText, { color: diffText }]}>
+                    {diffLabel}
                   </Text>
                 </View>
               )}
@@ -119,22 +130,15 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
       <View style={styles.championsRow}>
         {sortedUnits.map((unit, index) => (
           <UnitHexagonItem
-            style={{
-              marginBottom: 3,
-            }}
-            borderWidth={1.5}
-            shape='square'  
-            // Sử dụng index làm fallback key nếu championId trùng lặp (trường hợp hiếm)
             key={`${unit.championId}-${index}`}
+            style={STATIC_UNIT_STYLES.container}
+            borderWidth={1.5}
+            shape="square"  
             unit={unit}
-            size={itemSize} // Truyền size đã tính toán xuống
-            customStyleItem={{
-              bottom: -4
-            }}
-            customStyleStar={{
-              top: -8
-            }}
-            unlockPosition='topLeft'
+            size={itemSize} 
+            customStyleItem={STATIC_UNIT_STYLES.itemConfig}
+            customStyleStar={STATIC_UNIT_STYLES.starConfig}
+            unlockPosition="topLeft"
           />
         ))}
       </View>
@@ -142,4 +146,8 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
   );
 };
 
-export default React.memo(TeamCard);
+// TỐI ƯU CỐT LÕI: Chỉ re-render nếu compId thay đổi (hoặc active thay đổi)
+export default React.memo(TeamCard, (prevProps, nextProps) => {
+  return prevProps.composition.compId === nextProps.composition.compId &&
+         prevProps.composition.active === nextProps.composition.active;
+});

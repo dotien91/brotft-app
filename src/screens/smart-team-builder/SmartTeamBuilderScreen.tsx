@@ -5,8 +5,8 @@ import { useFocusEffect, useTheme } from '@react-navigation/native';
 import { TabView, TabBar, Route } from 'react-native-tab-view';
 import { getCachedUnits, getCachedItems, getCachedAugments } from '@services/api/data';
 import { useSmartSearchCompositions } from './useSmartTeam';
-import BackButton from '@shared-components/back-button/BackButton';
 import Text from '@shared-components/text-wrapper/TextWrapper';
+import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
 import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS } from '@shared-constants';
 import useStore from '@services/zustand/store';
@@ -21,6 +21,8 @@ import {
 } from './components';
 import { translations } from '../../shared/localization';
 import storage from '@services/local-storage';
+import { palette } from '@theme/themes';
+import Icon from '@shared-components/icon/Icon';
 
 const SMART_BUILDER_FILTER_COUNT_KEY = 'smart_builder_filter_count';
 
@@ -250,14 +252,7 @@ const SmartTeamBuilderScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
-
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text, textAlign: 'center', flex: 1 }]}>{translations.smartBuilder}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
+      <ScreenHeader title={translations.smartBuilder} />
 
       <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
      
@@ -290,11 +285,14 @@ const SmartTeamBuilderScreen: React.FC = () => {
         />
         {hasSelection ? (
           <TouchableOpacity
-            onPress={handleClearAll}
-            style={[styles.clearAllBtn, { borderColor: colors.border }]}
-            activeOpacity={0.7}>
-            <Text style={[styles.clearAllText, { color: colors.primary }]}>{translations.clearAll}</Text>
-          </TouchableOpacity>
+  onPress={handleClearAll}
+  style={styles.clearAllBtn}
+  activeOpacity={0.7}>
+  <Icon name="trash" color={palette.danger} size={16} /> {/* Thêm icon thùng rác sẽ cực kỳ rõ nghĩa */}
+  <Text style={[styles.clearAllText, { color: colors.danger, marginLeft: 8 }]}>
+    {translations.clearAll}
+  </Text>
+</TouchableOpacity>
         ) : null}
         <RecommendedTeamsSection
           matchedTeams={matchedTeams}
@@ -309,15 +307,26 @@ const SmartTeamBuilderScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 50, borderBottomWidth: 1 },
-  headerTitle: { fontSize: 16, fontWeight: 'bold' },
-  clearAllBtn: { marginHorizontal: 16, marginVertical: 12, paddingVertical: 12, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  clearAllText: { fontSize: 14, fontWeight: '600' },
+  clearAllBtn: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    paddingVertical: 8,
+    flexDirection: 'row', // Để icon và chữ nằm ngang
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Không dùng Border hoặc dùng border rất nhạt
+    borderBottomWidth: 1, 
+  },
+  clearAllText: { 
+    fontSize: 13, 
+    fontWeight: '500',
+    textDecorationLine: 'underline' // Gạch chân nhìn giống link xóa nhanh
+  },
   tabBar: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1 },
   tab: { paddingHorizontal: 0 },
   tabLabel: { fontSize: 14, fontWeight: '600', textTransform: 'none' as const },
   tabIndicator: { height: 3, borderRadius: 2 },
-  divider: { height: 4, opacity: 0.15 },
   resultsContainer: { flex: 1, paddingTop: 6 },
 });
 

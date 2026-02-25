@@ -12,15 +12,16 @@ import { useTheme } from '@react-navigation/native';
 import { useTftItemsWithPagination } from '@services/api/hooks/listQueryHooks';
 import GuideItemItem from '@screens/guide/tabs/components/GuideItemItem';
 import Icon, { IconType } from '@shared-components/icon/Icon';
+import { translations } from '../../../shared/localization';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // --- CẤU HÌNH GRID ---
-const COLUMNS = 7;
-const ROWS_PER_PAGE = 2; // Giảm xuống 2 hàng để vừa với TabView ở màn hình cha
+const COLUMNS = 8;
+const ROWS_PER_PAGE = 3; // Giảm xuống 2 hàng để vừa với TabView ở màn hình cha
 const ITEMS_PER_PAGE = COLUMNS * ROWS_PER_PAGE; // 14 items mỗi trang
-const GRID_PADDING = 8;
-const GAP = 8;
+const GRID_PADDING = 6;
+const GAP = 2;
 const ITEM_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
 
 export interface SmartBuilderItemsTabProps {
@@ -140,7 +141,7 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
   if (isError && itemsList.length === 0) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: colors.notification }}>Lỗi tải dữ liệu: {error?.message}</Text>
+        <Text style={{ color: colors.notification }}>{translations.errorLoadingItems}{error?.message ? `: ${error.message}` : ''}</Text>
       </View>
     );
   }
@@ -148,7 +149,7 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
   if (isNoData) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: colors.placeholder }}>Không tìm thấy trang bị nào.</Text>
+        <Text style={{ color: colors.placeholder }}>{translations.noItemsFound}</Text>
       </View>
     );
   }

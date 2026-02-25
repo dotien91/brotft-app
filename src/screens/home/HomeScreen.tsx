@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as NavigationService from 'react-navigation-helpers';
 import { SCREENS } from '@shared-constants';
@@ -26,7 +26,7 @@ const HomeScreen: React.FC = () => {
   const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // Fetch compositions logic
+  // Fetch dữ liệu với pagination
   const {
     data: compositions,
     isLoading,
@@ -40,20 +40,26 @@ const HomeScreen: React.FC = () => {
     loadMore,
   } = useCompositionsWithPagination(10, { active: true });
 
+  // Chuyển đổi dữ liệu sang định dạng hỗ trợ nhiều loại item (Multi-type list)
   const listData = useMemo<ListItem[]>(() => {
     if (!compositions || compositions.length === 0) return [];
 
     const result: ListItem[] = [];
     compositions.forEach((comp, index) => {
-      result.push({ type: 'composition', data: comp });
-      // Show ad at positions 2, 9, 16, 23... (every 7 items starting from 2nd)
+      // Chèn quảng cáo định kỳ (mỗi 7 item chèn 1 ad)
       if ((index + 1) % 7 === 1) {
         result.push({ type: 'ad', id: `ad-${index}` });
       }
+      result.push({ type: 'composition', data: comp });
     });
 
     return result;
   }, [compositions]);
+
+  // Tối ưu v2: Giúp list quản lý bộ nhớ tái chế hiệu quả hơn
+  const getItemType = useCallback((item: ListItem) => {
+    return item.type;
+  }, []);
 
   const renderItem = useCallback(
     ({ item }: { item: ListItem }) => {
@@ -67,7 +73,7 @@ const HomeScreen: React.FC = () => {
 
   const keyExtractor = useCallback((item: ListItem) => {
     if (item.type === 'ad') return item.id;
-    return item.data.name.toString();
+    return `comp-${item.data.compId || item.data.name}`;
   }, []);
 
   const ListHeader = useMemo(
@@ -88,27 +94,16 @@ const HomeScreen: React.FC = () => {
                 }
                 style={styles.filterButton}
               >
-                {/* Wrapper để định vị icon Fire đè lên icon Lightbulb */}
-                <View style={styles.iconWrapper}>
-                  {/* Icon chính: Bóng đèn (Gợi ý) */}
-                  <Icon
-                    name="lightbulb"
-                    color={colors.yellow}
-                    size={20}
-                    weight="regular"
-                  />
-                </View>
                 <View style={styles.hotBadge}>
                   <Icon
                     name="fire"
-                    color="#ef4444" // Màu đỏ cam cháy bỏng
+                    color="#ff0055" 
                     size={20}
-                    weight="fill" // Dùng fill cho nổi bật
+                    weight="fill" 
                   />
                 </View>
                 <Text style={styles.filterButtonText}>
-                  {(translations as { smartRecommendation?: string })
-                    .smartRecommendation ?? 'Smart Team'}
+                  {translations.smartRecommendation ?? 'Smart Team'}
                 </Text>
               </RNBounceable>
             </View>
@@ -116,7 +111,7 @@ const HomeScreen: React.FC = () => {
         </View>
       </View>
     ),
-    [styles, colors.yellow, colors.text], // Removed selectedUnits, translations, handleClearFilter from dependencies
+    [styles, colors.text],
   );
 
   const ListFooter = useCallback(() => {
@@ -148,65 +143,58 @@ const HomeScreen: React.FC = () => {
     }
   }, [hasMore, isLoadingMore, isLoading, loadMore]);
 
-  // Error State Render
   if (isError) {
     return (
-      <SafeAreaView style={styles.container}>
-        {ListHeader}
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 20,
-          }}>
-          <Text color={colors.danger} style={{ fontSize: 20, fontWeight: 'bold' }}>
-            {translations.errorLoadingCompositions}
-          </Text>
-          <Text
-            color={colors.placeholder}
-            style={{ marginTop: 8, marginBottom: 16 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <Text h4 color={colors.danger}>{translations.errorLoadingCompositions}</Text>
+          <Text color={colors.placeholder} style={{ textAlign: 'center', marginVertical: 10 }}>
             {error?.message || translations.somethingWentWrong}
           </Text>
-          <RNBounceable
-            onPress={refresh}
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              backgroundColor: colors.primary,
-              borderRadius: 8,
-            }}>
-            <Text color="#fff" style={{ fontWeight: '600' }}>
-              {translations.retry}
-            </Text>
+          <RNBounceable onPress={refresh} style={internalStyles.retryButton}>
+            <Text color="#fff" bold>{translations.retry}</Text>
           </RNBounceable>
         </View>
       </SafeAreaView>
     );
   }
 
-  // Render FlashList
   return (
-    <FlashList
-      data={listData}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      contentContainerStyle={styles.listContent}
-      
-      // Components
-      ListHeaderComponent={ListHeader}
-      ListFooterComponent={ListFooter}
-      ListEmptyComponent={ListEmpty}
-      
-      // Actions
-      refreshing={isRefetching}
-      onRefresh={refresh}
-      onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.3}
-      showsVerticalScrollIndicator={false}
-      removeClippedSubviews={false}
-    />
+      <FlashList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        contentContainerStyle={styles.listContent}
+        
+        // Tối ưu v2: Phân loại pool tái chế để tránh lag khi scroll
+        getItemType={getItemType} 
+        
+        // Tối ưu v2: Tự động giữ vị trí scroll khi load thêm data (pagination)
+        maintainVisibleContentPosition={{
+          autoscrollToTopThreshold: 0,
+        }}
+        
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        ListEmptyComponent={ListEmpty}
+        
+        refreshing={isRefetching}
+        onRefresh={refresh}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5} 
+        showsVerticalScrollIndicator={false}
+      />
   );
 };
+
+const internalStyles = StyleSheet.create({
+  retryButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#ff0055',
+    borderRadius: 12,
+    marginTop: 10
+  }
+});
 
 export default HomeScreen;

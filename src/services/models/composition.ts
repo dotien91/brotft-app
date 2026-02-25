@@ -79,6 +79,7 @@ export interface ICompositionsQueryParams {
   tier?: string; // S, A, B, C, D
   units?: string; // Comma-separated units: "garen,jarvaniv"
   searchInAllArrays?: boolean;
+  active?: boolean;
 }
 
 export interface ICompositionsResponse {

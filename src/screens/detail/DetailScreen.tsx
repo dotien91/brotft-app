@@ -24,6 +24,7 @@ import BannerAdItem from '@screens/home/components/banner-ad-item/BannerAdItem';
 import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS } from '@shared-constants';
 import storage from '@services/local-storage';
+import { isAndroid } from '@freakycoder/react-native-helpers';
 
 const DETAIL_SCREEN_ENTER_COUNT_KEY = 'detail_screen_enter_count';
 
@@ -529,7 +530,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
       </ScrollView>
 
       {/* Banner ad cố định bottom, chèn paddingBottom đẩy nội dung lên trên navigation bar */}
-      <View style={[styles.bannerAdBottom, { paddingBottom: insets.bottom }]}>
+      <View style={[styles.bannerAdBottom, { paddingBottom: isAndroid ? insets.bottom : 0 }]}>
         <BannerAdItem />
       </View>
     </SafeAreaView>

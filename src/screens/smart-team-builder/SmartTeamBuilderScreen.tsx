@@ -35,7 +35,7 @@ const SmartTeamBuilderScreen: React.FC = () => {
   const hasTrackingPermission = useStore((state) => state.hasTrackingPermission);
 
   const [index, setIndex] = useState(0);
-  
+
   // --- STATE LƯU TRỮ LỰA CHỌN ---
   const [selectedUnitApiNames, setSelectedUnitApiNames] = useState<string[]>([]);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
@@ -118,7 +118,7 @@ const SmartTeamBuilderScreen: React.FC = () => {
   const onFilterAction = useCallback(() => {
     const nextCount = getStoredFilterCount() + 1;
     storage.set(SMART_BUILDER_FILTER_COUNT_KEY, nextCount);
-    if (nextCount % 5 === 0) {
+    if (nextCount % 6 === 0) {
       maybeShowInterstitial();
     }
   }, [getStoredFilterCount, maybeShowInterstitial]);
@@ -255,19 +255,20 @@ const SmartTeamBuilderScreen: React.FC = () => {
       <ScreenHeader title={translations.smartBuilder} />
 
       <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-     
-      <View style={{ height: 240 }}>
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          renderTabBar={renderTabBar}
-          onIndexChange={setIndex}
-          initialLayout={{ width: layout.width }}
-          lazy={true}
-          swipeEnabled={false}
-        />
-      </View>
-      <View style={{height: 12}} />
+
+        <View style={{ height: 240 }}>
+          <TabView
+            navigationState={{ index, routes }}
+            renderScene={renderScene}
+            renderTabBar={renderTabBar}
+            onIndexChange={setIndex}
+            initialLayout={{ width: layout.width }}
+            lazy={true}
+            swipeEnabled={false}
+          />
+        </View>
+        <View style={{ height: 12 }} />
+        <View style={styles.selectionWrapper}>
         <SelectedHeroesSection
           selectedUnitApiNames={selectedUnitApiNames}
           localUnitsMap={localUnitsMap}
@@ -285,15 +286,17 @@ const SmartTeamBuilderScreen: React.FC = () => {
         />
         {hasSelection ? (
           <TouchableOpacity
-  onPress={handleClearAll}
-  style={styles.clearAllBtn}
-  activeOpacity={0.7}>
-  <Icon name="trash" color={palette.danger} size={16} /> {/* Thêm icon thùng rác sẽ cực kỳ rõ nghĩa */}
-  <Text style={[styles.clearAllText, { color: colors.danger, marginLeft: 8 }]}>
-    {translations.clearAll}
-  </Text>
-</TouchableOpacity>
+            onPress={handleClearAll}
+            style={styles.clearAllBtn}
+            activeOpacity={0.7}
+          >
+            <Icon name="trash" color={colors.danger || palette.danger} size={14} />
+            <Text style={[styles.clearAllText, { color: colors.danger || palette.danger }]}>
+              {translations.clearAll}
+            </Text>
+          </TouchableOpacity>
         ) : null}
+        </View>
         <RecommendedTeamsSection
           matchedTeams={matchedTeams}
           isSearching={isSearching}
@@ -308,21 +311,29 @@ const SmartTeamBuilderScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   clearAllBtn: {
+    alignSelf: 'flex-end', // Đẩy nút sang góc phải
     marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    paddingVertical: 8,
-    flexDirection: 'row', // Để icon và chữ nằm ngang
+    marginTop: 4,          // Giảm khoảng cách trên
+    marginBottom: 8,       // Giảm khoảng cách dưới
+    paddingVertical: 4,    // Giảm padding
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    // Không dùng Border hoặc dùng border rất nhạt
-    borderBottomWidth: 1, 
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 10,
   },
   clearAllText: { 
-    fontSize: 13, 
+    fontSize: 12,          // Chữ nhỏ lại một chút để thanh thoát hơn
     fontWeight: '500',
-    textDecorationLine: 'underline' // Gạch chân nhìn giống link xóa nhanh
+    marginLeft: 6,         // Khoảng cách giữa icon và chữ
+    textDecorationLine: 'underline' 
   },
+  selectionWrapper: {
+    position: 'relative',
+  },
+
   tabBar: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1 },
   tab: { paddingHorizontal: 0 },
   tabLabel: { fontSize: 14, fontWeight: '600', textTransform: 'none' as const },

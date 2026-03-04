@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1,
   },
-  divider: { height: 8, opacity: 0.15 },
+  divider: { opacity: 0.15 },
 });
 
 export default SelectedHeroesSection;

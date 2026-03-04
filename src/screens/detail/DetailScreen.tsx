@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { View, ScrollView, useWindowDimensions, ActivityIndicator, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// Đã thêm useSafeAreaInsets vào import dưới đây
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, useRoute, useFocusEffect } from '@react-navigation/native';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import createStyles from './DetailScreen.style';
@@ -112,7 +113,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
   const route = useRoute();
   const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { width: windowWidth } = useWindowDimensions();
+  
+  // Lấy thông tin vùng an toàn (notch, thanh điều hướng Android/iOS)
+  const insets = useSafeAreaInsets();
+  
   const language = useStore((state) => state.language);
   const adsSdkInitAttempted = useStore((state) => state.adsSdkInitAttempted);
   const adsSdkInitialized = useStore((state) => state.adsSdkInitialized);
@@ -435,7 +439,9 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
+        // Thêm insets.bottom + 60 (độ cao ước tính của banner) để paddingBottom rộng hơn
+        // giúp kéo tận cùng nội dung không bị che khuất
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 160 + insets.bottom }]}
         showsVerticalScrollIndicator={false}>
         <BackButton />
         <View style={styles.topHeader}>
@@ -522,8 +528,8 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
         <CoreChampion coreChampion={team.coreChampion} />
       </ScrollView>
 
-      {/* Banner ad cố định bottom */}
-      <View style={styles.bannerAdBottom}>
+      {/* Banner ad cố định bottom, chèn paddingBottom đẩy nội dung lên trên navigation bar */}
+      <View style={[styles.bannerAdBottom, { paddingBottom: insets.bottom }]}>
         <BannerAdItem />
       </View>
     </SafeAreaView>
@@ -531,4 +537,3 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
 };
 
 export default DetailScreen;
-

@@ -106,7 +106,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
     return {
       innerSize: size,
       outerSize: size, 
-      itemSize: size * 0.28,
+      itemSize: size * 0.328,
       itemRadius: 99, 
       unlockSize: unlockSize,
       itemsOffset: 0, 
@@ -190,7 +190,7 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
                 style={{
                   width: metrics.itemSize,
                   height: metrics.itemSize,
-                  borderWidth: 1,
+                  borderWidth: 0.5,
                   borderColor: ITEM_BORDER_COLOR,
                   backgroundColor: ITEM_BG_COLOR,
                   borderRadius: metrics.itemRadius, 

@@ -1,11 +1,13 @@
 import axiosInstance from './axios';
 import {getDeviceId} from '../device-id';
 import {getCurrentVersion} from '../version-check';
+import { Platform } from 'react-native';
 
 export interface IScreenTrackingRequest {
   screenName: string;
   deviceId: string;
   appVersion: string;
+  os: string;
 }
 
 export interface IScreenTrackingResponse {
@@ -32,6 +34,7 @@ export const trackScreen = async (
       '/screen-trackings',
       {
         screenName,
+        os: Platform.OS,
         deviceId: getDeviceId(),
         appVersion: getCurrentVersion() || '0.0.0',
       } as IScreenTrackingRequest,

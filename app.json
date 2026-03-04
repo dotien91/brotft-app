@@ -1,4 +1,8 @@
 {
   "name": "ChessBuddy",
-  "displayName": "ChessBuddy"
+  "displayName": "ChessBuddy",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-9275414127217585~1389409109",
+    "ios_app_id": "ca-app-pub-9275414127217585~1389409109" 
+  }
 }

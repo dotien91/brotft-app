@@ -64,7 +64,7 @@ const HomeScreen: React.FC = () => {
   const renderItem = useCallback(
     ({ item }: { item: ListItem }) => {
       if (item.type === 'ad') {
-        return <BannerAdItem />;
+        return <BannerAdItem style={{ marginBottom: 12 }} />;
       }
       return <TeamCard composition={item.data} />;
     },

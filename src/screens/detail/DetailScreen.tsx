@@ -353,7 +353,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
           console.error('Error loading items data:', error);
         }
       }
-
       return {
         ...compositionData,
         synergies: compositionData.synergies || [],
@@ -416,7 +415,6 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
       </SafeAreaView>
     );
   }
-
   // Render error state
   if (isError && compIdFromParams) {
     return (
@@ -481,7 +479,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
           </View>
 
           {/* 3. COPY BUTTON (RIGHT) */}
-          <CopyTeamcodeButton teamcode={team.teamcode} />
+          {team?.teamCode && <CopyTeamcodeButton teamcode={team.teamCode} />}
         </View>
 
         {/* Description Section */}

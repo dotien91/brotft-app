@@ -111,7 +111,7 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
             )}
             {isSelected && (
               <View style={styles.selectedOverlay}>
-                <Icon name="checkmark" type={IconType.Ionicons} size={16} color="#fff" />
+                <Icon name="check" size={16} color="#fff" />
               </View>
             )}
           </View>

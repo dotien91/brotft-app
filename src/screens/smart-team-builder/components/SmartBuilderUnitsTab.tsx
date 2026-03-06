@@ -87,7 +87,7 @@ const SmartBuilderUnitsTab: React.FC<SmartBuilderUnitsTabProps> = ({
             {/* Chuyển Border vào chung với lớp phủ để không bóp méo hình ảnh */}
             {isSelected && (
               <View style={[styles.selectedOverlay, { borderColor: colors.primary, borderWidth: 2 }]}>
-                <Icon name="checkmark" type={IconType.Ionicons} size={16} color="#fff" />
+                <Icon name="check" type={IconType.Ionicons} size={16} color="#fff" />
               </View>
             )}
           </View>

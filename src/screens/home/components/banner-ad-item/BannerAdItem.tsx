@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {View, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, StyleProp, ViewStyle} from 'react-native';
 import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
 import {AD_UNIT_IDS} from '@shared-constants';
 import LoadingList from '@shared-components/loading.list.component';
@@ -7,21 +7,22 @@ import useStore from '@services/zustand/store';
 
 interface BannerAdItemProps {
   height?: number;
+  style?: StyleProp<ViewStyle>;
 }
 
-const BannerAdItem: React.FC<BannerAdItemProps> = () => {
+const BannerAdItem: React.FC<BannerAdItemProps> = ({ style }) => {
   const adsSdkInitAttempted = useStore((state) => state.adsSdkInitAttempted);
   const adsSdkInitialized = useStore((state) => state.adsSdkInitialized);
   const hasTrackingPermission = useStore((state) => state.hasTrackingPermission);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  const handleAdLoaded = () => {
+  const handleAdLoaded = (e: any) => {
     setIsLoading(false);
     setHasError(false);
   };
 
-  const handleAdFailedToLoad = () => {
+  const handleAdFailedToLoad = (e: any) => {
     setIsLoading(false);
     setHasError(true);
   };
@@ -30,7 +31,7 @@ const BannerAdItem: React.FC<BannerAdItemProps> = () => {
     return null;
   }
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style && style]}>
       {isLoading && !hasError && <LoadingList numberItem={1} />}
       {!hasError && (
         <BannerAd
@@ -39,7 +40,7 @@ const BannerAdItem: React.FC<BannerAdItemProps> = () => {
           requestOptions={{
             requestNonPersonalizedAdsOnly: !hasTrackingPermission,
           }}
-          onAdLoaded={handleAdLoaded}
+          onAdLoaded={(e) => handleAdLoaded(e)}
           onAdFailedToLoad={handleAdFailedToLoad}
         />
       )}
@@ -50,8 +51,8 @@ const BannerAdItem: React.FC<BannerAdItemProps> = () => {
 const styles = StyleSheet.create({
   container: {
     borderRadius: 16,
-    marginBottom: 16,
     justifyContent: 'center',
+    height: 60,
   },
 });
 

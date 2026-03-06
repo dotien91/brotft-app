@@ -114,7 +114,7 @@ const SmartBuilderAugmentsTab: React.FC<SmartBuilderAugmentsTabProps> = ({
 
             {isSelected && (
               <View style={styles.selectedOverlay}>
-                <Icon name="checkmark" type={IconType.Ionicons} size={16} color="#fff" />
+                <Icon name="check" type={IconType.Ionicons} size={16} color="#fff" />
               </View>
             )}
           </View>

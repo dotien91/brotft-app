@@ -45,7 +45,6 @@ const itemImages: Record<string, any> = {
   'tft9_item_ornnhorizonfocus': require('@assets/images/items/tft9_item_ornnhorizonfocus.png'),
   'tft9_item_ornnhullbreaker': require('@assets/images/items/tft9_item_ornnhullbreaker.png'),
   // TFT7 Items
-  'tft7_item_shimmerscalegamblersblade': require('@assets/images/items/tft7_item_shimmerscalegamblersblade.png'),
   'tft7_item_shimmerscalemogulsmail': require('@assets/images/items/tft7_item_shimmerscalemogulsmail.png'),
   // TFT5 Radiant Items
   'tft5_item_adaptivehelmradiant': require('@assets/images/items/tft5_item_adaptivehelmradiant.png'),
@@ -74,7 +73,6 @@ const itemImages: Record<string, any> = {
   'tft5_item_rabadonsdeathcapradiant': require('@assets/images/items/tft5_item_rabadonsdeathcapradiant.png'),
   'tft5_item_rapidfirecannonradiant': require('@assets/images/items/tft5_item_rapidfirecannonradiant.png'),
   'tft5_item_redemptionradiant': require('@assets/images/items/tft5_item_redemptionradiant.png'),
-  'tft5_item_runaanshurricaneradiant': require('@assets/images/items/tft5_item_runaanshurricaneradiant.png'),
   'tft5_item_spearofshojinradiant': require('@assets/images/items/tft5_item_spearofshojinradiant.png'),
   'tft5_item_spectralgauntletradiant': require('@assets/images/items/tft5_item_spectralgauntletradiant.png'),
   'tft5_item_statikkshivradiant': require('@assets/images/items/tft5_item_statikkshivradiant.png'),
@@ -154,7 +152,6 @@ const itemImages: Record<string, any> = {
   'tft_item_spatula': require('@assets/images/items/tft_item_spatula.png'),
   'tft_item_spearofshojin': require('@assets/images/items/tft_item_spearofshojin.png'),
   'tft_item_spectralgauntlet': require('@assets/images/items/tft_item_spectralgauntlet.png'),
-  'tft_item_statikkshiv': require('@assets/images/items/tft_item_statikkshiv.png'),
   'tft_item_steraksgage': require('@assets/images/items/tft_item_steraksgage.png'),
   'tft_item_tacticiansring': require('@assets/images/items/tft_item_tacticiansring.png'),
   'tft_item_tacticiansscepter': require('@assets/images/items/tft_item_tacticiansscepter.png'),
@@ -163,6 +160,7 @@ const itemImages: Record<string, any> = {
   'tft_item_titansresolve': require('@assets/images/items/tft_item_titansresolve.png'),
   'tft_item_unstableconcoction': require('@assets/images/items/tft_item_unstableconcoction.png'),
   'tft_item_warmogsarmor': require('@assets/images/items/tft_item_warmogsarmor.png'),
+  'tft_item_statikkshiv': require('@assets/images/items/tft_item_statikkshiv.png'),
 };
 
 /**

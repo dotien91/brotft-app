@@ -11,7 +11,7 @@
       android:supportsRtl="true">
       <meta-data
           android:name="com.google.android.gms.ads.APPLICATION_ID"
-          android:value="ca-app-pub-9275414127217585~1389409109"/>
+          android:value="ca-app-pub-9275414127217585~1082406822"/>
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

@@ -140,7 +140,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Icon
-                name="language"
+                name="translate"
                 type={IconType.Ionicons}
                 color={colors.primary}
                 size={24}
@@ -169,7 +169,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                   {getCurrentLanguageLabel()}
                 </Text>
                 <Icon
-                  name="chevron-down"
+                  name="caret-down"
                   type={IconType.Ionicons}
                   color={colors.placeholder}
                   size={20}

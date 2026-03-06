@@ -143,6 +143,7 @@ interface Style {
   sectionTitle: TextStyle;
   descriptionSection: ViewStyle;
   descriptionText: TextStyle;
+  copyButton: ViewStyle;
 }
 
 export default (theme: ExtendedTheme) => {
@@ -989,6 +990,13 @@ export default (theme: ExtendedTheme) => {
       backgroundColor: colors.background,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    copyButton: {
+      position: 'absolute',
+      right: 0,
+      top: 120,
+      backgroundColor: "red",
+      zIndex: 11,
     },
   });
 };

@@ -10,14 +10,15 @@ import createStyles from './CopyTeamcodeButton.style';
 interface CopyTeamcodeButtonProps {
   teamcode?: string | null;
   style?: ViewStyle;
+  fromDetail?: boolean;
 }
 
-const CopyTeamcodeButton: React.FC<CopyTeamcodeButtonProps> = ({teamcode, style}) => {
+const CopyTeamcodeButton: React.FC<CopyTeamcodeButtonProps> = ({teamcode, style, fromDetail = false}) => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = createStyles(theme);
   const [modalVisible, setModalVisible] = useState(false);
-
+console.log("fromDetailfromDetail", fromDetail);
   // Auto hide modal after 1.5 seconds
   useEffect(() => {
     if (!modalVisible) return;
@@ -32,7 +33,6 @@ const CopyTeamcodeButton: React.FC<CopyTeamcodeButtonProps> = ({teamcode, style}
     Clipboard.setString(teamcode);
     setModalVisible(true);
   }, [teamcode]);
-
   if (!teamcode) {
     // Return a placeholder of same size to keep layout consistent
     return <View style={[styles.buttonPlaceholder, style]} />;
@@ -42,9 +42,8 @@ const CopyTeamcodeButton: React.FC<CopyTeamcodeButtonProps> = ({teamcode, style}
     <>
       <RNBounceable onPress={handlePress} style={[styles.button, style]}>
         <Icon 
-          name="copy-outline" 
-          type={IconType.Ionicons} 
-          color={colors.text} 
+          name="copy" 
+          color={fromDetail ? colors.white : colors.text} 
           size={18} 
         />
       </RNBounceable>

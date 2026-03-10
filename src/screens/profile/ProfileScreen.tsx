@@ -1,4 +1,4 @@
-import React, {useMemo, useEffect, useState, useRef} from 'react';
+import React, {useMemo, useEffect, useState, useRef, useCallback} from 'react';
 import {View, ScrollView, Modal, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
@@ -14,6 +14,7 @@ import {checkAndFetchDataByLocale} from '@services/api/data';
 import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
 import {SCREENS} from '@shared-constants';
 import LocalStorage from '@services/local-storage';
+import {useStallionModal} from 'react-native-stallion';
 
 interface ProfileScreenProps {}
 
@@ -25,10 +26,40 @@ const languages = [
   {code: 'es-ES', label: 'Spanish', flag: '🇪🇸'},
 ];
 
+const SETTINGS_TAP_COUNT = 4;
+const SETTINGS_TAP_RESET_MS = 1500;
+
 const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const {showModal: showStallionModal} = useStallionModal();
+
+  const settingsTapCountRef = useRef(0);
+  const settingsTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSettingsHeaderPress = useCallback(() => {
+    if (settingsTapTimeoutRef.current) {
+      clearTimeout(settingsTapTimeoutRef.current);
+      settingsTapTimeoutRef.current = null;
+    }
+    settingsTapCountRef.current += 1;
+    if (settingsTapCountRef.current >= SETTINGS_TAP_COUNT) {
+      settingsTapCountRef.current = 0;
+      showStallionModal();
+      return;
+    }
+    settingsTapTimeoutRef.current = setTimeout(() => {
+      settingsTapCountRef.current = 0;
+      settingsTapTimeoutRef.current = null;
+    }, SETTINGS_TAP_RESET_MS);
+  }, [showStallionModal]);
+
+  useEffect(() => {
+    return () => {
+      if (settingsTapTimeoutRef.current) clearTimeout(settingsTapTimeoutRef.current);
+    };
+  }, []);
 
   const language = useStore((state: StoreState) => state.language);
   const setLanguage = useStore((state: StoreState) => state.setLanguage);
@@ -97,8 +128,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
           
-          {/* Header */}
-          <ScreenHeader title={translations.settings} />
+          {/* Header — bấm 4 lần để mở Stallion modal */}
+          <TouchableOpacity activeOpacity={1} onPress={handleSettingsHeaderPress}>
+            <ScreenHeader title={translations.settings} />
+          </TouchableOpacity>
 
           {/* Appearance Section - Tạm ẩn */}
           {/* <View style={styles.section}>

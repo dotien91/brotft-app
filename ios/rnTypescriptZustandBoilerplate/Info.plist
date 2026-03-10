@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>StallionProjectId</key>
+	<string>69af8af25d1782299c5aa9aa</string>
+	<key>StallionAppToken</key>
+	<string>spb_JIMbKjqx_vhJK4uktS3kl7RhKJvsgSpxFNaj-9_mgd</string>
 	<key>CFBundleDisplayName</key>
 	<string>ChessBuddy</string>
 	<key>CFBundleExecutable</key>

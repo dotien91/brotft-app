@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ChessBuddy</string>
+    <string name="StallionProjectId">69af8af25d1782299c5aa9aa</string>
+    <string name="StallionAppToken">spb_JIMbKjqx_vhJK4uktS3kl7RhKJvsgSpxFNaj-9_mgd</string>
 </resources>

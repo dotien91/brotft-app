@@ -20,11 +20,13 @@ import {
   RecommendedTeamsSection,
 } from './components';
 import { translations } from '../../shared/localization';
-import storage from '@services/local-storage';
 import { palette } from '@theme/themes';
 import Icon from '@shared-components/icon/Icon';
 
-const SMART_BUILDER_FILTER_COUNT_KEY = 'smart_builder_filter_count';
+/** Đếm số lần chọn/bỏ filter (unit/item/augment) trong phiên app — reset khi thoát app / reload. */
+let smartBuilderSessionFilterCount = 0;
+/** Hiển thị interstitial mỗi N lần filter trong cùng session (lần 5, 10, …). */
+const INTERSTITIAL_EVERY_N_SMART_BUILDER_FILTERS = 5;
 
 const SmartTeamBuilderScreen: React.FC = () => {
   const theme = useTheme();
@@ -47,10 +49,6 @@ const SmartTeamBuilderScreen: React.FC = () => {
     });
   }, [hasTrackingPermission]);
 
-  const getStoredFilterCount = useCallback(() => {
-    const n = storage.getNumber(SMART_BUILDER_FILTER_COUNT_KEY);
-    return typeof n === 'number' && !Number.isNaN(n) ? n : 0;
-  }, []);
   const isInterstitialLoadedRef = useRef(false);
   const isInterstitialLoadingRef = useRef(false);
   const pendingShowRef = useRef(false);
@@ -116,12 +114,12 @@ const SmartTeamBuilderScreen: React.FC = () => {
   );
 
   const onFilterAction = useCallback(() => {
-    const nextCount = getStoredFilterCount() + 1;
-    storage.set(SMART_BUILDER_FILTER_COUNT_KEY, nextCount);
-    if (nextCount % 6 === 0) {
+    smartBuilderSessionFilterCount += 1;
+    const nextCount = smartBuilderSessionFilterCount;
+    if (nextCount % INTERSTITIAL_EVERY_N_SMART_BUILDER_FILTERS === 0) {
       maybeShowInterstitial();
     }
-  }, [getStoredFilterCount, maybeShowInterstitial]);
+  }, [maybeShowInterstitial]);
 
   const routes: Route[] = useMemo(
     () => [

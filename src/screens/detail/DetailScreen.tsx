@@ -23,10 +23,12 @@ import CoreChampion from './components/CoreChampion';
 import BannerAdItem from '@screens/home/components/banner-ad-item/BannerAdItem';
 import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS } from '@shared-constants';
-import storage from '@services/local-storage';
 import { isAndroid } from '@freakycoder/react-native-helpers';
 
-const DETAIL_SCREEN_ENTER_COUNT_KEY = 'detail_screen_enter_count';
+/** Đếm số lần mở màn detail trong phiên app (reset khi thoát app / reload). */
+let detailScreenSessionVisitCount = 0;
+/** Hiển thị interstitial mỗi N lần vào detail trong cùng session (lần 5, 10, ...) */
+const INTERSTITIAL_EVERY_N_DETAIL_VISITS = 5;
 
 type TeamUnitItem = {
   id?: string;
@@ -157,9 +159,10 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
       isInterstitialLoadingRef.current = false;
       pendingShowRef.current = false;
 
+      detailScreenSessionVisitCount += 1;
+      const nextCount = detailScreenSessionVisitCount;
+
       if (!adsSdkInitAttempted || !adsSdkInitialized) {
-        const nextCount = (storage.getNumber(DETAIL_SCREEN_ENTER_COUNT_KEY) ?? 0) + 1;
-        storage.set(DETAIL_SCREEN_ENTER_COUNT_KEY, nextCount);
         return;
       }
 
@@ -183,9 +186,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
         pendingShowRef.current = false;
       });
 
-      const nextCount = (storage.getNumber(DETAIL_SCREEN_ENTER_COUNT_KEY) ?? 0) + 1;
-      storage.set(DETAIL_SCREEN_ENTER_COUNT_KEY, nextCount);
-      if (nextCount % 4 === 0) {
+      if (nextCount % INTERSTITIAL_EVERY_N_DETAIL_VISITS === 0) {
         maybeShowInterstitial();
       } else {
         requestLoadInterstitial();

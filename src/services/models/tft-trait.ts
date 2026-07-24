@@ -23,11 +23,13 @@ export interface ITftTraitUnit {
 
 export interface ITftTrait {
   id: string | number;
+  season_id?: string;
   apiName: string; // Unique
   name: string;
   enName?: string | null;
   desc?: string | null;
   icon?: string | null;
+  type?: 'origin' | 'class' | null;
   effects?: ITftTraitEffect[];
   units?: ITftTraitUnit[];
   unitProperties?: Record<string, any>;
@@ -37,6 +39,7 @@ export interface ITftTrait {
 }
 
 export interface ITftTraitsFilters {
+  season_id?: string;
   name?: string;
   apiName?: string;
   type?: 'origin' | 'class';
@@ -48,6 +51,7 @@ export interface ITftTraitsSort {
 }
 
 export interface ITftTraitsQueryParams {
+  season_id?: string;
   page?: number;
   limit?: number;
   filters?: ITftTraitsFilters;
@@ -81,4 +85,3 @@ export interface IUpdateTftTraitDto {
   units?: ITftTraitUnit[];
   unitProperties?: Record<string, any>;
 }
-

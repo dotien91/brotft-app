@@ -68,7 +68,6 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
 
   // Ensure units is always an array
   const unitsList = units || [];
-
   // Create list items with banner ad as first item
   type ListItem = {type: 'unit'; data: typeof unitsList[0]} | {type: 'ad'; id: string};
   
@@ -262,4 +261,3 @@ const UnitsTab: React.FC<UnitsTabProps> = ({enabled = true}) => {
 };
 
 export default UnitsTab;
-

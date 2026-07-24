@@ -3,7 +3,6 @@ import { View, ScrollView, StyleSheet, StatusBar, useWindowDimensions, Touchable
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useTheme } from '@react-navigation/native';
 import { TabView, TabBar, Route } from 'react-native-tab-view';
-import { getCachedUnits, getCachedItems, getCachedAugments } from '@services/api/data';
 import { useSmartSearchCompositions } from './useSmartTeam';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import ScreenHeader from '@shared-components/screen-header/ScreenHeader';
@@ -22,6 +21,8 @@ import {
 import { translations } from '../../shared/localization';
 import { palette } from '@theme/themes';
 import Icon from '@shared-components/icon/Icon';
+import {useTftUnits} from '@services/api/hooks/listQueryHooks';
+import {getTftUnitLookupKeys} from '../../utils/tft-images';
 
 /** Đếm số lần chọn/bỏ filter (unit/item/augment) trong phiên app — reset khi thoát app / reload. */
 let smartBuilderSessionFilterCount = 0;
@@ -131,20 +132,26 @@ const SmartTeamBuilderScreen: React.FC = () => {
   );
 
   // --- LẤY DỮ LIỆU TỪ LOCAL CACHE ---
-  const localUnitsMap = useMemo(() => {
-    const cached = getCachedUnits();
-    return cached ? Object.values(cached) : [];
-  }, []);
+  const {data: unitsResponse} = useTftUnits({
+    page: 1,
+    limit: 100,
+    minimal: true,
+  });
 
-  const localItemsMap = useMemo(() => {
-    const cached = typeof getCachedItems === 'function' ? getCachedItems() : null;
-    return cached ? Object.values(cached) : [];
-  }, []);
+  const localUnitsMap = useMemo(
+    () => unitsResponse?.data || [],
+    [unitsResponse?.data],
+  );
 
-  const localAugmentsMap = useMemo(() => {
-    const cached = typeof getCachedAugments === 'function' ? getCachedAugments() : null;
-    return cached ? Object.values(cached) : [];
-  }, []);
+  const unitsByKey = useMemo(() => {
+    const lookup = new Map<string, any>();
+    localUnitsMap.forEach((unit: any) => {
+      getTftUnitLookupKeys(unit).forEach(key => {
+        lookup.set(key, unit);
+      });
+    });
+    return lookup;
+  }, [localUnitsMap]);
 
   // --- GỌI API TÌM KIẾM ĐỘI HÌNH ---
   const searchParams = useMemo(() => {
@@ -274,12 +281,10 @@ const SmartTeamBuilderScreen: React.FC = () => {
         />
         <SelectedItemsSection
           selectedItemIds={selectedItemIds}
-          localItemsMap={localItemsMap}
           onToggleItem={handleToggleItem}
         />
         <SelectedAugmentsSection
           selectedAugmentApiNames={selectedAugmentApiNames}
-          localAugmentsMap={localAugmentsMap}
           onToggleAugment={handleToggleAugment}
         />
         {hasSelection ? (
@@ -297,6 +302,7 @@ const SmartTeamBuilderScreen: React.FC = () => {
         </View>
         <RecommendedTeamsSection
           matchedTeams={matchedTeams}
+          unitsByKey={unitsByKey}
           isSearching={isSearching}
           isFetching={isFetching}
           hasSelection={selectedUnitApiNames.length > 0 || selectedItemIds.length > 0 || selectedAugmentApiNames.length > 0}

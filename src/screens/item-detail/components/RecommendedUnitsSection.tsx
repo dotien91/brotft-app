@@ -1,6 +1,5 @@
 import React, {useMemo, useEffect} from 'react';
 import {View, ScrollView} from 'react-native';
-import FastImage from 'react-native-fast-image';
 import {useTheme} from '@react-navigation/native';
 import createStyles from './RecommendedUnitsSection.style';
 import RNBounceable from '@freakycoder/react-native-bounceable';
@@ -13,6 +12,7 @@ import * as NavigationService from 'react-navigation-helpers';
 import {SCREENS} from '@shared-constants';
 import useStore, {StoreState} from '@services/zustand/store';
 import Hexagon from '@screens/detail/components/Hexagon';
+import {getUnitImageUrl} from '../../../utils/tft-images';
 
 interface RecommendedUnitsSectionProps {
   units: string[];
@@ -89,7 +89,12 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
     if (!unitApiName) return {local: null, uri: '', primary: '', fallback: ''};
     return getUnitAvatar(unitApiName, 64);
   }, [unitApiName]);
-  const unitAvatar = avatar.local ? undefined : avatar.uri;
+  const apiImage = getUnitImageUrl(unit);
+  const imageSource = {
+    local: apiImage ? null : avatar.local,
+    uri: apiImage || '',
+  };
+  const unitAvatar = imageSource.local ? undefined : imageSource.uri;
 
   const borderColor = useMemo(() => {
     return getUnitCostBorderColor(unit?.cost, colors.highlight || '#94a3b8');
@@ -131,4 +136,3 @@ const RecommendedUnitCard: React.FC<RecommendedUnitCardProps> = ({
 };
 
 export default RecommendedUnitsSection;
-

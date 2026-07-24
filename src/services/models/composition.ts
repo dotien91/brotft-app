@@ -43,6 +43,7 @@ export interface ICompositionCarryItem {
 
 export interface IComposition {
   id: string;
+  season_id?: string;
   compId: string;
   name: string;
   plan: string;
@@ -74,6 +75,7 @@ export interface IComposition {
 }
 
 export interface ICompositionsQueryParams {
+  season_id?: string;
   page?: number;
   limit?: number;
   tier?: string; // S, A, B, C, D
@@ -91,4 +93,3 @@ export interface ISearchByUnitsDto {
   units: string[];
   searchInAllArrays?: boolean;
 }
-

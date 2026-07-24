@@ -1,5 +1,24 @@
+export type TftItemType =
+  | 'basic'
+  | 'combined'
+  | 'radiant'
+  | 'elusive'
+  | 'consumable'
+  | 'artifact';
+
+export const TFT_ITEM_TYPE_LABELS: Record<TftItemType, string> = {
+  basic: 'Basic',
+  combined: 'Combined',
+  radiant: 'Radiant',
+  elusive: 'Non-Craftable',
+  consumable: 'Consumable',
+  artifact: 'Artifact',
+};
+
 export interface ITftItem {
   id: string | number;
+  season_id?: string;
+  slug?: string;
   apiName: string; // Unique
   name: string;
   enName?: string | null;
@@ -14,7 +33,8 @@ export interface ITftItem {
   from?: string | null;
   itemId?: string | null;
   disabled?: boolean;
-  type?: string | null;
+  type?: TftItemType | null;
+  tier?: string | null;
   texture?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -22,6 +42,7 @@ export interface ITftItem {
 }
 
 export interface ITftItemsFilters {
+  season_id?: string;
   name?: string;
   apiName?: string;
   trait?: string;
@@ -34,6 +55,8 @@ export interface ITftItemsSort {
 }
 
 export interface ITftItemsQueryParams {
+  season_id?: string;
+  type?: TftItemType;
   page?: number;
   limit?: number;
   filters?: ITftItemsFilters;
@@ -49,6 +72,8 @@ export interface ITftItemsResponse {
 
 // DTOs for create and update
 export interface ICreateTftItemDto {
+  season_id?: string;
+  slug?: string;
   apiName: string; // Bắt buộc, unique
   name: string; // Bắt buộc
   enName?: string;
@@ -63,11 +88,13 @@ export interface ICreateTftItemDto {
   from?: string;
   itemId?: string;
   disabled?: boolean;
-  type?: string;
+  type?: TftItemType;
   texture?: string;
 }
 
 export interface IUpdateTftItemDto {
+  season_id?: string;
+  slug?: string;
   apiName?: string;
   name?: string;
   enName?: string;
@@ -82,7 +109,6 @@ export interface IUpdateTftItemDto {
   from?: string;
   itemId?: string;
   disabled?: boolean;
-  type?: string;
+  type?: TftItemType;
   texture?: string;
 }
-

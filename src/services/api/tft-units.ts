@@ -1,10 +1,9 @@
 import axiosInstance from './axios';
+import {TFT_SEASON_ID} from '@shared-constants';
 import type {
   ITftUnit,
   ITftUnitsQueryParams,
   ITftUnitsResponse,
-  ICreateTftUnitDto,
-  IUpdateTftUnitDto,
 } from '@services/models/tft-unit';
 
 // Get all TFT units with pagination and filters
@@ -12,6 +11,7 @@ export const getTftUnits = async (
   params?: ITftUnitsQueryParams,
 ): Promise<ITftUnitsResponse> => {
   const queryParams = new URLSearchParams();
+  queryParams.append('season_id', params?.season_id ?? TFT_SEASON_ID);
 
   if (params?.page) {
     queryParams.append('page', params.page.toString());
@@ -56,60 +56,33 @@ export const getTftUnits = async (
 
 // Get TFT unit by ID
 export const getTftUnitById = async (id: string): Promise<ITftUnit | null> => {
-  try {
-    const url = `/tft-units/${encodeURIComponent(id)}`;
-    const response = await axiosInstance.get<ITftUnit | null>(url);
-    return response.data;
-  } catch (error: any) {
-    throw error;
-  }
+  const url = `/tft-units/${encodeURIComponent(id)}?season_id=${encodeURIComponent(TFT_SEASON_ID)}`;
+  const response = await axiosInstance.get<ITftUnit | null>(url);
+  return response.data;
 };
 
 // Get TFT unit by API name
 export const getTftUnitByApiName = async (
   apiName: string,
 ): Promise<ITftUnit | null> => {
-  try {
-    const url = `/tft-units/api-name/${encodeURIComponent(apiName)}`;
-    const response = await axiosInstance.get<ITftUnit | null>(url);
-    return response.data;
-  } catch (error: any) {
-    throw error;
-  }
+  const response = await getTftUnits({
+    season_id: TFT_SEASON_ID,
+    page: 1,
+    limit: 1,
+    filters: {apiName},
+  });
+  return response.data[0] ?? null;
 };
 
 // Get TFT units by cost
 export const getTftUnitsByCost = async (
   cost: number,
 ): Promise<ITftUnit[]> => {
-  const response = await axiosInstance.get<ITftUnit[]>(
-    `/tft-units/cost/${cost}`,
-  );
+  const response = await getTftUnits({
+    season_id: TFT_SEASON_ID,
+    page: 1,
+    limit: 100,
+    filters: {cost},
+  });
   return response.data;
 };
-
-// Create TFT unit
-export const createTftUnit = async (
-  data: ICreateTftUnitDto,
-): Promise<ITftUnit> => {
-  const response = await axiosInstance.post<ITftUnit>(`/tft-units`, data);
-  return response.data;
-};
-
-// Update TFT unit
-export const updateTftUnit = async (
-  id: string,
-  data: IUpdateTftUnitDto,
-): Promise<ITftUnit | null> => {
-  const response = await axiosInstance.patch<ITftUnit | null>(
-    `/tft-units/${id}`,
-    data,
-  );
-  return response.data;
-};
-
-// Delete TFT unit
-export const deleteTftUnit = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/tft-units/${id}`);
-};
-

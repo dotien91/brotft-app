@@ -60,7 +60,7 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
   const displayComponents = localizedComposition ?? composition ?? [];
 
   // Get item image source (local only logic)
-  const imageSource = getItemIconImageSource(icon, apiName, 48);
+  const imageSource = getItemIconImageSource(icon, apiName, 48, data);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
@@ -71,7 +71,12 @@ const GuideItemItem: React.FC<GuideItemItemProps> = ({data, onPress}) => {
             source={imageSource.local}
             style={styles.icon}
             resizeMode="cover"
-            // onError handler cũ có thể giữ hoặc bỏ tùy logic deleteTftItem của bạn
+          />
+        ) : imageSource.uri ? (
+          <Image
+            source={{uri: imageSource.uri}}
+            style={styles.icon}
+            resizeMode="cover"
           />
         ) : null}
       </View>

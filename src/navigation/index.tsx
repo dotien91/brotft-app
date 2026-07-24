@@ -17,7 +17,6 @@ import GuideScreen from '@screens/guide/GuideScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
 import TraitDetailScreen from '@screens/traits/TraitDetailScreen';
 import ItemDetailScreen from '@screens/item-detail/ItemDetailScreen';
-import ChampionDetailScreen from '@screens/champion-detail/ChampionDetailScreen';
 import PrivacyScreen from '@screens/privacy/PrivacyScreen';
 import TermsScreen from '@screens/terms/TermsScreen';
 import FeedbackScreen from '@screens/feedback/FeedbackScreen';
@@ -54,7 +53,6 @@ const getTrackingScreenName = (routeName: string): string => {
     [SCREENS.UNIT_DETAIL]: 'unit-detail',
     [SCREENS.TRAIT_DETAIL]: 'trait-detail',
     [SCREENS.ITEM_DETAIL]: 'item-detail',
-    [SCREENS.CHAMPION_DETAIL]: 'champion-detail',
     [SCREENS.PRIVACY]: 'privacy',
     [SCREENS.TERMS]: 'terms',
     [SCREENS.FEEDBACK]: 'feedback',
@@ -208,9 +206,6 @@ const Navigation = () => {
         </Stack.Screen>
         <Stack.Screen name={SCREENS.ITEM_DETAIL}>
           {props => <ItemDetailScreen {...props} />}
-        </Stack.Screen>
-        <Stack.Screen name={SCREENS.CHAMPION_DETAIL}>
-          {props => <ChampionDetailScreen {...props} />}
         </Stack.Screen>
         <Stack.Screen name={SCREENS.PRIVACY} component={PrivacyScreen} />
         <Stack.Screen name={SCREENS.TERMS} component={TermsScreen} />

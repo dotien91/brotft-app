@@ -15,7 +15,6 @@ interface Augment {
 }
 
 const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
-  console.log("augments", augments);
   const theme = useTheme();
   const {colors} = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -28,7 +27,6 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
 
   const getAugmentIcon = (augmentName: string): string | null => {
     if (!augmentsData || Object.keys(augmentsData).length === 0) {
-      console.log("Not found augments data");
       return null;
     }
 
@@ -66,7 +64,6 @@ const AugmentsSection: React.FC<{augments: Augment[]}> = ({augments}) => {
       // Try to parse icon path and get MetaTFT URL
       const metatftUrl = getAugmentIconUrlFromPath(localizedAugment.icon);
       if (metatftUrl) {
-        console.log("metatftUrl", metatftUrl);
         return metatftUrl;
       }
     }

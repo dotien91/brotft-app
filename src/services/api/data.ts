@@ -1,5 +1,6 @@
 import axiosInstance from './axios'; // Đảm bảo đường dẫn đúng
 import LocalStorage from '@services/local-storage'; // Đảm bảo đường dẫn đúng
+import {TFT_SEASON_ID} from '@shared-constants';
 
 // ==========================================
 // 1. TYPES & CONSTANTS
@@ -7,6 +8,7 @@ import LocalStorage from '@services/local-storage'; // Đảm bảo đường d�
 
 // Cấu trúc Cache lưu trên RAM
 interface DataCache {
+  seasonId: string | null;
   locale: string | null;
   units: Record<string, any>;
   items: Record<string, any>;
@@ -17,6 +19,7 @@ interface DataCache {
 // Biến toàn cục (Module-Level Cache)
 // Tồn tại suốt vòng đời App, giúp truy xuất tức thì mà không cần đọc Disk
 const MEMORY_CACHE: DataCache = {
+  seasonId: null,
   locale: null,
   units: {},
   items: {},
@@ -26,10 +29,10 @@ const MEMORY_CACHE: DataCache = {
 
 // Helper sinh Key lưu LocalStorage
 const DATA_KEYS = {
-  units: (locale: string) => `data_units_${locale}`,
-  items: (locale: string) => `data_items_${locale}`,
-  traits: (locale: string) => `data_traits_${locale}`,
-  augments: (locale: string) => `data_augments_${locale}`,
+  units: (locale: string) => `data_${TFT_SEASON_ID}_units_${locale}`,
+  items: (locale: string) => `data_${TFT_SEASON_ID}_items_${locale}`,
+  traits: (locale: string) => `data_${TFT_SEASON_ID}_traits_${locale}`,
+  augments: (locale: string) => `data_${TFT_SEASON_ID}_augments_${locale}`,
 } as const;
 
 export const getLocaleFromLanguage = (language: string): string => {
@@ -78,6 +81,7 @@ const ensureCacheIsWarm = (locale: string) => {
   // 1. Nếu cache RAM đã có đúng locale và có đủ units, items, traits, augments -> Return ngay
   if (
     MEMORY_CACHE.locale === locale &&
+    MEMORY_CACHE.seasonId === TFT_SEASON_ID &&
     Object.keys(MEMORY_CACHE.units).length > 0 &&
     Object.keys(MEMORY_CACHE.items).length > 0 &&
     Object.keys(MEMORY_CACHE.traits).length > 0 &&
@@ -89,6 +93,7 @@ const ensureCacheIsWarm = (locale: string) => {
   // 2. Nếu chưa có hoặc đổi ngôn ngữ -> Đọc từ Disk (Chậm hơn xíu, nhưng chỉ làm 1 lần)
   // console.log(`[Cache] Loading from Disk to RAM for: ${locale}`);
   
+  MEMORY_CACHE.seasonId = TFT_SEASON_ID;
   MEMORY_CACHE.locale = locale;
   MEMORY_CACHE.units = parseJson(LocalStorage.getString(DATA_KEYS.units(locale)));
   MEMORY_CACHE.items = parseJson(LocalStorage.getString(DATA_KEYS.items(locale)));
@@ -102,13 +107,12 @@ const ensureCacheIsWarm = (locale: string) => {
 
 export const fetchAllDataByLocale = async (language: string) => {
   const locale = getLocaleFromLanguage(language);
-  const [units, items, traits, augments] = await Promise.all([
-    axiosInstance.get(`/data/units/${locale}`).then(res => res.data),
-    axiosInstance.get(`/data/items/${locale}`).then(res => res.data),
-    axiosInstance.get(`/data/traits/${locale}`).then(res => res.data),
-    axiosInstance.get(`/data/augments/${locale}`).then(res => res.data),
-  ]);
-  return { units, items, traits, augments };
+  const queryParams = new URLSearchParams({season_id: TFT_SEASON_ID});
+  const response = await axiosInstance.get(
+    `/data/tft/${locale}?${queryParams.toString()}`,
+  );
+  const {units, items, traits, augments} = response.data;
+  return {units, items, traits, augments};
 };
 
 // Biến giữ Promise để tránh gọi API trùng lặp khi component mount nhiều lần
@@ -155,6 +159,7 @@ export const checkAndFetchDataByLocale = async (language: string): Promise<boole
       LocalStorage.set(DATA_KEYS.augments(locale), JSON.stringify(augmentsMap));
 
       // UPDATE MEMORY: Cập nhật RAM ngay lập tức (Hot Update)
+      MEMORY_CACHE.seasonId = TFT_SEASON_ID;
       MEMORY_CACHE.locale = locale;
       MEMORY_CACHE.units = unitsMap;
       MEMORY_CACHE.items = itemsMap;

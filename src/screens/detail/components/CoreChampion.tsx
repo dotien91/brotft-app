@@ -16,6 +16,7 @@ import { getTraitIconUrl } from '../../../utils/metatft';
 import getUnitAvatar from '../../../utils/unit-avatar';
 import { getItemIconImageSource } from '../../../utils/item-images';
 import { getUnitCostBorderColor } from '../../../utils/unitCost';
+import {getUnitImageUrl} from '../../../utils/tft-images';
 
 interface CoreChampionCardProps {
   coreChampion: any;
@@ -74,8 +75,13 @@ const CoreChampionCard: React.FC<CoreChampionCardProps> = ({ coreChampion }) => 
 
   // 4. Chuẩn bị hình ảnh và màu sắc
   const avatar = getUnitAvatar(championKey, 64);
-  const imageSource = { local: avatar.local };
-  const unitImageUri = avatar.local ? undefined : (avatar.uri || coreChampion.image);
+  const apiImage =
+    getUnitImageUrl(localUnitData) ||
+    getUnitImageUrl(coreChampion);
+  const imageSource = {local: apiImage ? null : avatar.local};
+  const unitImageUri = imageSource.local
+    ? undefined
+    : apiImage;
   const borderColor = getUnitCostBorderColor(coreChampion.cost);
 
   const handlePress = () => {

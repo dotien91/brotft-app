@@ -22,20 +22,7 @@ import BackButton from '@shared-components/back-button/BackButton';
 import UnitTraitsDisplay from './components/UnitTraitsDisplay';
 import ReferenceCompositionsSection from './components/ReferenceCompositionsSection';
 import PopularItemsSection from './components/PopularItemsSection';
-
-// Popular items list
-const POPULAR_ITEMS = [
-  'TFT_Item_InfinityEdge',
-  'TFT_Item_GuinsoosRageblade',
-  'TFT_Item_SpearOfShojin',
-  'TFT_Item_MadredsBloodrazor',
-  'TFT_Item_RunaansHurricane',
-  'TFT_Item_Deathblade',
-  'TFT_Item_LastWhisper',
-  'TFT_Item_RapidFireCannon',
-  'TFT_Item_PowerGauntlet',
-  'TFT_Item_BlueBuff',
-];
+import {getUnitImageUrl} from '../../utils/tft-images';
 
 interface UnitDetailScreenProps {
   route?: {
@@ -82,7 +69,6 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({ route: routeProp })
     error: errorById,
     refetch: refetchById,
   } = useTftUnitById(unitId || '');
-  console.log("unitById", unitApiName, unitId);
   const {
     data: unitByApiName,
     isLoading: isLoadingByApiName,
@@ -306,17 +292,14 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({ route: routeProp })
     // Get TFT unit avatar image source (local only)
     // Size: 80x80 for hexagon display (70px hexagon needs ~80px image)
     const getTftUnitAvatarSource = () => {
-      // Try API icon fields first (if they're local paths)
-      if (unit?.icon && !unit.icon.startsWith('http')) {
-        // Could be a local path, but we'll use apiName for consistency
-      }
-      if (unit?.squareIcon && !unit.squareIcon.startsWith('http')) {
-        // Could be a local path, but we'll use apiName for consistency
+      const backendImage = getUnitImageUrl(unit);
+      if (backendImage) {
+        return {local: null, uri: backendImage};
       }
 
-      // Use local image only
+      // Không có slug: chỉ dùng ảnh local; thiếu ảnh sẽ hiển thị placeholder.
       const apiName = unit?.apiName || unit?.name || '';
-      return getUnitAvatar(apiName, 80);
+      return {local: getUnitAvatar(apiName, 80).local, uri: ''};
     };
 
     const avatarSource = getTftUnitAvatarSource();
@@ -568,7 +551,7 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({ route: routeProp })
           />
 
           {/* Popular Items Section */}
-          <PopularItemsSection popularItems={POPULAR_ITEMS} />
+          <PopularItemsSection popularItems={unit.popularItems ?? []} />
         </View>
         {/* Suggested Items Section */}
         {/* <View style={styles.augmentsSection}>
@@ -633,4 +616,3 @@ const UnitDetailScreen: React.FC<UnitDetailScreenProps> = ({ route: routeProp })
 };
 
 export default UnitDetailScreen;
-

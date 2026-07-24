@@ -1,4 +1,5 @@
 import axiosInstance from './axios';
+import {TFT_SEASON_ID} from '@shared-constants';
 import type {
   IComposition,
   ICompositionsQueryParams,
@@ -11,6 +12,12 @@ export const getCompositions = async (
   params?: ICompositionsQueryParams,
 ): Promise<ICompositionsResponse> => {
   const queryParams = new URLSearchParams();
+  const filters = {
+    season_id: params?.season_id ?? TFT_SEASON_ID,
+    ...(params?.active !== undefined && {active: params.active}),
+    ...(params?.tier && {tier: params.tier}),
+  };
+  queryParams.append('filters', JSON.stringify(filters));
 
   if (params?.page) {
     queryParams.append('page', params.page.toString());
@@ -18,12 +25,6 @@ export const getCompositions = async (
   if (params?.limit) {
     queryParams.append('limit', params.limit.toString());
   }
-
-  if (params?.active != undefined) {
-    queryParams.append('active', params.active.toString());
-  }
-
-  console.log("params", params);
 
   const response = await axiosInstance.get<ICompositionsResponse>(
     `/compositions?${queryParams.toString()}`,
@@ -35,7 +36,9 @@ export const getCompositions = async (
 export const getCompositionById = async (
   id: string,
 ): Promise<IComposition> => {
-  const response = await axiosInstance.get<IComposition>(`/compositions/${id}`);
+  const response = await axiosInstance.get<IComposition>(
+    `/compositions/${id}?season_id=${encodeURIComponent(TFT_SEASON_ID)}`,
+  );
   return response.data;
 };
 
@@ -43,10 +46,23 @@ export const getCompositionById = async (
 export const getCompositionByCompId = async (
   compId: string,
 ): Promise<IComposition> => {
-  const response = await axiosInstance.get<IComposition>(
-    `/compositions/compId/${compId}`,
+  const filters = JSON.stringify({
+    season_id: TFT_SEASON_ID,
+    compId,
+  });
+  const queryParams = new URLSearchParams({
+    page: '1',
+    limit: '1',
+    filters,
+  });
+  const response = await axiosInstance.get<ICompositionsResponse>(
+    `/compositions?${queryParams.toString()}`,
   );
-  return response.data;
+  const composition = response.data.data[0];
+  if (!composition) {
+    throw new Error(`Composition not found: ${compId}`);
+  }
+  return composition;
 };
 
 // Search compositions by units (GET method with query params)
@@ -55,16 +71,15 @@ export const searchCompositionsByUnits = async (
   params?: ICompositionsQueryParams,
 ): Promise<ICompositionsResponse> => {
   const queryParams = new URLSearchParams();
-
-  // Add units as comma-separated string
-  if (dto.units && dto.units.length > 0) {
-    queryParams.append('units', dto.units.join(','));
-  }
-
-  // Add searchInAllArrays if provided
-  if (dto.searchInAllArrays !== undefined) {
-    queryParams.append('searchInAllArrays', dto.searchInAllArrays.toString());
-  }
+  const filters = {
+    season_id: params?.season_id ?? TFT_SEASON_ID,
+    units: dto.units.join(','),
+    ...(dto.searchInAllArrays !== undefined && {
+      searchInAllArrays: dto.searchInAllArrays,
+    }),
+    ...(params?.tier && {tier: params.tier}),
+  };
+  queryParams.append('filters', JSON.stringify(filters));
 
   // Add pagination params
   if (params?.page) {
@@ -74,25 +89,9 @@ export const searchCompositionsByUnits = async (
     queryParams.append('limit', params.limit.toString());
   }
 
-  // Add tier if provided in params
-  if (params?.tier) {
-    queryParams.append('tier', params.tier);
-  }
-console.log('queryParams',  `/compositions?${queryParams.toString()}`);
   const url = `/compositions?${queryParams.toString()}`;
-  try {
-    const response = await axiosInstance.get<ICompositionsResponse>(url);
-    return response.data;
-  } catch (error: any) {
-    console.error('❌ ========== SEARCH ERROR ==========');
-    console.error('❌ Error message:', error?.message);
-    console.error('❌ Error response status:', error?.response?.status);
-    console.error('❌ Error response data:', error?.response?.data);
-    console.error('❌ Error response headers:', error?.response?.headers);
-    console.error('❌ Full error:', JSON.stringify(error, null, 2));
-    console.error('❌ ===========================================');
-    throw error;
-  }
+  const response = await axiosInstance.get<ICompositionsResponse>(url);
+  return response.data;
 };
 
 // Định nghĩa DTO cho Search V2
@@ -111,18 +110,11 @@ export const searchCompositionsV2 = async (
   params?: { page?: number; limit?: number }
 ): Promise<ICompositionsResponse> => {
   const queryParams = new URLSearchParams();
+  queryParams.append('season_id', TFT_SEASON_ID);
   if (params?.page) queryParams.append('page', params.page.toString());
   if (params?.limit) queryParams.append('limit', params.limit.toString());
 
   const url = `/compositions/search-v2?${queryParams.toString()}`;
-  try {
-    // Sử dụng phương thức POST và gửi searchData trong body
-    const response = await axiosInstance.post<ICompositionsResponse>(url, searchData);
-    return response.data;
-  } catch (error: any) {
-    console.error('❌ ========== SEARCH V2 ERROR ==========');
-    console.error('Data gửi đi:', searchData);
-    console.error('Error:', error?.response?.data || error.message);
-    throw error;
-  }
+  const response = await axiosInstance.post<ICompositionsResponse>(url, searchData);
+  return response.data;
 };

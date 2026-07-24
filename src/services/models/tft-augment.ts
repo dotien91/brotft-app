@@ -10,6 +10,7 @@ export interface ITftAugmentVariableMatch {
 
 export interface ITftAugment {
   id: string | number;
+  season_id?: string;
   apiName: string; // Unique
   name: string;
   enName?: string | null;
@@ -28,6 +29,7 @@ export interface ITftAugment {
 }
 
 export interface ITftAugmentsFilters {
+  season_id?: string;
   name?: string;
   apiName?: string;
   trait?: string;
@@ -42,6 +44,7 @@ export interface ITftAugmentsSort {
 }
 
 export interface ITftAugmentsQueryParams {
+  season_id?: string;
   page?: number;
   limit?: number;
   filters?: ITftAugmentsFilters;
@@ -86,7 +89,6 @@ export interface IUpdateTftAugmentDto {
   variableMatches?: ITftAugmentVariableMatch[];
   tags?: string[];
 }
-
 
 
 

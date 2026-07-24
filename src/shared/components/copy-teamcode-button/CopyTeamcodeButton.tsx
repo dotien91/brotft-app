@@ -18,7 +18,6 @@ const CopyTeamcodeButton: React.FC<CopyTeamcodeButtonProps> = ({teamcode, style,
   const {colors} = theme;
   const styles = createStyles(theme);
   const [modalVisible, setModalVisible] = useState(false);
-console.log("fromDetailfromDetail", fromDetail);
   // Auto hide modal after 1.5 seconds
   useEffect(() => {
     if (!modalVisible) return;

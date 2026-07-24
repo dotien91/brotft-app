@@ -27,6 +27,8 @@ export interface IUnitStats {
 
 export interface ITftUnit {
   id: string | number;
+  season_id?: string;
+  slug?: string;
   apiName: string; // Unique
   name: string;
   enName?: string | null;
@@ -39,6 +41,7 @@ export interface ITftUnit {
   ability?: IAbility | null;
   stats?: IUnitStats | null;
   traits?: string[];
+  popularItems?: string[];
   tier?: string | null; // S, A, B, C, D
   needUnlock?: boolean; // Flag từ API: tướng này có điều kiện unlock đặc biệt
   createdAt?: Date | string;
@@ -47,6 +50,7 @@ export interface ITftUnit {
 }
 
 export interface ITftUnitsFilters {
+  season_id?: string;
   name?: string;
   apiName?: string;
   trait?: string;
@@ -60,6 +64,7 @@ export interface ITftUnitsSort {
 }
 
 export interface ITftUnitsQueryParams {
+  season_id?: string;
   page?: number;
   limit?: number;
   minimal?: boolean;
@@ -75,6 +80,8 @@ export interface ITftUnitsResponse {
 
 // DTOs for create and update
 export interface ICreateTftUnitDto {
+  season_id?: string;
+  slug?: string;
   apiName: string; // Bắt buộc, unique
   name: string; // Bắt buộc
   enName?: string;
@@ -87,9 +94,12 @@ export interface ICreateTftUnitDto {
   ability?: IAbility;
   stats?: IUnitStats;
   traits?: string[];
+  popularItems?: string[];
 }
 
 export interface IUpdateTftUnitDto {
+  season_id?: string;
+  slug?: string;
   apiName?: string;
   name?: string;
   enName?: string;
@@ -102,5 +112,5 @@ export interface IUpdateTftUnitDto {
   ability?: IAbility;
   stats?: IUnitStats;
   traits?: string[];
+  popularItems?: string[];
 }
-

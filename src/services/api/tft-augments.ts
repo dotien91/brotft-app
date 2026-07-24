@@ -1,10 +1,9 @@
 import axiosInstance from './axios';
+import {TFT_SEASON_ID} from '@shared-constants';
 import type {
   ITftAugment,
   ITftAugmentsQueryParams,
   ITftAugmentsResponse,
-  ICreateTftAugmentDto,
-  IUpdateTftAugmentDto,
 } from '@services/models/tft-augment';
 
 // Get all TFT augments with pagination and filters
@@ -12,6 +11,7 @@ export const getTftAugments = async (
   params?: ITftAugmentsQueryParams,
 ): Promise<ITftAugmentsResponse> => {
   const queryParams = new URLSearchParams();
+  queryParams.append('season_id', params?.season_id ?? TFT_SEASON_ID);
 
   if (params?.page) {
     queryParams.append('page', params.page.toString());
@@ -57,55 +57,23 @@ export const getTftAugments = async (
 
 // Get TFT augment by ID
 export const getTftAugmentById = async (id: string): Promise<ITftAugment | null> => {
-  try {
-    const url = `/tft-augments/${encodeURIComponent(id)}`;
-    const response = await axiosInstance.get<ITftAugment | null>(url);
-    return response.data;
-  } catch (error: any) {
-    throw error;
-  }
+  const url = `/tft-augments/${encodeURIComponent(id)}?season_id=${encodeURIComponent(TFT_SEASON_ID)}`;
+  const response = await axiosInstance.get<ITftAugment | null>(url);
+  return response.data;
 };
 
 // Get TFT augment by API name
 export const getTftAugmentByApiName = async (
   apiName: string,
 ): Promise<ITftAugment | null> => {
-  try {
-    const url = `/tft-augments/api-name/${encodeURIComponent(apiName)}`;
-    const response = await axiosInstance.get<ITftAugment | null>(url);
-    return response.data;
-  } catch (error: any) {
-    throw error;
-  }
+  const response = await getTftAugments({
+    season_id: TFT_SEASON_ID,
+    page: 1,
+    limit: 1,
+    filters: {apiName},
+  });
+  return response.data[0] ?? null;
 };
-
-// Create TFT augment
-export const createTftAugment = async (
-  data: ICreateTftAugmentDto,
-): Promise<ITftAugment> => {
-  const response = await axiosInstance.post<ITftAugment>(`/tft-augments`, data);
-  return response.data;
-};
-
-// Update TFT augment
-export const updateTftAugment = async (
-  id: string,
-  data: IUpdateTftAugmentDto,
-): Promise<ITftAugment | null> => {
-  const response = await axiosInstance.patch<ITftAugment | null>(
-    `/tft-augments/${id}`,
-    data,
-  );
-  return response.data;
-};
-
-// Delete TFT augment
-export const deleteTftAugment = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/tft-augments/${id}`);
-};
-
-
-
 
 
 

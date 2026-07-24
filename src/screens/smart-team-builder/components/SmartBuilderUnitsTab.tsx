@@ -35,7 +35,11 @@ const SmartBuilderUnitsTab: React.FC<SmartBuilderUnitsTabProps> = ({
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // TAB UNIT TỰ FETCH DATA CỦA NÓ
-  const { data: fetchedUnits, isLoading: isUnitsLoading, totalCount } = useTftUnitsWithPagination(200, undefined, true);
+  const {
+    data: fetchedUnits,
+    isLoading: isUnitsLoading,
+    totalCount,
+  } = useTftUnitsWithPagination(100, undefined, true);
 
   const allUnits = useMemo(() => {
     if (!fetchedUnits || !Array.isArray(fetchedUnits)) return [];

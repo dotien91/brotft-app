@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { searchCompositionsV2, ISearchV2Dto } from '@services/api/compositions';
+import {TFT_SEASON_ID} from '@shared-constants';
 
 /**
  * Hook dùng cho tìm kiếm thông minh
@@ -12,7 +13,7 @@ export const useSmartSearchCompositions = (
 ) => {
   return useQuery({
     // Query key bao gồm tất cả các filter để cache dữ liệu chính xác
-    queryKey: ['compositions', 'search-v2', searchData],
+    queryKey: ['compositions', TFT_SEASON_ID, 'search-v2', searchData],
     queryFn: () => searchCompositionsV2(searchData, { page: 1, limit: 50 }),
     enabled: enabled && (
       (searchData?.units?.length ?? 0) > 0 ||

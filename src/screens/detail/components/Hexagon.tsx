@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react';
 import {View, StyleSheet, Image} from 'react-native';
-import Svg, {Polygon, Defs, ClipPath, Image as SvgImage} from 'react-native-svg';
+import Svg, {Polygon} from 'react-native-svg';
 import MaskedView from '@react-native-masked-view/masked-view';
 import {useTheme} from '@react-navigation/native';
 
@@ -51,15 +51,9 @@ const points = useMemo(() => {
   // ... (giữ nguyên phần return và styles)
 
   const fillColor = backgroundColor || (colors as any).hexagonBg || '#222';
-  const clipId = useMemo(() => `hexagon-clip-${Math.random().toString(36).substr(2, 9)}`, []);
   return (
     <View style={{width, height, alignItems: 'center', justifyContent: 'center'}}>
       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
-        <Defs>
-          <ClipPath id={clipId}>
-            <Polygon points={points} />
-          </ClipPath>
-        </Defs>
         {/* Lớp nền và viền */}
         <Polygon
           points={points}
@@ -68,20 +62,10 @@ const points = useMemo(() => {
           strokeWidth={borderWidth}
           strokeLinejoin="round"
         />
-        {/* Ảnh từ URL */}
-        {imageUri && !imageSource && (
-          <SvgImage
-            href={{uri: imageUri}}
-            width={width}
-            height={height}
-            clipPath={`url(#${clipId})`}
-            preserveAspectRatio="xMidYMid slice"
-          />
-        )}
       </Svg>
 
-      {/* Ảnh Local (require) */}
-      {imageSource && (
+      {/* Ảnh local hoặc remote, dùng native Image để tải URL ổn định hơn. */}
+      {(imageSource || imageUri) && (
         <View style={StyleSheet.absoluteFill}>
           <MaskedView
             style={{flex: 1}}
@@ -91,7 +75,7 @@ const points = useMemo(() => {
               </Svg>
             }>
             <Image
-              source={imageSource}
+              source={imageSource || {uri: imageUri}}
               style={{width, height}}
               resizeMode="cover"
             />

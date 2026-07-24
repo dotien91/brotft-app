@@ -187,7 +187,8 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
     const imageSource = getItemIconImageSource(
       localizedIcon || item.icon,
       item.apiName,
-      80
+      80,
+      item,
     );
     // Only use local image, no URL fallback
     // Get components to display - prefer composition from localizedItem
@@ -324,6 +325,12 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
                 style={styles.itemIcon}
                 resizeMode="cover"
               />
+            ) : imageSource.uri ? (
+              <Image
+                source={{uri: imageSource.uri}}
+                style={styles.itemIcon}
+                resizeMode="cover"
+              />
             ) : null}
           </View>
 
@@ -390,4 +397,3 @@ const ItemDetailScreen: React.FC<ItemDetailScreenProps> = ({route: routeProp}) =
 };
 
 export default ItemDetailScreen;
-

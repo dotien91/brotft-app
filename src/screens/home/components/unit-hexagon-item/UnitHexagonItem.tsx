@@ -7,6 +7,7 @@ import getUnitAvatar from '../../../../utils/unit-avatar';
 import { getItemIconImageSource } from '../../../../utils/item-images';
 import { getUnitCostBorderColor } from '../../../../utils/unitCost';
 import { getCachedUnits } from '@services/api/data';
+import {getUnitImageUrl} from '../../../../utils/tft-images';
 
 export type UnitHexagonItemUnit = {
   championKey?: string;
@@ -15,6 +16,11 @@ export type UnitHexagonItemUnit = {
   name?: string;
   cost?: number | null;
   image?: string;
+  season_id?: string | null;
+  slug?: string | null;
+  squareIcon?: string | null;
+  tileIcon?: string | null;
+  icon?: string | null;
   items?: string[];
   need3Star?: boolean;
   carry?: boolean;
@@ -57,11 +63,23 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
   const theme = useTheme();
   const { colors } = theme;
 
-  const unitKey = unit.championKey ?? unit.apiName ?? '';
+  const unitKey =
+    unit.apiName ?? unit.championId ?? unit.championKey ?? '';
   
   const itemLocal = useMemo(() => {
-    return getCachedUnits()?.[unitKey];
-  }, [unitKey]);
+    const cachedUnits = getCachedUnits();
+    const directUnit = cachedUnits?.[unitKey];
+    if (directUnit) return directUnit;
+
+    return Object.values(cachedUnits || {}).find((cachedUnit: any) => {
+      return (
+        cachedUnit.apiName === unit.apiName ||
+        cachedUnit.apiName === unit.championId ||
+        cachedUnit.characterName === unit.championId ||
+        cachedUnit.apiName === unit.championKey
+      );
+    });
+  }, [unit.apiName, unit.championId, unit.championKey, unitKey]);
 
   const metrics = useMemo(() => {
     // Kích thước icon unlock
@@ -124,8 +142,13 @@ const UnitHexagonItem: React.FC<UnitHexagonItemProps> = ({
   }, [size, shape, unlockPosition]);
 
   const avatar = getUnitAvatar(unitKey, 64);
-  const imageSource = { local: avatar.local };
-  const unitImage = avatar.local ? undefined : (avatar.uri || unit.image || '');
+  const backendImage =
+    getUnitImageUrl(itemLocal) ||
+    getUnitImageUrl(unit);
+  const imageSource = {local: backendImage ? null : avatar.local};
+  const unitImage = imageSource.local
+    ? undefined
+    : backendImage;
   const itemsToShow = unit.items?.slice(0, 3) ?? [];
   const unitIdForKey = unit.championId ?? unit.championKey ?? unit.apiName ?? '';
   const borderColor = getUnitCostBorderColor(unit.cost, colors.primary || '#94a3b8');

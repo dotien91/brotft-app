@@ -8,13 +8,18 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useTheme } from '@react-navigation/native';
 import { useTftItemsWithPagination } from '@services/api/hooks/listQueryHooks';
-import Icon, { IconType } from '@shared-components/icon/Icon';
+import Icon from '@shared-components/icon/Icon';
 import { translations } from '../../../shared/localization';
 import { getItemIconImageSource } from '../../../utils/item-images';
+import {
+  TFT_ITEM_TYPE_LABELS,
+  type TftItemType,
+} from '@services/models/tft-item';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -25,6 +30,7 @@ const ITEMS_PER_PAGE = COLUMNS * ROWS_PER_PAGE; // 14 items mỗi trang
 const GRID_PADDING = 6;
 const GAP = 2;
 const ITEM_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
+const ITEM_TYPES = Object.keys(TFT_ITEM_TYPE_LABELS) as TftItemType[];
 
 export interface SmartBuilderItemsTabProps {
   enabled?: boolean;
@@ -42,6 +48,8 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
   const flatListRef = useRef<FlatList>(null);
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [selectedType, setSelectedType] =
+    useState<TftItemType>('combined');
 
   // 1. Sử dụng API Pagination (Load 42 items = 3 trang full hiển thị mượt)
   const {
@@ -54,7 +62,7 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
     isNoData,
     loadMore,
     totalCount,
-  } = useTftItemsWithPagination(42, enabled, { hasComposition: true });
+  } = useTftItemsWithPagination(42, enabled, {type: selectedType});
 
   const itemsList = allItems || [];
 
@@ -92,7 +100,12 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
     (item: any, index: number) => {
       const itemApiName = item?.apiName;
       const isSelected = selectedItemIds.includes(itemApiName);
-      const imageSource = getItemIconImageSource(item?.icon, itemApiName, Math.round(ITEM_SIZE));
+      const imageSource = getItemIconImageSource(
+        item?.icon,
+        itemApiName,
+        Math.round(ITEM_SIZE),
+        item,
+      );
 
       return (
         <TouchableOpacity
@@ -160,6 +173,42 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
   // --- RENDER GIAO DIỆN CHÍNH ---
   return (
     <View style={styles.container}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.typeTabs}>
+        {ITEM_TYPES.map(type => {
+          const selected = selectedType === type;
+          return (
+            <TouchableOpacity
+              key={type}
+              onPress={() => {
+                setSelectedType(type);
+                setCurrentPageIndex(0);
+                flatListRef.current?.scrollToOffset({
+                  offset: 0,
+                  animated: false,
+                });
+              }}
+              style={[
+                styles.typeTab,
+                {
+                  backgroundColor: selected
+                    ? colors.primary
+                    : colors.card,
+                },
+              ]}>
+              <Text
+                style={{
+                  color: selected ? '#fff' : colors.text,
+                  fontSize: 10,
+                }}>
+                {TFT_ITEM_TYPE_LABELS[type]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
       <FlatList
         ref={flatListRef}
         data={paginatedItems}
@@ -205,7 +254,17 @@ const SmartBuilderItemsTab: React.FC<SmartBuilderItemsTabProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
+    paddingVertical: 6,
+  },
+  typeTabs: {
+    gap: 5,
+    paddingBottom: 6,
+    paddingHorizontal: 6,
+  },
+  typeTab: {
+    borderRadius: 12,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
   },
   center: {
     height: 200,

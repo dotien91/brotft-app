@@ -6,6 +6,9 @@ export const API_BASE_URL = __DEV__
   ? 'http://localhost:3900'
   : 'https://api.apporastudio.com';
 
+// Keep the active TFT season in one place. The API accepts the numeric season id.
+export const TFT_SEASON_ID = '18';
+
 // ? AdMob
 export const AD_UNIT_IDS = {
   BANNER: __DEV__
@@ -27,7 +30,6 @@ export const SCREENS = {
   TRAITS: 'Traits',
   TRAIT_DETAIL: 'TraitDetail',
   ITEM_DETAIL: 'ItemDetail',
-  CHAMPION_DETAIL: 'ChampionDetail',
   PRIVACY: 'Privacy',
   TERMS: 'Terms',
   FEEDBACK: 'Feedback',

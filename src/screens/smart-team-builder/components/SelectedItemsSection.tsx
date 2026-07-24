@@ -7,16 +7,15 @@ import Icon, { IconType } from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
 import { translations } from '../../../shared/localization';
 import { getItemIconImageSource } from '../../../utils/item-images';
+import {useTftItemByApiName} from '@services/api/hooks/listQueryHooks';
 
 export interface SelectedItemsSectionProps {
   selectedItemIds: string[];
-  localItemsMap: any[];
   onToggleItem: (itemId: string) => void;
 }
 
 const SelectedItemsSection: React.FC<SelectedItemsSectionProps> = ({
   selectedItemIds,
-  localItemsMap,
   onToggleItem,
 }) => {
   const { colors } = useTheme();
@@ -33,35 +32,68 @@ const SelectedItemsSection: React.FC<SelectedItemsSectionProps> = ({
         showsHorizontalScrollIndicator={false} 
         contentContainerStyle={{ paddingHorizontal: 6, gap: 6, paddingTop: 4, paddingBottom: 4 }}
       >
-        {selectedItemIds.map((itemId) => {
-          const item = localItemsMap.find((i: any) => i.id === itemId || i.apiName === itemId);
-          const imageSource = getItemIconImageSource(item?.icon, itemId, 48);
-          return (
-            <RNBounceable
-              key={itemId}
-              onPress={() => onToggleItem(itemId)}
-              style={{ overflow: 'visible' }}
-            >
-              <View style={styles.itemWrapper}>
-                <View style={styles.itemBox}>
-                  {imageSource.local ? (
-                    <Image source={imageSource.local} style={styles.iconSquare} resizeMode="cover" />
-                  ) : imageSource.uri ? (
-                    <FastImage source={{ uri: imageSource.uri }} style={styles.iconSquare} resizeMode={FastImage.resizeMode.cover} />
-                  ) : (
-                    <View style={[styles.iconSquare, styles.iconPlaceholder]} />
-                  )}
-                </View>
-                <View style={[styles.removeBadge, { backgroundColor: colors.danger }]}>
-                  <Icon name="close" type={IconType.Ionicons} size={10} color="#fff" />
-                </View>
-              </View>
-            </RNBounceable>
-          );
-        })}
+        {selectedItemIds.map(itemId => (
+          <SelectedItem
+            key={itemId}
+            itemApiName={itemId}
+            onRemove={onToggleItem}
+          />
+        ))}
       </ScrollView>
       <View style={[styles.divider, { backgroundColor: colors.border, marginTop: 8, opacity: 0.1 }]} />
     </View>
+  );
+};
+
+const SelectedItem = ({
+  itemApiName,
+  onRemove,
+}: {
+  itemApiName: string;
+  onRemove: (itemApiName: string) => void;
+}) => {
+  const {colors} = useTheme();
+  const {data: item} = useTftItemByApiName(itemApiName);
+  const imageSource = getItemIconImageSource(
+    item?.icon,
+    itemApiName,
+    48,
+    item,
+  );
+
+  return (
+    <RNBounceable
+      onPress={() => onRemove(itemApiName)}
+      style={{overflow: 'visible'}}>
+      <View style={styles.itemWrapper}>
+        <View style={styles.itemBox}>
+          {imageSource.local ? (
+            <Image
+              source={imageSource.local}
+              style={styles.iconSquare}
+              resizeMode="cover"
+            />
+          ) : imageSource.uri ? (
+            <FastImage
+              source={{uri: imageSource.uri}}
+              style={styles.iconSquare}
+              resizeMode={FastImage.resizeMode.cover}
+            />
+          ) : (
+            <View style={[styles.iconSquare, styles.iconPlaceholder]} />
+          )}
+        </View>
+        <View
+          style={[styles.removeBadge, {backgroundColor: colors.danger}]}>
+          <Icon
+            name="close"
+            type={IconType.Ionicons}
+            size={10}
+            color="#fff"
+          />
+        </View>
+      </View>
+    </RNBounceable>
   );
 };
 

@@ -83,10 +83,8 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
 
   const imageSource = useMemo(() => {
     if (!itemApiName) return {local: null, uri: ''};
-    return getItemIconImageSource(null, itemApiName, 48);
-  }, [itemApiName]);
-  // Only use local image, no URL fallback
-  const itemIcon = imageSource.local;
+    return getItemIconImageSource(null, itemApiName, 48, item);
+  }, [item, itemApiName]);
 
   // Get components from item
   const components = useMemo(() => {
@@ -104,9 +102,9 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
       <View style={styles.itemCard}>
         <View style={styles.itemColumn}>
           <View style={[styles.itemIconContainer, {backgroundColor: colors.card}]}>
-            {itemIcon ? (
+            {imageSource.local || imageSource.uri ? (
               <Image
-                source={itemIcon}
+                source={imageSource.local || {uri: imageSource.uri}}
                 style={styles.itemIcon}
                 resizeMode="contain"
               />
@@ -124,9 +122,9 @@ const PopularItemCard: React.FC<PopularItemCardProps> = ({
         onPress={() => onPress(item?.id)}>
         {/* Main item */}
         <View style={[styles.itemIconContainer, {backgroundColor: colors.card}]}>
-          {itemIcon ? (
+          {imageSource.local || imageSource.uri ? (
             <Image
-              source={itemIcon}
+              source={imageSource.local || {uri: imageSource.uri}}
               style={styles.itemIcon}
               resizeMode="contain"
             />

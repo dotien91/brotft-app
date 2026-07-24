@@ -10,6 +10,7 @@ export interface RecommendedTeamsSectionProps {
   isSearching: boolean;
   isFetching: boolean;
   hasSelection: boolean;
+  unitsByKey?: ReadonlyMap<string, any>;
 }
 
 const RecommendedTeamsSection: React.FC<RecommendedTeamsSectionProps> = ({
@@ -17,6 +18,7 @@ const RecommendedTeamsSection: React.FC<RecommendedTeamsSectionProps> = ({
   isSearching,
   isFetching,
   hasSelection,
+  unitsByKey,
 }) => {
   const { colors } = useTheme();
   const teams = Array.isArray(matchedTeams) ? matchedTeams : [];
@@ -34,7 +36,11 @@ const RecommendedTeamsSection: React.FC<RecommendedTeamsSectionProps> = ({
           </Text>
         ) : (
           teams.map((comp: any, idx: number) => (
-            <TeamCard key={comp.id || idx} composition={comp} />
+            <TeamCard
+              key={comp.id || idx}
+              composition={comp}
+              unitsByKey={unitsByKey}
+            />
           ))
         )}
       </View>

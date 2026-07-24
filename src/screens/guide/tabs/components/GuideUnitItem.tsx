@@ -15,6 +15,7 @@ import UnitCostBadge from '@screens/detail/components/UnitCostBadge';
 import ThreeStars from '@shared-components/three-stars/ThreeStars';
 import UnitTraitsDisplay from '@screens/unit-detail/components/UnitTraitsDisplay';
 import UnitHexagonItem from '@screens/home/components/unit-hexagon-item/UnitHexagonItem';
+import {getUnitImageUrl} from '../../../../utils/tft-images';
 
 interface GuideUnitItemProps {
   data: ITftUnit;
@@ -32,7 +33,7 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
 
   
 
-  const {name, cost, icon, squareIcon, apiName} = data;
+  const {name, cost, apiName} = data;
 
   const handlePress = () => {
     if (onPress) {
@@ -88,17 +89,15 @@ const GuideUnitItem: React.FC<GuideUnitItemProps> = ({data, compact = false, onP
   // Get TFT unit avatar image source (local first, then URL)
   // Size: 64x64 for hexagon display (56px hexagon needs ~64px image)
   const getTftUnitAvatarSource = () => {
-    // Try API icon fields first
-    if (icon && icon.startsWith('http')) {
-      return {local: null, uri: icon};
-    }
-    if (squareIcon && squareIcon.startsWith('http')) {
-      return {local: null, uri: squareIcon};
+    const backendImage = getUnitImageUrl(data);
+    if (backendImage) {
+      return {local: null, uri: backendImage};
     }
     
-    // Use local image first, then fallback to metatft.com
+    // Không có slug: dùng ảnh local nếu có, nếu không component hiển thị placeholder.
     const unitKey = apiName || name || '';
-    return getUnitAvatar(unitKey, 64);
+    const localAvatar = getUnitAvatar(unitKey, 64).local;
+    return {local: localAvatar, uri: ''};
   };
 
   const imageSource = getTftUnitAvatarSource();
@@ -206,4 +205,3 @@ export default React.memo(GuideUnitItem, (prevProps, nextProps) => {
   // Only re-render if data.id or compact changes, ignore onPress changes
   return prevProps.data?.id === nextProps.data?.id && prevProps.compact === nextProps.compact;
 });
-

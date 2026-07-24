@@ -75,6 +75,7 @@ import type {
   IComposition,
   ISearchByUnitsDto,
 } from '@services/models/composition';
+import {TFT_SEASON_ID} from '@shared-constants';
 
 // Query keys
 export const championKeys = {
@@ -339,7 +340,7 @@ export const useChampionsByTrait = (
 
 // Query keys for TFT units
 export const tftUnitKeys = {
-  all: ['tft-units'] as const,
+  all: ['tft-units', TFT_SEASON_ID] as const,
   lists: () => [...tftUnitKeys.all, 'list'] as const,
   list: (params?: ITftUnitsQueryParams) =>
     [...tftUnitKeys.lists(), params] as const,
@@ -568,7 +569,7 @@ export const useTftUnitsByCost = (
 
 // Query keys for TFT traits
 export const tftTraitKeys = {
-  all: ['tft-traits'] as const,
+  all: ['tft-traits', TFT_SEASON_ID] as const,
   lists: () => [...tftTraitKeys.all, 'list'] as const,
   list: (params?: ITftTraitsQueryParams) =>
     [...tftTraitKeys.lists(), params] as const,
@@ -762,7 +763,7 @@ export const useTftTraitByApiName = (
 
 // Query keys for TFT items
 export const tftItemKeys = {
-  all: ['tft-items'] as const,
+  all: ['tft-items', TFT_SEASON_ID] as const,
   lists: () => [...tftItemKeys.all, 'list'] as const,
   list: (params?: ITftItemsQueryParams) =>
     [...tftItemKeys.lists(), params] as const,
@@ -795,9 +796,9 @@ export const useTftItems = (
 
 // Hook with pagination handling built-in for TFT items
 export const useTftItemsWithPagination = (
-  limit: number = 20,
+  limit: number = 50,
   enabled: boolean = true,
-  extraParams?: Pick<ITftItemsQueryParams, 'hasComposition'>,
+  extraParams?: Pick<ITftItemsQueryParams, 'hasComposition' | 'type'>,
 ) => {
   const [page, setPage] = useState(1);
   const [allTftItems, setAllTftItems] = useState<ITftItem[]>([]);
@@ -805,6 +806,15 @@ export const useTftItemsWithPagination = (
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isNoData, setIsNoData] = useState(false);
+  const itemType = extraParams?.type;
+
+  useEffect(() => {
+    setPage(1);
+    setAllTftItems([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+    setIsNoData(false);
+  }, [itemType]);
 
   const {
     data: tftItemsData,
@@ -935,7 +945,7 @@ export const useTftItemByApiName = (
 
 // Query keys for TFT augments
 export const tftAugmentKeys = {
-  all: ['tft-augments'] as const,
+  all: ['tft-augments', TFT_SEASON_ID] as const,
   lists: () => [...tftAugmentKeys.all, 'list'] as const,
   list: (params?: ITftAugmentsQueryParams) =>
     [...tftAugmentKeys.lists(), params] as const,
@@ -1478,7 +1488,7 @@ export const useItemByApiName = (
 
 // Query keys for compositions
 export const compositionKeys = {
-  all: ['compositions'] as const,
+  all: ['compositions', TFT_SEASON_ID] as const,
   lists: () => [...compositionKeys.all, 'list'] as const,
   list: (params?: ICompositionsQueryParams) =>
     [...compositionKeys.lists(), params] as const,
@@ -1682,7 +1692,6 @@ export const useSearchCompositionsByUnits = (
         return Promise.resolve({ data: [], hasNextPage: false });
       }
       // Log để debug xem query có thực sự chạy không
-      console.log('Fetching with:', { dto, page }); 
       return searchCompositionsByUnits(dto, { page, limit });
     },
     enabled: isEnabled,

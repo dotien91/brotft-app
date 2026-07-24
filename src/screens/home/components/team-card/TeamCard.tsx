@@ -11,10 +11,14 @@ import * as NavigationService from 'react-navigation-helpers';
 import { SCREENS } from '@shared-constants';
 import { translations } from '../../../../shared/localization';
 import TierBadge from '@shared-components/tier-badge';
+import {getTftUnitLookupKeys} from '../../../../utils/tft-images';
 
 interface TeamCardProps {
   composition: IComposition;
+  unitsByKey?: ReadonlyMap<string, any>;
 }
+
+const EMPTY_UNITS_BY_KEY = new Map<string, any>();
 
 // --- HELPER FUNCTIONS ---
 const getDifficultyColor = (diff?: string) => {
@@ -44,7 +48,10 @@ const STATIC_UNIT_STYLES = {
   starConfig: { top: -8 },
 };
 
-const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
+const TeamCard: React.FC<TeamCardProps> = ({
+  composition,
+  unitsByKey = EMPTY_UNITS_BY_KEY,
+}) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   
@@ -82,8 +89,19 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
       const aItems = a.items?.length || 0;
       const bItems = b.items?.length || 0;
       return bItems - aItems; 
+    }).map(unit => {
+      const apiUnit = getTftUnitLookupKeys(unit)
+        .map(key => unitsByKey.get(key))
+        .find(Boolean);
+
+      return {
+        ...apiUnit,
+        ...unit,
+        slug: apiUnit?.slug,
+        season_id: apiUnit?.season_id,
+      };
     });
-  }, [composition.units]);
+  }, [composition.units, unitsByKey]);
 
   return (
     <RNBounceable style={styles.teamCard} onPress={handlePress}>
@@ -149,5 +167,6 @@ const TeamCard: React.FC<TeamCardProps> = ({ composition }) => {
 // TỐI ƯU CỐT LÕI: Chỉ re-render nếu compId thay đổi (hoặc active thay đổi)
 export default React.memo(TeamCard, (prevProps, nextProps) => {
   return prevProps.composition.compId === nextProps.composition.compId &&
-         prevProps.composition.active === nextProps.composition.active;
+         prevProps.composition.active === nextProps.composition.active &&
+         prevProps.unitsByKey === nextProps.unitsByKey;
 });

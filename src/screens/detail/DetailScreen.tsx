@@ -263,7 +263,7 @@ const DetailScreen: React.FC<DetailScreenProps> = ({ route: routeProp }) => {
           row: (unit.position?.row || 0) + 1,
           col: (unit.position?.col || 0) + 1,
         },
-        image: avatar.uri || '', // Use URL when no local image
+        image: unit.image || avatar.uri || '',
         imageSource: avatar.local, // Add local image source
         championKey: unit.championKey,
       };

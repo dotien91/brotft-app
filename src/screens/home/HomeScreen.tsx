@@ -8,7 +8,10 @@ import RNBounceable from '@freakycoder/react-native-bounceable';
 import { useTheme } from '@react-navigation/native';
 import Icon from '@shared-components/icon/Icon';
 import Text from '@shared-components/text-wrapper/TextWrapper';
-import { useCompositionsWithPagination } from '@services/api/hooks/listQueryHooks';
+import {
+  useCompositionsWithPagination,
+  useTftUnits,
+} from '@services/api/hooks/listQueryHooks';
 import type { IComposition } from '@services/models/composition';
 import EmptyList from '@shared-components/empty-list/EmptyList';
 import TeamCard from './components/team-card/TeamCard';
@@ -16,6 +19,7 @@ import HomeHeaderCover from './components/home-header-cover/HomeHeaderCover';
 import BannerAdItem from './components/banner-ad-item/BannerAdItem';
 import { translations } from '../../shared/localization';
 import { FlashList } from '@shopify/flash-list';
+import {getTftUnitLookupKeys} from '../../utils/tft-images';
 
 type ListItem =
   | { type: 'composition'; data: IComposition }
@@ -39,6 +43,22 @@ const HomeScreen: React.FC = () => {
     isNoData,
     loadMore,
   } = useCompositionsWithPagination(10, { active: true });
+
+  const {data: unitsResponse} = useTftUnits({
+    page: 1,
+    limit: 100,
+    minimal: true,
+  });
+
+  const unitsByKey = useMemo(() => {
+    const lookup = new Map<string, any>();
+    (unitsResponse?.data || []).forEach(unit => {
+      getTftUnitLookupKeys(unit).forEach(key => {
+        lookup.set(key, unit);
+      });
+    });
+    return lookup;
+  }, [unitsResponse?.data]);
 
   // Chuyển đổi dữ liệu sang định dạng hỗ trợ nhiều loại item (Multi-type list)
   const listData = useMemo<ListItem[]>(() => {
@@ -66,9 +86,9 @@ const HomeScreen: React.FC = () => {
       if (item.type === 'ad') {
         return <BannerAdItem style={{ marginBottom: 12 }} />;
       }
-      return <TeamCard composition={item.data} />;
+      return <TeamCard composition={item.data} unitsByKey={unitsByKey} />;
     },
-    [],
+    [unitsByKey],
   );
 
   const keyExtractor = useCallback((item: ListItem) => {
@@ -162,6 +182,7 @@ const HomeScreen: React.FC = () => {
   return (
       <FlashList
         data={listData}
+        extraData={unitsByKey}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}

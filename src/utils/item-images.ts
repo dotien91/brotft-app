@@ -2,6 +2,7 @@
  * Mapping of item API names to local image require() paths
  * Format: apiName -> require() path
  */
+import {getItemImageUrl} from './tft-images';
 
 // Import all item images
 const itemImages: Record<string, any> = {
@@ -206,7 +207,13 @@ export const getItemIconImageSource = (
   iconPath?: string | null,
   apiName?: string | null,
   _size: number = 48,
+  imageIdentity?: {season_id?: string | null; slug?: string | null},
 ): {local: any; uri: string} => {
+  const backendImage = getItemImageUrl(imageIdentity);
+  if (backendImage) {
+    return {local: null, uri: backendImage};
+  }
+
   if (apiName) {
     const localImage = getItemLocalImage(apiName);
     if (localImage) {
@@ -260,4 +267,3 @@ export const getItemIconImageSource = (
     uri: '', // No URL fallback
   };
 };
-
